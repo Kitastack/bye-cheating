@@ -28,7 +28,7 @@ export default function Sidebar() {
     <>
       <div
         className={`bg-[#2C353C] h-screen fixed left-0 py-5 pt-8 font-poppins ${
-          open ? "w-72" : "w-20"
+          open ? "w-96" : "w-20"
         } duration-300 relative`}
       >
         {/* Title */}
