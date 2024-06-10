@@ -4,6 +4,7 @@ import Title from "../components/titleDashboard";
 import Flashphoner from "@flashphoner/websdk";
 import { MdOutlinePlayCircle } from "react-icons/md";
 import Swal from "sweetalert2";
+import { IoMdRefresh } from "react-icons/io";
 
 const Home = () => {
   const [labelVisible, setLabelVisible] = useState(false);
@@ -99,6 +100,28 @@ const Home = () => {
     });
   };
 
+  const handleRefresh = () => {
+    // Fungsi untuk menangani refresh
+    console.log("Refreshing...");
+
+    if (streamRef.current) {
+      streamRef.current.stop();
+      streamRef.current = null;
+    }
+
+    if (sessionRef.current) {
+      sessionRef.current.disconnect();
+      sessionRef.current = null;
+    }
+
+    setTimeout(() => {
+      setRTSPUrl((prevUrl) => {
+        const newUrl = prevUrl.includes("?") ? prevUrl.split("?")[0] : prevUrl;
+        return `${newUrl}?refresh=${Date.now()}`;
+      });
+    }, 500); // Menambahkan sedikit jeda sebelum memulai ulang untuk memastikan stream dihentikan sepenuhnya
+  };
+
   return (
     <div className="flex font-primary">
       <div className="fixed z-50">
@@ -111,7 +134,7 @@ const Home = () => {
           <div className="flex-[74%] mt-2 text-center">
             <h1 className="text-xl font-bold">KAMERA CCTV RUANG A301</h1>
             <h3>Tanggal: 19 Februari 2024</h3>
-            <div className=" mt-5 pr-10">
+            <div className="mt-5 pr-10">
               <div
                 id="play"
                 className="w-full h-full border-4 mx-auto border-solid rounded-lg flex place-content-center"
@@ -134,8 +157,15 @@ const Home = () => {
               </button>
             </div>
             <div className="flex-[40%] mx-5 mt-10">
-              <h1 className="font-bold text-xl">SOURCE :</h1>
-
+              <div className="flex items-center">
+                <h1 className="font-bold text-xl">SOURCE :</h1>
+                <button
+                  className="ml-2 focus:outline-none"
+                  onClick={handleRefresh}
+                >
+                  <IoMdRefresh size={20} />
+                </button>
+              </div>
               <h1 className="font-semibold text-sm">
                 CAMERA SOURCE URL (RTSP)
               </h1>
