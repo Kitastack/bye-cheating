@@ -1,8 +1,6 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Sidebar from "../components/sidebar";
 import Title from "../components/titleDashboard";
-import Hls from "hls.js";
 import Swal from "sweetalert2";
 import { IoMdRefresh } from "react-icons/io";
 import { MdOutlinePlayCircle } from "react-icons/md";
@@ -10,62 +8,15 @@ import { MdOutlinePlayCircle } from "react-icons/md";
 const Home = () => {
   const [labelVisible, setLabelVisible] = useState(false);
   const [RTSP_URL, setRTSPUrl] = useState(
-    "rtsp://admin:%40psti2012@192.168.145.2/Streaming/Channels/1"
+    "rtsp://rtspstream:2c40947ac6aba92b217cdec98ca3126a@zephyr.rtsp.stream/movie"
   );
   const [newRTSPUrl, setNewRTSPUrl] = useState("");
-  const [HLS_URL, setHLSUrl] = useState("");
 
   const videoRef = useRef(null);
 
-  const toggleLabelVisibility = () => {
-    setLabelVisible(!labelVisible);
-  };
-
-  const clearCache = () => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.src = "";
-      videoRef.current.load();
-    }
-    console.log("Cache cleared");
-  };
-
-  const initApi = () => {
-    clearCache();
-    console.log("Inisialisasi HLS stream");
-    setHLSUrl(`http://127.0.0.1:8080/stream.m3u8`);
-  };
-
-  const playStream = () => {
-    if (Hls.isSupported()) {
-      const hls = new Hls();
-      hls.loadSource(HLS_URL);
-      hls.attachMedia(videoRef.current);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        videoRef.current.play();
-      });
-    } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
-      videoRef.current.src = HLS_URL;
-      videoRef.current.addEventListener("loadedmetadata", () => {
-        videoRef.current.play();
-      });
-    }
-  };
-
   useEffect(() => {
-    if (HLS_URL) {
-      playStream();
-    }
-  }, [HLS_URL]);
-
-  useEffect(() => {
-    if (RTSP_URL) {
-      setTimeout(initApi, 1000);
-    }
-    return () => {
-      clearCache();
-    };
-  }, [RTSP_URL]);
+    // Tidak perlu memulai pemutaran video secara otomatis
+  }, []);
 
   const handleRTSPUrlChange = () => {
     Swal.fire({
@@ -78,26 +29,34 @@ const Home = () => {
       confirmButtonText: "Yes, use it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        clearCache();
+        // Set RTSP URL baru
         setRTSPUrl(newRTSPUrl);
-        Swal.fire({
-          title: "Success!",
-          text: "Your RTSP URL has been updated.",
-          icon: "success",
-        });
       }
     });
   };
 
   const handleRefresh = () => {
-    console.log("Refreshing...");
-    clearCache();
-    setTimeout(() => {
-      setRTSPUrl((prevUrl) => {
-        const newUrl = prevUrl.includes("?") ? prevUrl.split("?")[0] : prevUrl;
-        return `${newUrl}?refresh=${Date.now()}`;
+    // Fungsi ini akan mengirim permintaan ke server backend untuk menyegarkan RTSP URL
+    fetch("http://localhost:5000/set_rtsp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ url: RTSP_URL }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.message === "RTSP URL updated") {
+          Swal.fire({
+            title: "Success!",
+            text: "RTSP URL has been refreshed.",
+            icon: "success",
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error refreshing RTSP URL:", error);
       });
-    }, 500);
   };
 
   return (
@@ -114,10 +73,12 @@ const Home = () => {
             <h3>Tanggal: 19 Februari 2024</h3>
             <div className="mt-5 pr-10">
               <video
-                id="play"
+                id="video"
                 ref={videoRef}
                 className="w-full h-full border-4 mx-auto border-solid rounded-lg flex place-content-center"
                 controls
+                autoPlay
+                src={RTSP_URL}
               ></video>
             </div>
             <br />
@@ -128,7 +89,7 @@ const Home = () => {
               <h1 className="font-bold text-xl">OPSI :</h1>
               <h1 className="font-semibold text-md">Tampilan Label Prediksi</h1>
               <button
-                onClick={toggleLabelVisibility}
+                onClick={() => setLabelVisible(!labelVisible)}
                 className={`px-4 py-2 rounded-md mt-2 ${
                   labelVisible ? "bg-[#F59024]" : "bg-[#2C353C]"
                 } text-white`}
@@ -160,34 +121,6 @@ const Home = () => {
                   className="ml-2 focus:outline-none"
                   onClick={handleRTSPUrlChange}
                 >
-                  <MdOutlinePlayCircle size={20} />
-                </button>
-              </div>
-
-              <h1 className="font-semibold text-sm mt-5">
-                CAMERA WITH LABELED SOURCE (RTSP)
-              </h1>
-              <div className="flex items-center border border-gray-400 rounded px-3 py-2">
-                <input
-                  type="text"
-                  className="flex-1 focus:outline-none"
-                  placeholder="RTSP://localhost:8082/A301-label.live"
-                />
-                <button className="ml-2 focus:outline-none">
-                  <MdOutlinePlayCircle size={20} />
-                </button>
-              </div>
-
-              <h1 className="font-semibold text-sm mt-5">
-                LABEL SOURCE (WEBSOCKET)
-              </h1>
-              <div className="flex items-center border border-gray-400 rounded px-3 py-2">
-                <input
-                  type="text"
-                  className="flex-1 focus:outline-none"
-                  placeholder="WS://localhost:8082/ws"
-                />
-                <button className="ml-2 focus:outline-none">
                   <MdOutlinePlayCircle size={20} />
                 </button>
               </div>
