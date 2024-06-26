@@ -6,4 +6,4 @@ RUN pip install --no-cache-dir --upgrade -r requirements.txt
 # setup port
 USER model
 EXPOSE 8093
-CMD ["fastapi", "run", "src/main.py", "--port", "80"]
+CMD ["fastapi", "run", "main.py", "--port", "80"]
