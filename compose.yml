@@ -1,0 +1,16 @@
+services:
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+  ffmpeg:
+    image: "chainguard/ffmpeg:latest-dev"
+  your_service:
+    image: your_images:tag
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    #fix .env your project
+    environment:
+      NODE_ENV: production
+      # pirvate config your project
