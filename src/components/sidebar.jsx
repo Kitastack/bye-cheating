@@ -3,10 +3,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { IoMdArrowDropleft } from "react-icons/io";
 import { MdMonitor } from "react-icons/md";
 import { HiClipboardDocumentList } from "react-icons/hi2";
-import { MdOutlineVideoLabel } from "react-icons/md";
 
 export default function Sidebar() {
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false); // Mulai dari tertutup
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -16,11 +15,6 @@ export default function Sidebar() {
       title: "Laporan",
       path: "/laporan",
       icon: <HiClipboardDocumentList />,
-    },
-    {
-      title: "Label",
-      path: "/label",
-      icon: <MdOutlineVideoLabel />,
     },
   ];
 
@@ -50,7 +44,7 @@ export default function Sidebar() {
               !open && "hidden"
             }`}
           >
-            Dashborad
+            Dashboard
           </h1>
         </div>
 

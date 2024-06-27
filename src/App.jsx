@@ -1,7 +1,7 @@
 import Home from "./pages/index";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Laporan from "./pages/laporan";
-import Label from "./pages/label";
+import WebSocketDemo from "./pages/index";
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/laporan" element={<Laporan />} />
-        <Route path="/label" element={<Label />} />
+        <Route path="/websoket" element={<WebSocketDemo />} />
       </Routes>
     </Router>
   );
