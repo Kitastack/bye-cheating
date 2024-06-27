@@ -1,16 +1,52 @@
+version: "3.9"
+
+networks:
+  b2c:
+    driver: bridge
 services:
   redis:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+    networks:
+      - b2c
+
   ffmpeg:
     image: "chainguard/ffmpeg:latest-dev"
-  your_service:
-    image: your_images:tag
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    #fix .env your project
+    networks:
+      - b2c
+    tty: true
+
+  model-service:
+    build: ./services/model
+    # volumes:
+    #   - ./model-service:/app
+    ports:
+      - 8093:8000
     environment:
-      NODE_ENV: production
-      # pirvate config your project
+      - AUTH_SERVICE_URL=http://authentication-service:8000
+      - PYTHONPATH=/
+
+  authentication-service:
+    build: ./services/authentication
+    # volumes:
+    #   - ./authentication-service:/app
+    ports:
+      - 8091:8000
+    environment:
+      - MODEL_SERVICE_URL=http://model-service:8000
+      - PORT=8000
+    depends_on:
+      - redis
+      - ffmpeg
+      - model-service
+
+  nginx-reverse-proxy:
+    image: nginx:latest
+    ports:
+      - 8080:8080
+    volumes:
+      - ./nginx_config.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - authentication-service
+      - model-service

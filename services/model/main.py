@@ -61,6 +61,38 @@ async def detect_objects(
         raise HTTPException(status_code=500, detail="something wrong behind")
 
 
+@app.post("/detect/result/")
+async def detect_objects(
+    request: Request,
+    file: Optional[Annotated[UploadFile, Form()]] = Form(None),
+    fileBase64: Optional[Annotated[str, Form()]] = Form(None),
+):
+    try:
+        logger.info(request.headers)
+
+        # Process the uploaded image for object detection
+        if file:
+            image_bytes = await file.read()
+        else:
+            image_bytes = base64.b64decode(fileBase64)
+
+        # Perform object detection with YOLOv7 (interfence)
+        detections = model.track(
+            get_formatted_image_from_binary(image_bytes),
+            imgsz=1024,
+            conf=0.35,
+            line_width=1,
+        )
+
+        # return as json
+        return {
+            "message": "successfully predicted",
+            "result": json.loads(detections[0].tojson()),
+        }
+    except:
+        raise HTTPException(status_code=500, detail="something wrong behind")
+
+
 @app.post("/detect/result-with-image/")
 async def detect_objects(
     request: Request,
