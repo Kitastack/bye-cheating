@@ -1,5 +1,3 @@
-version: "3.9"
-
 networks:
   b2c:
     driver: bridge
@@ -19,6 +17,8 @@ services:
 
   model-service:
     build: ./services/model
+    networks:
+      - b2c
     # volumes:
     #   - ./model-service:/app
     ports:
@@ -29,6 +29,8 @@ services:
 
   authentication-service:
     build: ./services/authentication
+    networks:
+      - b2c
     # volumes:
     #   - ./authentication-service:/app
     ports:
@@ -43,6 +45,8 @@ services:
 
   nginx-reverse-proxy:
     image: nginx:latest
+    networks:
+      - b2c
     ports:
       - 8080:8080
     volumes:
