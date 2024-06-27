@@ -1,13 +1,17 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import Sidebar from "../components/sidebar";
 import Title from "../components/titleDashboard";
 import Hls from "hls.js";
 import Swal from "sweetalert2";
 import { IoMdRefresh } from "react-icons/io";
 import { MdOutlinePlayCircle } from "react-icons/md";
+import { ChannelContext, IChannelContext } from "../context/ChannelContext";
 
 const Home = () => {
+  const {camList} = useContext(ChannelContext) as IChannelContext
+
+  
   const [labelVisible, setLabelVisible] = useState(false);
   const [RTSP_URL, setRTSPUrl] = useState(
     "rtsp://admin:%40psti2012@192.168.145.2/Streaming/Channels/1"
