@@ -15,7 +15,7 @@ const Home = () => {
   const [newRTSPUrl, setNewRTSPUrl] = useState("");
   const [HLS_URL, setHLSUrl] = useState("");
 
-  const videoRef = useRef(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const toggleLabelVisibility = () => {
     setLabelVisible(!labelVisible);
@@ -40,14 +40,14 @@ const Home = () => {
     if (Hls.isSupported()) {
       const hls = new Hls();
       hls.loadSource(HLS_URL);
-      hls.attachMedia(videoRef.current);
+      hls.attachMedia(videoRef.current!!);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        videoRef.current.play();
+        videoRef.current?.play();
       });
-    } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
+    } else if (videoRef.current?.canPlayType("application/vnd.apple.mpegurl")) {
       videoRef.current.src = HLS_URL;
       videoRef.current.addEventListener("loadedmetadata", () => {
-        videoRef.current.play();
+        videoRef.current?.play();
       });
     }
   };
