@@ -27,7 +27,7 @@ Untuk melakukan langkah ini, ada beberapa hal yang Anda perlu ketahui:
 - Server machine_learning pada [services/model](./services/model/) sebagai Restful API untuk model.
 - Hasil yang didapatkan berupa 2 server masing-masing sebagai container.
 
-[Preview container](../images/container.backend.png)
+![Preview container](../images/container.backend.png)
 
 Berikut langkah untuk menginstall `service/report`:
 
