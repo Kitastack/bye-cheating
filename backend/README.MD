@@ -6,6 +6,18 @@ Pengembangan backend menggunakan microservices architecture dan dockerize.
 
 ![Preview arsitektur yang digunakan](../images/architecture.backend.png)
 
+## Spessifikasi Minimum
+
+### Hardware
+
+| Component                              | Minimum                                                                                                              | Recommended\*                                   | Maximum   |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------- |
+| CPU socket                             | 1.4 GHz (64-bit processor) or faster for single core<br /><br /> 1.3 GHz (64-bit processor) or faster for multi-core | 3.1 GHz (64-bit processor) or faster multi-core | 2 sockets |
+| Memory (RAM)                           | 2 GB                                                                                                                 | 16 GB                                           | 64 GB     |
+| Hard disks and available storage space | 160 GB hard disk with a 60 GB system partition                                                                       |                                                 | No limit  |
+
+\*Recommended hardware requirements to support Windows Server Essentials maximum user and device limits.
+
 ## Instalasi
 
 1.  Pastikan sudah menginstall docker. Jika belum bisa unduh melalui [situs docker](https://docs.docker.com/engine/install/)
