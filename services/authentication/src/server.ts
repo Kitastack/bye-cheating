@@ -6,8 +6,6 @@ import { prettyJSON } from "hono/pretty-json";
 import { cors } from "hono/cors";
 import { errorHandler, notFoundHandler } from "@middlewares/index";
 import { users } from "@routes/index";
-import { FormData as FormDataNode } from "formdata-node";
-import { Readable } from "stream";
 import axios from "axios";
 import { FormDataEncoder } from "form-data-encoder";
 import mongoDB from "@utils/db";
@@ -31,15 +29,16 @@ app.use(
 let count = 0;
 const topic = "anonymous";
 let stream = new rtsp.FFMpeg({
-  input: "rtsp://localhost:8554/mystream", //"rtsp://admin:@psti2012@192.168.145.4:554/Streaming/Channels/1", //
+  input: "rtsp://host.docker.internal:8554/mystream", // "rtsp://host.docker.internal:8554/mystream", //"rtsp://admin:@psti2012@192.168.145.4:554/Streaming/Channels/1", //
   resolution: "1024x768",
   quality: 5,
 });
 let delay = false;
 let currentImage: any = null;
+console.log("here ---", Bun.env.MODEL_SERVICE_URL);
 const pipeStream =
   (socket: ServerWebSocket<undefined>) => async (data: any) => {
-    // console.log(typeof data);
+    console.log("test jalan", typeof data);
     try {
       if (delay == false) {
         delay = !delay;
@@ -76,7 +75,13 @@ app.get(
     onOpen(_, ws) {
       const rawWs = ws.raw as ServerWebSocket;
       rawWs.subscribe(topic);
+      console.log("rtsp://localhost:8554/mystream");
       stream.on("data", pipeStream(rawWs));
+      stream.on("error", () => {
+        console.log("errono");
+      });
+      stream.start();
+      console.log(stream);
       console.log(`WebSocket server opened and subscribed to topic '${topic}'`);
     },
     onClose(_, ws) {
@@ -87,6 +92,9 @@ app.get(
       );
       stream.removeListener("data", pipeStream(rawWs));
     },
+    onError(event, ws) {
+      console.log(`message errro`, ws);
+    },
     onMessage(event, ws) {
       console.log(`message ${event?.data ?? ""}`);
       ws.send("hello from server");
@@ -94,15 +102,8 @@ app.get(
   }))
 );
 
-// todo:routes
-app.get("/hello", async (c) => {
-  return c.json({
-    message: "hello",
-  });
-});
 app.route("/users", users);
 
-// todo:validate middlewares
 app.notFound((c) => {
   const notFound = notFoundHandler(c);
   return notFound;
@@ -115,6 +116,6 @@ app.onError((err, c) => {
 
 Bun.serve({
   fetch: app.fetch,
-  port: process.env.PORT,
+  port: process.env.PORT || 8000,
   websocket, // handlers
 });

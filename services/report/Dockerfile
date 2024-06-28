@@ -1,13 +1,15 @@
 # image
-FROM oven/bun
+FROM nodered/node-red
 # create and set directory
-WORKDIR /tmp
-COPY package*.json bun.lockb ./
+WORKDIR /app
+USER root
+RUN apk add --no-cache ffmpeg
+COPY package.json ./
 # install dependencies
-RUN bun install --frozen-lockfile
-# copy
+RUN npm install typescript -g
+RUN npm install
+# Copy the rest of the application files to the container
 COPY . .
 # setup port
-USER report
-EXPOSE 8094
-CMD [ "bun", "run", "index.ts" ]
+# EXPOSE 8091
+CMD [ "npm", "run", "start" ]

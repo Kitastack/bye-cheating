@@ -1,6 +1,12 @@
 networks:
   b2c:
     driver: bridge
+  # public:
+  #   external:
+  #     name: custom_network
+volumes:
+  shared-volume:
+
 services:
   redis:
     image: "redis:alpine"
@@ -14,9 +20,12 @@ services:
     networks:
       - b2c
     tty: true
+    volumes:
+      - shared-volume:/shared
 
   model-service:
     build: ./services/model
+    restart: always
     networks:
       - b2c
     # volumes:
@@ -29,10 +38,14 @@ services:
 
   authentication-service:
     build: ./services/authentication
+    restart: always
     networks:
       - b2c
+      # - public
     # volumes:
     #   - ./authentication-service:/app
+    volumes:
+      - shared-volume:/shared
     ports:
       - 8091:8000
     environment:
@@ -41,7 +54,25 @@ services:
     depends_on:
       - redis
       - ffmpeg
-      - model-service
+      # - model-service
+  report-service:
+    build: ./services/report
+    restart: always
+    networks:
+      - b2c
+      # - public
+    # volumes:
+    #   - ./authentication-service:/app
+    volumes:
+      - shared-volume:/shared
+    ports:
+      - 8094:8000
+    environment:
+      - MODEL_SERVICE_URL=http://model-service:8000
+      - PORT=8000
+    depends_on:
+      - redis
+      - ffmpeg
 
   nginx-reverse-proxy:
     image: nginx:latest
