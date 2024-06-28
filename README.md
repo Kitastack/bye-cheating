@@ -1,6 +1,6 @@
 # Bye-Cheating
 
-Sebuah aplikasi mendeteksi kecurangan ujian melalui sistem pendeteksis CCTV menggunakan Algoritma YOLOv7 Terintegrasi dengan website
+Sebuah aplikasi mendeteksi kecurangan ujian melalui sistem pendeteksi CCTV menggunakan Algoritma YOLOv7 Terintegrasi dengan website
 
 ## Preview
 
