@@ -36,25 +36,6 @@ services:
       - AUTH_SERVICE_URL=http://authentication-service:8000
       - PYTHONPATH=/
 
-  authentication-service:
-    build: ./services/authentication
-    restart: always
-    networks:
-      - b2c
-      # - public
-    # volumes:
-    #   - ./authentication-service:/app
-    volumes:
-      - shared-volume:/shared
-    ports:
-      - 8091:8000
-    environment:
-      - MODEL_SERVICE_URL=http://model-service:8000
-      - PORT=8000
-    depends_on:
-      - redis
-      - ffmpeg
-      # - model-service
   report-service:
     build: ./services/report
     restart: always
