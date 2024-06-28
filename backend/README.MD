@@ -24,6 +24,7 @@ Pengembangan backend menggunakan microservices architecture dan dockerize untuk 
 - `ultralytics`, lihat dokumentasi lengkap di [situs resmi](https://docs.ultralytics.com/models/yolov7/)
 - `fastapi`, lihat dokumentasi lengkap di [situs resmi](https://fastapi.tiangolo.com/)
 - `nginx`, lihat dokumentasi lengkap di [situs resmi](https://www.docker.com/)
+- `redis`, lihat dokumentasi lengkap di [situs resmi](https://redis.io/)
 - `docker & docker compose`, lihat dokumentasi lengkap di [situs resmi](https://www.docker.com/)
 
 ## Instalasi
