@@ -1,6 +1,6 @@
 # Bye Cheating Backend
 
-Pengembangan backend menggunakan microservices architecture dan dockerize.
+Pengembangan backend menggunakan microservices architecture dan dockerize untuk YOLOv7.
 
 ## Arsitektur
 
@@ -10,13 +10,21 @@ Pengembangan backend menggunakan microservices architecture dan dockerize.
 
 ### Hardware
 
-| Component                              | Minimum                                                                                                              | Recommended\*                                   | Maximum   |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------- |
-| CPU socket                             | 1.4 GHz (64-bit processor) or faster for single core<br /><br /> 1.3 GHz (64-bit processor) or faster for multi-core | 3.1 GHz (64-bit processor) or faster multi-core | 2 sockets |
-| Memory (RAM)                           | 2 GB                                                                                                                 | 16 GB                                           | 64 GB     |
-| Hard disks and available storage space | 160 GB hard disk with a 60 GB system partition                                                                       |                                                 | No limit  |
+| Component                  | Minimum                                             | Recommended\*                                   | Maximum   |
+| -------------------------- | --------------------------------------------------- | ----------------------------------------------- | --------- |
+| CPU socket                 | 1.3 GHz (64-bit processor) or faster for multi-core | 3.1 GHz (64-bit processor) or faster multi-core | 2 sockets |
+| Memory (RAM)               | 8 GB                                                | 16 GB                                           | 64 GB     |
+| Hard disks dan penyimpanan | 10 GB hard disk with a 60 GB system partition       |                                                 | No limit  |
 
-\*Recommended hardware requirements to support Windows Server Essentials maximum user and device limits.
+### Software
+
+- `node 18` atau terbaru
+- `python 3.12`
+- `ffmpeg`, dapat diunduh di [situs resmi](https://www.ffmpeg.org/download.html)
+- `ultralytics`, lihat dokumentasi lengkap di [situs resmi](https://docs.ultralytics.com/models/yolov7/)
+- `fastapi`, lihat dokumentasi lengkap di [situs resmi](https://fastapi.tiangolo.com/)
+- `nginx`, lihat dokumentasi lengkap di [situs resmi](https://www.docker.com/)
+- `docker & docker compose`, lihat dokumentasi lengkap di [situs resmi](https://www.docker.com/)
 
 ## Instalasi
 
