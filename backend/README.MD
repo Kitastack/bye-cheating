@@ -29,7 +29,7 @@ Untuk melakukan langkah ini, ada beberapa hal yang Anda perlu ketahui:
 
 ![Preview container](../images/container.backend.png)
 
-Berikut langkah untuk menginstall `service/report`:
+> Berikut langkah untuk menginstall `service/report`:
 
 1.  Buka terminal dan masuk ke dalam folder [utama](./) dimana terdapat file [compose.yml](./compose.yml)
 2.  Jalankan perintah berikut pada terminal
@@ -42,7 +42,7 @@ Berikut langkah untuk menginstall `service/report`:
 
 3.  Anda dapat mengakses server dapat diakses melalui [http://127.0.0.1:8000](http://127.0.0.1:8000)
 
-Berikut langkah untuk menginstall `service/model`:
+> Berikut langkah untuk menginstall `service/model`:
 
 1.  Buka terminal dan masuk ke dalam folder [utama](./) dimana terdapat file [compose.yml](./compose.yml)
 2.  Jalankan perintah berikut pada terminal
