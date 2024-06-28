@@ -6,7 +6,7 @@ Pengembangan backend menggunakan microservices architecture dan dockerize untuk 
 
 ![Preview arsitektur yang digunakan](../images/architecture.backend.png)
 
-## Spessifikasi Minimum
+## Spesifikasi Minimum
 
 ### Hardware
 

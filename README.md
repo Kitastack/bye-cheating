@@ -8,10 +8,20 @@ Sebuah aplikasi mendeteksi kecurangan ujian melalui sistem pendeteksis CCTV meng
 
 > Lihat demo aplikasi
 
-- [Youtube](https://youtu.be/If0CceWZb44)
+- [Youtube](https://youtu.be/Jt4vekrCvrE)
 - [Website](https://by-cheating.web.app/)
 
 ## Prasyarat
+
+### Hardware
+
+| Component                  | Minimum                                             | Recommended\*                                   | Maximum   |
+| -------------------------- | --------------------------------------------------- | ----------------------------------------------- | --------- |
+| CPU socket                 | 1.3 GHz (64-bit processor) or faster for multi-core | 3.1 GHz (64-bit processor) or faster multi-core | 2 sockets |
+| Memory (RAM)               | 8 GB                                                | 16 GB                                           | 64 GB     |
+| Hard disks dan penyimpanan | 10 GB hard disk with a 60 GB system partition       |                                                 | No limit  |
+
+### Software
 
 - `node 18` atau terbaru
 - `python 3.12`
