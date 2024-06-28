@@ -4,7 +4,7 @@ Sebuah aplikasi mendeteksi kecurangan ujian melalui sistem pendeteksis CCTV meng
 
 ## Preview
 
-![Preview aplikasi](../images/preview.png)
+![Preview aplikasi](../images/preview.jpeg)
 
 > Lihat demo aplikasi
 
