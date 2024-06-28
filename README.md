@@ -1,4 +1,6 @@
-# Edu Sign Codebase
+# Bye-Cheating
+
+Sebuah aplikasi mendeteksi kecurangan ujian melalui sistem pendeteksis CCTV menggunakan Algoritma YOLOv7 Terintegrasi dengan website
 
 ## Prasyarat
 
