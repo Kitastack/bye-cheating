@@ -64,5 +64,5 @@ services:
     volumes:
       - ./nginx_config.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - authentication-service
+      - report-service
       - model-service
