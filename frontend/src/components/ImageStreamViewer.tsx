@@ -8,17 +8,17 @@ const getBlobUrl = (data: any) => {
 };
 
 export function ImageStreamViewer({
-  socketEvent,
+  base64Data,
 }: {
-  socketEvent: MessageEvent<any> | null;
+  base64Data: string | null;
 }) {
   const [base64String, setBase64String] = useState<string | undefined>(
     undefined
   );
   useEffect(() => {
-    setBase64String(getBlobUrl(socketEvent?.data));
+    setBase64String(getBlobUrl(base64Data));
     console.log(`sizedata: ${base64String}`);
-  }, [socketEvent]);
+  }, [base64Data]);
   return (
     <div className="flex justify-center">
       <div className="border-4 border-solid min-w-[640px] aspect-video rounded-lg flex place-content-center mt-5 px-10">
