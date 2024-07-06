@@ -1,4 +1,6 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
+import { Socket } from "socket.io";
+import { io } from "socket.io-client";
 
 export interface IStreamSocketContext {
   /**
@@ -13,10 +15,12 @@ export interface IStreamSocketContext {
    */
   setWebsocketURL: (url: string) => void;
   /**
-   * call `stop()` if the existing websocket is available, and start new connection to websocket source.
+   * start new connection to websocket source, and don't create new instance if existing instance is active.
+   *
+   * Please close the existing instance by call `stop()` if you want to call this function
    * @returns
    */
-  startOrReload: () => void;
+  start: () => void;
   /**
    * Stop all connection to websocsket source
    * @returns
@@ -33,8 +37,15 @@ export const StreamSocketContext = createContext<
  * @returns JSX.Element
  */
 export function StreamSocketProvider({ children }: { children: JSX.Element }) {
-  const [currentUrl, setCurrentUrl] = useState("ws://localhost:7000/v1/test");
-  const [wsInstance, setWsInstance] = useState<WebSocket | null>();
+  const initialized = useRef(false)
+  const [currentUrl, setCurrentUrl] = useState("http://localhost:7000");
+  const [wsInstance, setWsInstance] = useState<WebSocket | undefined>(
+    undefined
+  );
+
+  const [socketInstance, setSocketInstance] = useState<Socket | undefined>(
+    undefined
+  );
 
   const [base64Stream, setBase64Stream] = useState("");
 
@@ -43,25 +54,63 @@ export function StreamSocketProvider({ children }: { children: JSX.Element }) {
     setWebsocketURL(url) {
       setCurrentUrl(url);
     },
-    startOrReload() {
-      if (wsInstance) {
-        this.stop();
+    start() {
+      if (socketInstance) {
+        return;
       }
-      const ws = new WebSocket(currentUrl);
-      ws.onmessage = (ev) => {
-        setBase64Stream(ev.data);
-      };
-      ws.onclose = (ev) => {
-        console.log("WS: close from");
-        ev.stopPropagation();
-      };
-      setWsInstance(ws);
+
+      setSocketInstance((prevVal) => {
+        if (prevVal) {
+          return prevVal;
+        }
+        const socket = io(currentUrl);
+        socket.on("connect", () => {
+          console.log(`socket established: ${socket.id}`);
+        });
+        socket.on("disconnect", () => {
+          console.log(`socket closed: ${socket.id}`);
+        });
+        socket.on("data", (val) => {
+          console.log(`data: ${val}`);
+        });
+        return socket as unknown as Socket;
+      });
+
+      // if (wsInstance) {
+      //   this.stop();
+      // }
+      // const ws = new WebSocket(currentUrl);
+      // ws.onopen = (ev) => {
+      //   console.log(`connection established`)
+      // }
+      // ws.onmessage = (ev) => {
+      //   setBase64Stream(ev.data);
+      // };
+      // ws.onclose = (ev) => {
+      //   console.log("WS: close from");
+      //   ev.stopPropagation();
+      // };
+      // setWsInstance(ws);
     },
     stop() {
       wsInstance?.close();
-      setWsInstance(null);
+      socketInstance?.disconnect(true);
+      setWsInstance(undefined);
+      setSocketInstance(undefined);
     },
   };
+
+  //INITIALIZE
+  useEffect(() => {
+    if(!initialized.current) {
+      initialized.current = true
+
+      data.start();
+    }
+    return () => {
+      data.stop();
+    };
+  }, []);
 
   return (
     <StreamSocketContext.Provider value={data}>
