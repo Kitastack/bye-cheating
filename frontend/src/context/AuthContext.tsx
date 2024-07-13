@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import cookie from "cookie";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useNavigate } from "react-router-dom";
 
@@ -17,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [accessToken, setAccessToken] = useLocalStorage(KEY_ACCESS_TOKEN, "");
   const [refreshToken, setRefreshToken] = useLocalStorage(
     KEY_REFRESH_TOKEN,
-    ""
+    "",
   );
   const navigate = useNavigate();
   const [loggedIn, setLoggedIn] = useState(false);
@@ -33,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         navigate("/", { replace: true });
       },
     }),
-    [accessToken, refreshToken]
+    [accessToken, refreshToken],
   );
 
   return <AuthContext.Provider value={data}>{children}</AuthContext.Provider>;

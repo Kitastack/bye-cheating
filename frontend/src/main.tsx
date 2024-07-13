@@ -2,15 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { StreamSocketProvider } from "./context/CameraSocketContext";
-import { AuthProvider } from "./context/AuthContext";
 
-ReactDOM.createRoot(document.getElementById("root")!!).render(
+const container = document.getElementById("root") as ReactDOM.Container;
+
+ReactDOM.createRoot(container).render(
   <React.StrictMode>
-    <AuthProvider>
-      <StreamSocketProvider>
-        <App />
-      </StreamSocketProvider>
-    </AuthProvider>
-  </React.StrictMode>
+    <App />
+  </React.StrictMode>,
 );
