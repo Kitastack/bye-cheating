@@ -23,8 +23,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const data: IAuthContext = useMemo(
     () => ({
-      login(email, password) {
+      async login(email, password) {
         //TODO: fetch login, save tokens, and navigate to `/app`
+        const result = await fetch("http://localhost:8889/v1/camera", {
+          method: "GET",
+          keepalive: true,
+          body: JSON.stringify({ email, password }),
+        });
+        console.log(result.statusText);
       },
       logout() {
         setAccessToken("");

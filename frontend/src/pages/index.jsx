@@ -1,11 +1,10 @@
-import { useContext } from "react";
-import Title from "../components/titleDashboard";
-import { Inspector } from "../components/inspector";
 import { ImageStreamViewer } from "../components/ImageStreamViewer";
-import { StreamSocketContext } from "../context/CameraSocketContext";
+import { Inspector } from "../components/inspector";
+import Title from "../components/titleDashboard";
+import { useStreamSocket } from "../context/CameraSocketContext";
 
 const Home = () => {
-  const stream = useContext(StreamSocketContext);
+  const stream = useStreamSocket();
 
   return (
     <div className="w-full p-4">

@@ -1,7 +1,10 @@
-import { createContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io";
 import { io } from "socket.io-client";
 
+/**
+interface of `StreamSocketContext`
+ */
 export interface IStreamSocketContext {
   /**
    * raw `base64` string. remember you must include `"data:image/jpeg;${base64}"` manually at client side to display the stream image
@@ -28,23 +31,33 @@ export interface IStreamSocketContext {
   stop: () => void;
 }
 
-export const StreamSocketContext = createContext<
-  IStreamSocketContext | undefined
->(undefined);
+const StreamSocketContext = createContext<IStreamSocketContext | undefined>(
+  undefined,
+);
+
+export const useStreamSocket = () => {
+  const context = useContext(StreamSocketContext);
+  if (context === undefined) {
+    throw new Error(
+      "useStreamSocket must be used within a StreamSocketProvider",
+    );
+  }
+  return context as IStreamSocketContext;
+};
 
 /**
  * Provider for `StreamSocketContext`
  * @returns JSX.Element
  */
 export function StreamSocketProvider({ children }: { children: JSX.Element }) {
-  const initialized = useRef(false)
+  const initialized = useRef(false);
   const [currentUrl, setCurrentUrl] = useState("http://localhost:7000");
   const [wsInstance, setWsInstance] = useState<WebSocket | undefined>(
-    undefined
+    undefined,
   );
 
   const [socketInstance, setSocketInstance] = useState<Socket | undefined>(
-    undefined
+    undefined,
   );
 
   const [base64Stream, setBase64Stream] = useState("");
@@ -102,8 +115,8 @@ export function StreamSocketProvider({ children }: { children: JSX.Element }) {
 
   //INITIALIZE
   useEffect(() => {
-    if(!initialized.current) {
-      initialized.current = true
+    if (!initialized.current) {
+      initialized.current = true;
 
       data.start();
     }
