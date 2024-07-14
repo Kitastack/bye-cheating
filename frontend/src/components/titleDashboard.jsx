@@ -3,7 +3,8 @@ export default function Title() {
     <>
       <div className="flex my-10 mx-16 place-content-center">
         <div className=" items-end">
-          <img src="logo.png" />
+          {/* dont forget add `/` like `/logo.png` to avoid missing asset */}
+          <img src="/logo.png" /> 
         </div>
         <div className="my-10 text-[#66ABB1]">
           <h1 className=" text-7xl font-extrabold">BYE-CHEATING</h1>

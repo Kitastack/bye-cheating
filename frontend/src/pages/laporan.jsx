@@ -31,7 +31,7 @@ export default function Laporan() {
   };
 
   return (
-    <div className="w-full container mx-auto ml-28">
+    <div className="w-full container mx-auto">
       <Title />
       <hr style={{ border: "1px solid #66ABB1" }} className="mt-2 " />
       {/* Data Pengunjung */}
