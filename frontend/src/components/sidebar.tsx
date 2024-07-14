@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { IoMdArrowDropleft } from "react-icons/io";
 import { MdMonitor } from "react-icons/md";
 import { HiClipboardDocumentList } from "react-icons/hi2";
-import { MdOutlineVideoLabel } from "react-icons/md";
 
 function TitleSidebar() {
   return (
@@ -66,10 +64,10 @@ export default function Sidebar() {
   const location = useLocation();
 
   const Menus = [
-    { title: "Tampilan Langsung", path: "/", icon: <MdMonitor /> },
+    { title: "Tampilan Langsung", path: "/app", icon: <MdMonitor /> },
     {
       title: "Laporan",
-      path: "/laporan",
+      path: "/app/laporan",
       icon: <HiClipboardDocumentList />,
     },
   ];

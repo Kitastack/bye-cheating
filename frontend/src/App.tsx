@@ -4,12 +4,12 @@ import {
   BrowserRouter as Router,
   Routes,
 } from "react-router-dom";
-import MainLayout from "./layout/MainLayout";
-import { default as Home, default as WebSocketDemo } from "./pages/index";
-import Laporan from "./pages/laporan";
-import { LoginPage } from "./pages/login";
-import { AuthProvider } from "./context/AuthContext";
-import { StreamSocketProvider } from "./context/CameraSocketContext";
+import MainLayout from "@/layout/MainLayout";
+import { default as Home, default as WebSocketDemo } from "@/pages/index";
+import Laporan from "@/pages/laporan";
+import { LoginPage } from "@/pages/login";
+import { AuthProvider } from "@/context/AuthContext";
+import { StreamSocketProvider } from "@/context/CameraSocketContext";
 
 function App() {
   return (

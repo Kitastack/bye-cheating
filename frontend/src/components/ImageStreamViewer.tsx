@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const getBlobUrl = (data: any) => {
+const getBlobUrl = (data: string | null) => {
   if (data) {
     return `data:image/jpeg;base64, ${data}`;
   }
@@ -16,7 +16,7 @@ export function ImageStreamViewer({
     undefined
   );
   useEffect(() => {
-    setBase64String(getBlobUrl(base64Data));
+    setBase64String(getBlobUrl(base64Data ));
     console.log(`sizedata: ${base64String}`);
   }, [base64Data]);
   return (
