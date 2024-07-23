@@ -3,7 +3,7 @@ import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { useNavigate } from "react-router-dom";
 
-export function LoginPage() {
+export function RegisterPage() {
   return (
     <div className="w-full h-svh flex flex-col items-center justify-center">
       <LoginCard />
@@ -20,10 +20,12 @@ function LoginCard() {
     mode: "uncontrolled",
     initialValues: {
       email: "",
+      name: "",
       password: "",
     },
     validate: {
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
+      name: (value) => (/^\S+$/.test(value) ? null : "Field is required"),
       password: (value) =>
         /^(?=.*[A-Z])[A-Za-z\d]{8,}$/.test(value)
           ? null
@@ -34,7 +36,7 @@ function LoginCard() {
   return (
     <div className="border-2 rounded-md p-4 flex flex-col gap-4 w-96">
       <Flex justify={"center"}>
-        <h1 className="text-2xl font-bold">Login</h1>
+        <h1 className="text-2xl font-bold">Register</h1>
       </Flex>
       <form
         className="flex flex-col gap-2"
@@ -42,10 +44,17 @@ function LoginCard() {
       >
         <TextInput
           withAsterisk
-          label="email"
+          label="Email"
           placeholder="your@email.com"
           key={form.key("email")}
           {...form.getInputProps("email")}
+        />
+        <TextInput
+          withAsterisk
+          label="Name"
+          placeholder="your name"
+          key={form.key("name")}
+          {...form.getInputProps("name")}
         />
         <PasswordInput
           withAsterisk
@@ -57,12 +66,12 @@ function LoginCard() {
         />
         <Divider />
         <Flex direction={"column"} gap={"4px"}>
-          <Button type="submit">Login</Button>
+          <Button type="submit">Register</Button>
           <Button
-            onClick={() => navigate("/register", { replace: true })}
+            onClick={() => navigate("/login", { replace: true })}
             variant="outline"
           >
-            Create new account
+            Back to Login
           </Button>
         </Flex>
       </form>

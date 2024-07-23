@@ -1,34 +1,30 @@
-import {
-  Outlet,
-  Route,
-  BrowserRouter as Router,
-  Routes,
-} from "react-router-dom";
+import { Outlet, Route, Routes } from "react-router-dom";
 import MainLayout from "@/layout/MainLayout";
-import { default as Home, default as WebSocketDemo } from "@/pages/index";
+import {
+  default as CameraView,
+  default as WebSocketDemo,
+} from "@/pages/CameraView";
 import Laporan from "@/pages/laporan";
 import { LoginPage } from "@/pages/login";
-import { AuthProvider } from "@/context/AuthContext";
-import { StreamSocketProvider } from "@/context/CameraSocketContext";
+import { RegisterPage } from "./pages/register";
 
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <StreamSocketProvider>
-          <Routes>
-            <Route path="/" element={<Outlet />}>
-              <Route index element={<LoginPage />} />
-              <Route path="app" element={<MainLayout />}>
-                <Route index element={<Home />} />
-                <Route path="laporan" element={<Laporan />} />
-                <Route path="websoket" element={<WebSocketDemo />} />
-              </Route>
-            </Route>
-          </Routes>
-        </StreamSocketProvider>
-      </AuthProvider>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Outlet />}>
+        <Route index element={<LoginPage />} />
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
+        <Route path="app" element={<MainLayout />}>
+          <Route index element={<CameraView />} />
+          <Route path="laporan" element={<Laporan />} />
+          <Route path="websoket" element={<WebSocketDemo />} />
+          <Route path="test" element={<div>test view</div>} />
+          <Route path="*" element={<div>404 not found</div>} />
+        </Route>
+      </Route>
+      <Route path="*" element={<div>404 not found</div>} />
+    </Routes>
   );
 }
 

@@ -1,10 +1,25 @@
 import { useState } from "react";
-import Title from "../components/titleDashboard";
 import { DataCctv as initialDataCctv } from "../model/dataset";
 import { FaEdit } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { Divider, ScrollArea, Table } from "@mantine/core";
 
 export default function Laporan() {
+  return (
+    <div className="w-full mx-auto p-4">
+      <div className="flex flex-col">
+        <h2 className="text-lg font-bold">Laporan</h2>
+      </div>
+      <Divider my={"md"}/>
+      {/* Data Pengunjung */}
+      <ScrollArea h={600}>
+        <ReportTable />
+      </ScrollArea>
+    </div>
+  );
+}
+
+function ReportTableBackup() {
   const [dataCctv, setDataCctv] = useState(initialDataCctv);
 
   const handleEdit = (index) => {
@@ -29,76 +44,93 @@ export default function Laporan() {
       }
     });
   };
-
   return (
-    <div className="w-full container mx-auto">
-      <Title />
-      <hr style={{ border: "1px solid #66ABB1" }} className="mt-2 " />
-      {/* Data Pengunjung */}
-      <div className="container mx-auto pb-10 lg:pl-3 pl-5 mt-5">
-        <div className="overflow-x-auto pr-5 lg:pr-0">
-          <table className="table-auto w-full">
-            <thead>
-              <tr>
-                <th className="px-4 py-2 bg-slate-500 text-white rounded-tl-lg">
-                  No
-                </th>
-                <th className="px-4 py-2 bg-slate-500 text-white">ID</th>
-                <th className="px-4 py-2 bg-slate-500 text-white">Status</th>
-                <th className="px-4 py-2 bg-slate-500 text-white">Persen</th>
-                <th className="px-4 py-2 bg-slate-500 text-white">Nama</th>
-                <th className="px-4 py-2 bg-slate-500 text-white rounded-tr-lg">
-                  Edit
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {dataCctv.map((entry, index) => (
-                <tr
-                  key={index}
-                  className={
-                    index % 2 === 0 ? "bg-primary-50" : "bg-primary-100"
-                  }
+    <div className="container mx-auto pb-10 lg:pl-3 pl-5 mt-5">
+      <div className="overflow-x-auto pr-5 lg:pr-0">
+        <table className="table-auto w-full">
+          <thead>
+            <tr>
+              <th className="px-4 py-2 bg-slate-500 text-white rounded-tl-lg">
+                No
+              </th>
+              <th className="px-4 py-2 bg-slate-500 text-white">ID</th>
+              <th className="px-4 py-2 bg-slate-500 text-white">Status</th>
+              <th className="px-4 py-2 bg-slate-500 text-white">Persen</th>
+              <th className="px-4 py-2 bg-slate-500 text-white">Nama</th>
+              <th className="px-4 py-2 bg-slate-500 text-white rounded-tr-lg">
+                Edit
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {dataCctv.map((entry, index) => (
+              <tr
+                key={index}
+                className={index % 2 === 0 ? "bg-primary-50" : "bg-primary-100"}
+              >
+                <td className="border border-bg-slate-500 px-4 py-2 text-center font-semibold">
+                  {index + 1}
+                </td>
+                <td
+                  className={`border border-bg-slate-500 px-4 py-2 text-center font-semibold ${
+                    entry.status === "Mencontek" ? "text-red-500" : ""
+                  }`}
                 >
-                  <td className="border border-bg-slate-500 px-4 py-2 text-center font-semibold">
-                    {index + 1}
-                  </td>
-                  <td
-                    className={`border border-bg-slate-500 px-4 py-2 text-center font-semibold ${
-                      entry.status === "Mencontek" ? "text-red-500" : ""
-                    }`}
-                  >
-                    {entry.id}
-                  </td>
-                  <td
-                    className={`border border-bg-slate-500 px-4 py-2 text-center font-semibold ${
-                      entry.status === "Mencontek" ? "text-red-500" : ""
-                    }`}
-                  >
-                    {entry.status}
-                  </td>
-                  <td
-                    className={`border border-bg-slate-500 px-4 py-2 text-center font-semibold ${
-                      entry.status === "Mencontek" ? "text-red-500" : ""
-                    }`}
-                  >
-                    {entry.persen}
-                  </td>
-                  <td className="border border-bg-slate-500 px-4 py-2 text-center font-semibold">
-                    {entry.nama}
-                  </td>
-                  <td className="border border-bg-slate-500 px-4 py-2 text-center font-semibold">
-                    <FaEdit
-                      className="cursor-pointer"
-                      onClick={() => handleEdit(index)}
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  {entry.id}
+                </td>
+                <td
+                  className={`border border-bg-slate-500 px-4 py-2 text-center font-semibold ${
+                    entry.status === "Mencontek" ? "text-red-500" : ""
+                  }`}
+                >
+                  {entry.status}
+                </td>
+                <td
+                  className={`border border-bg-slate-500 px-4 py-2 text-center font-semibold ${
+                    entry.status === "Mencontek" ? "text-red-500" : ""
+                  }`}
+                >
+                  {entry.persen}
+                </td>
+                <td className="border border-bg-slate-500 px-4 py-2 text-center font-semibold">
+                  {entry.nama}
+                </td>
+                <td className="border border-bg-slate-500 px-4 py-2 text-center font-semibold">
+                  <FaEdit
+                    className="cursor-pointer"
+                    onClick={() => handleEdit(index)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
+  );
+}
+
+function ReportTable() {
+  return (
+    <Table>
+      <Table.Thead>
+        <Table.Th>ID</Table.Th>
+        <Table.Th>Status</Table.Th>
+        <Table.Th>Akurasi</Table.Th>
+        <Table.Th>Nama</Table.Th>
+      </Table.Thead>
+      <Table.Tbody>
+        {initialDataCctv.map((val, idx) => {
+          return (
+            <Table.Tr key={idx}>
+              <Table.Td>{val.id}</Table.Td>
+              <Table.Td>{val.status}</Table.Td>
+              <Table.Td>{val.persen}</Table.Td>
+              <Table.Td>{val.nama}</Table.Td>
+            </Table.Tr>
+          );
+        })}
+      </Table.Tbody>
+    </Table>
   );
 }

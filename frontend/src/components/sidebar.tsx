@@ -1,104 +1,69 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { MdMonitor } from "react-icons/md";
 import { HiClipboardDocumentList } from "react-icons/hi2";
+import { NavLink, Text } from "@mantine/core";
+import { useState } from "react";
+import { HiLogout } from "react-icons/hi";
+
+const menuLists = [
+  { title: "Tampilan Langsung", path: "/app", icon: <MdMonitor /> },
+  {
+    title: "Laporan",
+    path: "/app/laporan",
+    icon: <HiClipboardDocumentList />,
+  },
+];
 
 function TitleSidebar() {
   return (
-    <div className="flex min-h-6 items-center justify-center p-5">
+    <div className="flex min-h-6 items-center justify-center p-4">
       <img
         src="/LogoBgWhite.png"
-        className={`float-left block h-12 w-12 cursor-pointer duration-500 ${
+        className={`float-left block h-12 w-12 duration-500 ${
           !open && "hidden"
         }`}
       />
       <div className="p-1" />
-      <h1
-        className={`text-2xl font-bold text-white duration-500 ${
-          !open && `hidden`
-        } `}
-      >
-        Dashboard
-      </h1>
+      <Text variant="text">Dashboard</Text>
     </div>
   );
 }
 
-function SubMenu({
-  title,
-  icon,
-  isActive,
-  onClick,
-  isExpanded,
-}: {
-  title: string;
-  icon: JSX.Element;
-  isActive: boolean;
-  isExpanded: boolean;
-  onClick: () => void;
-}) {
-  const mainColor = isActive
-    ? "bg-[#F59024] text-white"
-    : "hover:bg-[#F59024] hover:text-white";
-
-  return (
-    <li
-      className={`flex cursor-pointer items-center w-auto p-4 text-white ${mainColor}`}
-      onClick={onClick}
-    >
-      <span className="text-2xl">{icon}</span>
-      <span
-        className={`font-poppins flex-1 overflow-hidden text-lg font-medium transition-all ${
-          isExpanded ? "w-fit" : "w-0"
-        }`}
-      >
-        {title}
-      </span>
-    </li>
-  );
-}
-
-export default function Sidebar() {
-  const [open, setOpen] = useState(true);
-  const navigate = useNavigate();
+export default function NavbarContent() {
   const location = useLocation();
-
-  const Menus = [
-    { title: "Tampilan Langsung", path: "/app", icon: <MdMonitor /> },
-    {
-      title: "Laporan",
-      path: "/app/laporan",
-      icon: <HiClipboardDocumentList />,
-    },
-  ];
+  const navigate = useNavigate();
+  const [active, setActive] = useState(
+    menuLists.findIndex((item) => item.path == (location.pathname ?? "/app"))
+  );
 
   return (
     <>
-      <div
-        className={`font-poppins min-w-28 left-0 flex h-screen flex-col items-center bg-[#2C353C] duration-200`}
-      >
-        {/* <IoMdArrowDropleft
-          className={`cursor-pointer rounded-full bg-transparent text-3xl text-white ${
-            !open && "right-8 rotate-180"
-          }`}
-          onClick={() => setOpen(!open)}
-        /> */}
-        <TitleSidebar />
-
-        {/* Sub Menu */}
-        <ul className="pt-10">
-          {Menus.map((menu, index) => (
-            <SubMenu
-              key={index}
-              icon={menu.icon}
-              isActive={menu.path == location.pathname}
-              onClick={() => navigate(menu.path)}
-              title={menu.title}
-              isExpanded={open}
-            />
-          ))}
-        </ul>
-      </div>
+      <TitleSidebar />
+      {menuLists.map((val, idx) => (
+        <NavLink
+          variant="filled"
+          key={val.title}
+          component={"button"}
+          label={val.title}
+          leftSection={val.icon}
+          active={active == idx}
+          onClick={() => {
+            navigate(val.path);
+            setActive(idx);
+          }}
+        />
+      ))}
+      <NavLink
+        key={"logout"}
+        variant="subtle"
+        component="button"
+        label={"Log out"}
+        color="red"
+        leftSection={<HiLogout />}
+        onClick={() => {
+          console.log("logout");
+        }}
+      />
     </>
   );
 }
