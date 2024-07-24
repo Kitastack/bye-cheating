@@ -10,11 +10,11 @@ export default function Laporan() {
       <div className="flex flex-col">
         <h2 className="text-lg font-bold">Laporan</h2>
       </div>
-      <Divider my={"md"}/>
+      <Divider my={"md"} />
       {/* Data Pengunjung */}
-      <ScrollArea h={600}>
+      <Table.ScrollContainer className="border-[1px]" h={600}>
         <ReportTable />
-      </ScrollArea>
+      </Table.ScrollContainer>
     </div>
   );
 }
@@ -112,12 +112,14 @@ function ReportTableBackup() {
 
 function ReportTable() {
   return (
-    <Table>
+    <Table stickyHeader striped>
       <Table.Thead>
-        <Table.Th>ID</Table.Th>
-        <Table.Th>Status</Table.Th>
-        <Table.Th>Akurasi</Table.Th>
-        <Table.Th>Nama</Table.Th>
+        <Table.Tr>
+          <Table.Th>ID</Table.Th>
+          <Table.Th>Status</Table.Th>
+          <Table.Th>Akurasi</Table.Th>
+          <Table.Th>Nama</Table.Th>
+        </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
         {initialDataCctv.map((val, idx) => {

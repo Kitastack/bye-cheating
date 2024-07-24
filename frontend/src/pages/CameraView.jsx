@@ -38,7 +38,7 @@ const RtspInput = () => {
         label="RTSP URL"
         placeholder="rtsp://urlname"
         rightSection={
-          <ActionIcon variant="gradient">
+          <ActionIcon variant="filled">
             <MdOutlinePlayArrow />
           </ActionIcon>
         }

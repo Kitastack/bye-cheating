@@ -33,6 +33,8 @@ const theme = createTheme({
   colors: {
     myColor,
   },
+  fontFamily: "Poppins,Karla, sans-serif",
+  // headings: {fontFamily:"Poppins, sans-serif"},
   primaryColor: "myColor",
 });
 

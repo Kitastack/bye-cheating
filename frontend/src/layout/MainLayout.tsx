@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import NavbarContent from "../components/sidebar";
 import { AppShell, Burger, Group } from "@mantine/core";
-import Title from "@/components/titleDashboard";
+import TitleDashboard from "@/components/titleDashboard";
 import { useDisclosure } from "@mantine/hooks";
 
 export default function MainLayout() {
@@ -19,7 +19,7 @@ export default function MainLayout() {
         <NavbarContent />
       </AppShell.Navbar>
       <AppShell.Header>
-        <Title
+        <TitleDashboard
           leftSection={
             <>
               <Burger
