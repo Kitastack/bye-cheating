@@ -42,6 +42,7 @@ export default function NavbarContent() {
       {menuLists.map((val, idx) => (
         <NavLink
           variant="filled"
+          
           key={val.title}
           component={"button"}
           label={val.title}

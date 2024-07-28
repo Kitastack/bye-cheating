@@ -37,7 +37,7 @@ function LoginCard() {
         <h1 className="text-2xl font-bold">Login</h1>
       </Flex>
       <form
-        className="flex flex-col gap-2"
+        className="flex flex-col gap-2 min-h-96"
         onSubmit={form.onSubmit((values) => console.log(values))}
       >
         <TextInput
@@ -55,6 +55,7 @@ function LoginCard() {
           key={form.key("password")}
           {...form.getInputProps("password")}
         />
+        <div className="flex-grow"></div>
         <Divider />
         <Flex direction={"column"} gap={"4px"}>
           <Button type="submit">Login</Button>

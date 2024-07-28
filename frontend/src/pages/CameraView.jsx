@@ -7,15 +7,15 @@ const CameraView = () => {
   const stream = useStreamSocket();
 
   return (
-    <div className="w-full p-4">
-      <div className="flex">
+    <div className="flex flex-grow p-4">
+      <div className="flex flex-grow">
         <div className="flex-grow flex flex-col items-center">
-          <h1 className="text-xl font-bold">KAMERA CCTV RUANG A301</h1>
+          <h1 className="text-xl font-bold">Nama Camera</h1>
           <h3>Tanggal: 19 Februari 2024</h3>
           <ImageStreamViewer base64Data={stream.base64data} />
           <br />
         </div>
-        <div className="border-l border-[#66ABB1] h-[40rem]"></div>
+        <div className="border-l border-gray-300 min-h-full"></div>
         <Inspector />
       </div>
     </div>

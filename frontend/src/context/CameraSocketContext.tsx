@@ -39,7 +39,7 @@ export const useStreamSocket = () => {
   const context = useContext(StreamSocketContext);
   if (context === undefined) {
     throw new Error(
-      "useStreamSocket must be used within a StreamSocketProvider",
+      "useStreamSocket must be used inside of `<StreamSocketProvider>` component",
     );
   }
   return context as IStreamSocketContext;
@@ -85,6 +85,7 @@ export function StreamSocketProvider({ children }: { children: JSX.Element }) {
         });
         socket.on("data", (val) => {
           console.log(`data: ${val}`);
+          setBase64Stream(val)
         });
         return socket as unknown as Socket;
       });
@@ -117,7 +118,6 @@ export function StreamSocketProvider({ children }: { children: JSX.Element }) {
   useEffect(() => {
     if (!initialized.current) {
       initialized.current = true;
-
       data.start();
     }
     return () => {

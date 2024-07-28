@@ -1,6 +1,10 @@
 import { Outlet } from "react-router-dom";
 import NavbarContent from "../components/sidebar";
-import { AppShell, Burger, Group } from "@mantine/core";
+import {
+  AppShell,
+  Burger,
+  Group,
+} from "@mantine/core";
 import TitleDashboard from "@/components/titleDashboard";
 import { useDisclosure } from "@mantine/hooks";
 
@@ -10,10 +14,13 @@ export default function MainLayout() {
     <AppShell
       navbar={{
         width: 200,
+
         breakpoint: "sm",
-        collapsed: { mobile: !mobileOpened},
+        collapsed: { mobile: !mobileOpened },
       }}
       header={{ height: 100 }}
+      layout="alt"
+      
     >
       <AppShell.Navbar>
         <NavbarContent />
@@ -32,7 +39,7 @@ export default function MainLayout() {
           }
         />
       </AppShell.Header>
-      <AppShell.Main>
+      <AppShell.Main className="flex flex-col">
         <Outlet />
       </AppShell.Main>
       <AppShell.Footer zIndex={300}>
