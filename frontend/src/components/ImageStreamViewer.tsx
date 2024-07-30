@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  MdOutlineWarningAmber,
-} from "react-icons/md";
+import { MdOutlineWarningAmber } from "react-icons/md";
 
 // const getBlobUrl = (data: string | null) => {
 //   if (data) {
@@ -20,16 +18,20 @@ export function ImageStreamViewer({
    */
   base64Data?: string;
   error?: string;
-  w?: number,
+  w?: number;
 }) {
   const [base64String, setBase64String] = useState<string | undefined>(
     undefined
   );
+
   useEffect(() => {
     setBase64String(base64Data ?? "");
   }, [base64Data]);
   return (
-    <div className={`border-2 border-solid min-w-[${w ?? 640}px] aspect-video rounded-lg flex justify-center items-center mt-5 px-10`}>
+    <div
+      style={{ width: w ?? 600 }}
+      className={`border-2 border-solid min-w-[400px] aspect-video rounded-lg flex justify-center items-center mt-5 px-10`}
+    >
       {base64String ? (
         <img src={base64String} alt="CCTV Stream" />
       ) : (

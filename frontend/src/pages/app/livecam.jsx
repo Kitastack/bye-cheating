@@ -1,8 +1,7 @@
-import { ImageStreamViewer } from "../components/ImageStreamViewer";
-import { useStreamSocket } from "../context/CameraSocketContext";
+import { ImageStreamViewer } from "../../components/ImageStreamViewer";
+import { useStreamSocket } from "../../context/CameraSocketContext";
 import {
   MdCamera,
-  MdCameraAlt,
   MdOutlinePlayArrow,
   MdTableView,
 } from "react-icons/md";
@@ -13,7 +12,7 @@ import { sampleDataCCTV } from "@/model/dataset";
 
 const CameraView = () => {
   const stream = useStreamSocket();
-  const [showTable, setShowTable] = useState(true);
+  const [showTable, setShowTable] = useState(false);
 
   return (
     <div className="flex flex-grow p-4">
@@ -38,7 +37,7 @@ const CameraView = () => {
               <ReportTable data={sampleDataCCTV} />
             </Table.ScrollContainer>
           ) : (
-            <ImageStreamViewer base64Data={stream.base64data} />
+            <ImageStreamViewer base64Data={stream.base64data} w={640} />
           )}
           <br />
         </div>

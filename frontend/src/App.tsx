@@ -3,8 +3,8 @@ import MainLayout from "@/layout/MainLayout";
 import {
   default as CameraView,
   default as WebSocketDemo,
-} from "@/pages/CameraView";
-import Laporan from "@/pages/laporan";
+} from "@/pages/app/livecam";
+import Laporan from "@/pages/app/report";
 import { LoginPage } from "@/pages/login";
 import { RegisterPage } from "./pages/register";
 
