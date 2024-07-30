@@ -1,18 +1,45 @@
 import { ImageStreamViewer } from "../components/ImageStreamViewer";
 import { useStreamSocket } from "../context/CameraSocketContext";
-import { MdOutlinePlayArrow } from "react-icons/md";
-import { ActionIcon, Text, TextInput } from "@mantine/core";
+import {
+  MdCamera,
+  MdCameraAlt,
+  MdOutlinePlayArrow,
+  MdTableView,
+} from "react-icons/md";
+import { ActionIcon, Table, Text, TextInput } from "@mantine/core";
+import { useState } from "react";
+import { ReportTable } from "@/components/ReportTable";
+import { sampleDataCCTV } from "@/model/dataset";
 
 const CameraView = () => {
   const stream = useStreamSocket();
+  const [showTable, setShowTable] = useState(true);
 
   return (
     <div className="flex flex-grow p-4">
       <div className="flex flex-grow">
-        <div className="flex-grow flex flex-col items-center">
-          <h1 className="text-xl font-bold">Nama Camera</h1>
-          <h3>Tanggal: 19 Februari 2024</h3>
-          <ImageStreamViewer base64Data={stream.base64data} />
+        <div className="flex-grow flex flex-col items-start">
+          <span className="flex w-full justify-between pr-4">
+            <span className="flex flex-col">
+              <h1 className="text-xl font-bold">Nama Camera</h1>
+              <h3>Tanggal: 19 Februari 2024</h3>
+            </span>
+            <ActionIcon.Group>
+              <ActionIcon variant="default" size={"lg"} onClick={()=> setShowTable(false)} aria-label="Camera">
+                <MdCamera />
+              </ActionIcon>
+              <ActionIcon variant="default" size={"lg"} onClick={()=> setShowTable(true)} aria-label="Table View">
+                <MdTableView />
+              </ActionIcon>
+            </ActionIcon.Group>
+          </span>
+          {showTable ? (
+            <Table.ScrollContainer className="border-[1px] aspect-video" w={640}>
+              <ReportTable data={sampleDataCCTV} />
+            </Table.ScrollContainer>
+          ) : (
+            <ImageStreamViewer base64Data={stream.base64data} />
+          )}
           <br />
         </div>
         <div className="border-l border-gray-300 min-h-full"></div>

@@ -12,13 +12,15 @@ import {
 //todo: create error handling like result, error, and loading.
 export function ImageStreamViewer({
   base64Data,
-  error
+  error,
+  w,
 }: {
   /**
    * Base64 image string, not include `data:image/jpeg;base64,`
    */
   base64Data?: string;
-  error?: string
+  error?: string;
+  w?: number,
 }) {
   const [base64String, setBase64String] = useState<string | undefined>(
     undefined
@@ -27,7 +29,7 @@ export function ImageStreamViewer({
     setBase64String(base64Data ?? "");
   }, [base64Data]);
   return (
-    <div className="border-2 border-solid min-w-[640px] aspect-video rounded-lg flex justify-center items-center mt-5 px-10">
+    <div className={`border-2 border-solid min-w-[${w ?? 640}px] aspect-video rounded-lg flex justify-center items-center mt-5 px-10`}>
       {base64String ? (
         <img src={base64String} alt="CCTV Stream" />
       ) : (
