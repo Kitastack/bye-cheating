@@ -11,17 +11,17 @@ import { MdOutlineWarningAmber } from "react-icons/md";
 export function ImageStreamViewer({
   base64Data,
   error,
-  w,
+  minW,
 }: {
   /**
    * Base64 image string, not include `data:image/jpeg;base64,`
    */
   base64Data?: string;
   error?: string;
-  w?: number;
+  minW?: number;
 }) {
   const [base64String, setBase64String] = useState<string | undefined>(
-    undefined
+    undefined,
   );
 
   useEffect(() => {
@@ -29,8 +29,8 @@ export function ImageStreamViewer({
   }, [base64Data]);
   return (
     <div
-      style={{ width: w ?? 600 }}
-      className={`border-2 border-solid min-w-[400px] aspect-video rounded-lg flex justify-center items-center mt-5 px-10`}
+      style={{ minWidth: minW ?? 600, minHeight: ((minW ?? 600) * 9) / 16 }}
+      className={`border-[1px] resize overflow-auto border-solid aspect-video rounded-sm flex justify-center items-center`}
     >
       {base64String ? (
         <img src={base64String} alt="CCTV Stream" />
