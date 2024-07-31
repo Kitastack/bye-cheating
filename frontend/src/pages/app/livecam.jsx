@@ -1,7 +1,7 @@
 import { ImageStreamViewer } from "@/components/ImageStreamViewer";
 import { useStreamSocket } from "@/context/CameraSocketContext";
 import { MdCamera, MdOutlinePlayArrow, MdTableView } from "react-icons/md";
-import { ActionIcon, Table, Text, TextInput } from "@mantine/core";
+import { ActionIcon, Table, Text, TextInput, Tooltip } from "@mantine/core";
 import { useState } from "react";
 import { ReportTable } from "@/components/ReportTable";
 import { sampleDataCCTV } from "@/model/dataset";
@@ -9,13 +9,11 @@ import { sampleDataCCTV } from "@/model/dataset";
 const CameraView = () => {
   return (
     <div className="flex flex-grow p-4">
-      <div className="flex flex-grow">
-        <div className="flex-grow flex flex-col items-start">
-          <MainView />
-        </div>
-        <div className="border-l border-gray-300 min-h-full"></div>
-        <Inspector />
+      <div className="flex-grow flex flex-col items-center">
+        <MainView />
       </div>
+      <div className="border-l border-gray-300 dark:border-gray-300/30 min-h-full"></div>
+      <Inspector />
     </div>
   );
 };
@@ -31,27 +29,32 @@ const MainView = () => {
           <h3>Tanggal: 19 Februari 2024</h3>
         </span>
         <ActionIcon.Group>
-          <ActionIcon
-            variant={showTable ? "default" : "filled"}
-            size={"lg"}
-            onClick={() => setShowTable(false)}
-            aria-label="Camera"
-          >
-            <MdCamera />
-          </ActionIcon>
-          <ActionIcon
-            variant={showTable ? "filled" : "default"}
-            size={"lg"}
-            onClick={() => setShowTable(true)}
-            aria-label="Table View"
-          >
-            <MdTableView />
-          </ActionIcon>
+          <Tooltip label="Tampilan Kamera">
+            <ActionIcon
+              variant={showTable ? "default" : "filled"}
+              size={"lg"}
+              onClick={() => setShowTable(false)}
+              aria-label="Camera"
+            >
+              <MdCamera />
+            </ActionIcon>
+          </Tooltip>
+          <Tooltip label="Tampilan Tabel">
+            <ActionIcon
+              variant={showTable ? "filled" : "default"}
+              size={"lg"}
+              onClick={() => setShowTable(true)}
+              aria-label="Table View"
+            >
+              <MdTableView />
+            </ActionIcon>
+          </Tooltip>
         </ActionIcon.Group>
       </span>
       {showTable ? (
         <Table.ScrollContainer
-          className="border-[1px] hover:resize aspect-video"
+          bd={"1px solid myColor.5"}
+          className="hover:resize aspect-video"
           minWidth={720}
         >
           <ReportTable data={sampleDataCCTV} />

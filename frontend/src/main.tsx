@@ -40,7 +40,7 @@ const theme = createTheme({
 
 ReactDOM.createRoot(container).render(
   <React.StrictMode>
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={theme} defaultColorScheme="light">
       <BrowserRouter>
         <AuthProvider>
           <StreamSocketProvider>

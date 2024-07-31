@@ -1,3 +1,4 @@
+import { Box } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { MdOutlineWarningAmber } from "react-icons/md";
 
@@ -21,16 +22,17 @@ export function ImageStreamViewer({
   minW?: number;
 }) {
   const [base64String, setBase64String] = useState<string | undefined>(
-    undefined,
+    undefined
   );
 
   useEffect(() => {
     setBase64String(base64Data ?? "");
   }, [base64Data]);
   return (
-    <div
+    <Box
+      bd={"1px solid myColor.5"}
       style={{ minWidth: minW ?? 600, minHeight: ((minW ?? 600) * 9) / 16 }}
-      className={`border-[1px] resize overflow-auto border-solid aspect-video rounded-sm flex justify-center items-center`}
+      className={`resize overflow-auto aspect-video rounded-sm flex justify-center items-center`}
     >
       {base64String ? (
         <img src={base64String} alt="CCTV Stream" />
@@ -40,6 +42,6 @@ export function ImageStreamViewer({
           <MdOutlineWarningAmber /> {error ?? "Masalah tidak diketahui"}
         </p>
       )}
-    </div>
+    </Box>
   );
 }
