@@ -1,3 +1,4 @@
+import { MinimalLayout } from "@/layout/MinimalLayout";
 import { Button, Divider, Flex, PasswordInput, TextInput } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
@@ -5,9 +6,11 @@ import { useNavigate } from "react-router-dom";
 
 export function RegisterPage() {
   return (
-    <div className="w-full h-svh flex flex-col items-center justify-center">
-      <LoginCard />
-    </div>
+    <MinimalLayout>
+      <div className="w-full h-svh flex flex-col items-center justify-center">
+        <LoginCard />
+      </div>
+    </MinimalLayout>
   );
 }
 
