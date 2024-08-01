@@ -1,14 +1,12 @@
 import {
   ActionIcon,
   ActionIconGroup,
-  Box,
   Flex,
-  Group,
   Stack,
   Text,
   useMantineColorScheme,
 } from "@mantine/core";
-import { MdDarkMode, MdLightMode } from "react-icons/md";
+import {IconMoon, IconSun} from "@tabler/icons-react"
 
 export default function TitleDashboard({
   leftSection,
@@ -35,10 +33,10 @@ export default function TitleDashboard({
         </Flex>
         <ActionIconGroup>
           <ActionIcon variant={colorScheme ==="light" ? "filled" : "light"} size={"xl"} onClick={()=> setColorScheme("light")}>
-            <MdLightMode />
+            <IconSun size={20} />
           </ActionIcon>
           <ActionIcon variant={colorScheme ==="dark" ? "filled" : "light"} size={"xl"} onClick={()=> setColorScheme("dark")}>
-            <MdDarkMode />
+            <IconMoon size={20} />
           </ActionIcon>
         </ActionIconGroup>
       </Flex>

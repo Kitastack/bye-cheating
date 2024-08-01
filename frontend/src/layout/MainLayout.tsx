@@ -14,7 +14,7 @@ import {
 } from "@mantine/core";
 import TitleDashboard from "@/components/titleDashboard";
 import { useDisclosure } from "@mantine/hooks";
-import { MdMoreVert, MdOutlinePlayArrow } from "react-icons/md";
+import {IconDotsVertical, IconPlayerPlay} from "@tabler/icons-react"
 
 export default function MainLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -87,7 +87,7 @@ const Inspector = () => {
           <Group justify="space-between">
             <Text fw={400} size="sm">Camera 2</Text>
             <ActionIcon variant="subtle">
-              <MdMoreVert />
+              <IconDotsVertical />
             </ActionIcon>
           </Group>
         </Card>
@@ -104,7 +104,7 @@ const RtspInput = () => {
         placeholder="rtsp://urlname"
         rightSection={
           <ActionIcon variant="filled">
-            <MdOutlinePlayArrow />
+            <IconPlayerPlay size={16} />
           </ActionIcon>
         }
       />

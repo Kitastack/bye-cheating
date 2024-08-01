@@ -1,16 +1,14 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { MdMonitor } from "react-icons/md";
-import { HiClipboardDocumentList } from "react-icons/hi2";
 import { NavLink, Text } from "@mantine/core";
 import { useState } from "react";
-import { HiLogout } from "react-icons/hi";
+import {IconDeviceDesktop, IconBook2,IconLogout} from "@tabler/icons-react"
 
 const menuLists = [
-  { title: "Tampilan Langsung", path: "/app", icon: <MdMonitor /> },
+  { title: "Tampilan Langsung", path: "/app", icon: <IconDeviceDesktop size={20} /> },
   {
     title: "Laporan",
     path: "/app/laporan",
-    icon: <HiClipboardDocumentList />,
+    icon: <IconBook2 size={20} />,
   },
 ];
 
@@ -60,7 +58,7 @@ export default function NavbarContent() {
         component="button"
         label={"Log out"}
         color="red"
-        leftSection={<HiLogout />}
+        leftSection={<IconLogout  size={20}/>}
         onClick={() => {
           console.log("logout");
         }}

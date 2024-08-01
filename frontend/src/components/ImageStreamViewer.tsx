@@ -1,6 +1,6 @@
 import { Box } from "@mantine/core";
 import { useEffect, useState } from "react";
-import { MdOutlineWarningAmber } from "react-icons/md";
+import {IconAlertCircle} from "@tabler/icons-react"
 
 // const getBlobUrl = (data: string | null) => {
 //   if (data) {
@@ -36,7 +36,7 @@ export function ImageStreamViewer({
       ) : (
         <p className="flex gap-2 justify-center items-center">
           {" "}
-          <MdOutlineWarningAmber /> {error ?? "Masalah tidak diketahui"}
+          <IconAlertCircle /> {error ?? "Masalah tidak diketahui"}
         </p>
       )}
     </Box>

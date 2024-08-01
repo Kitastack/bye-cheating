@@ -1,6 +1,6 @@
 import { ImageStreamViewer } from "@/components/ImageStreamViewer";
 import { useStreamSocket } from "@/context/CameraSocketContext";
-import { MdCamera, MdTableView } from "react-icons/md";
+import {IconCamera, IconTable} from "@tabler/icons-react"
 import {
   ActionIcon,
   Card,
@@ -39,7 +39,7 @@ const MainView = () => {
                 onClick={() => setShowTable(false)}
                 aria-label="Camera"
               >
-                <MdCamera />
+                <IconCamera size={20} />
               </ActionIcon>
             </Tooltip>
             <Tooltip label="Tampilan Tabel">
@@ -49,7 +49,7 @@ const MainView = () => {
                 onClick={() => setShowTable(true)}
                 aria-label="Table View"
               >
-                <MdTableView />
+                <IconTable  size={20}  />
               </ActionIcon>
             </Tooltip>
           </ActionIcon.Group>
