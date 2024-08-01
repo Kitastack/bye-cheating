@@ -1,35 +1,44 @@
+import { Box } from "@mantine/core";
 import { useEffect, useState } from "react";
+import {IconAlertCircle} from "@tabler/icons-react"
 
-const getBlobUrl = (data: string | null) => {
-  if (data) {
-    return `data:image/jpeg;base64, ${data}`;
-  }
-  return;
-};
-
+// const getBlobUrl = (data: string | null) => {
+//   if (data) {
+//     return `data:image/jpeg;base64, ${data}`;
+//   }
+//   return;
+// };
+//todo: create error handling like result, error, and loading.
 export function ImageStreamViewer({
   base64Data,
+  error,
 }: {
-  base64Data: string | null;
+  /**
+   * Base64 image string, not include `data:image/jpeg;base64,`
+   */
+  base64Data?: string;
+  error?: string;
 }) {
   const [base64String, setBase64String] = useState<string | undefined>(
     undefined
   );
+
   useEffect(() => {
-    setBase64String(getBlobUrl(base64Data ));
-    console.log(`sizedata: ${base64String}`);
+    setBase64String(base64Data ?? "");
   }, [base64Data]);
   return (
-    <div className="flex justify-center">
-      <div className="border-4 border-solid min-w-[640px] aspect-video rounded-lg flex place-content-center mt-5 px-10">
-        {base64String ? (
-          <img src={base64String} alt="CCTV Stream" />
-        ) : (
-          <h1 className="place-content-center text-2xl bg-slate-400 mx-auto my-auto px-7 py-2 rounded-lg bg-opacity-30">
-            Tidak Ada Video CCTV
-          </h1>
-        )}
-      </div>
-    </div>
+    <Box
+      bd={"1px solid myColor.5"}
+      className={`overflow-auto aspect-video w-full rounded-sm flex justify-center items-center`}
+    >
+      {base64String ? (
+        <img src={base64String} alt="CCTV Stream" />
+      ) : (
+        <p className="flex gap-2 justify-center items-center">
+          {" "}
+          <IconAlertCircle /> {error ?? "Masalah tidak diketahui"}
+        </p>
+      )}
+    </Box>
   );
 }
