@@ -5,6 +5,7 @@ import "@fontsource/poppins";
 import "@fontsource-variable/karla";
 import "@/index.css";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
 import {
   createTheme,
   MantineColorsTuple,
@@ -13,6 +14,8 @@ import {
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { StreamSocketProvider } from "./context/CameraSocketContext";
+import { ModalsProvider } from "@mantine/modals";
+import { Notifications } from "@mantine/notifications";
 
 const container = document.getElementById("root") as ReactDOM.Container;
 
@@ -41,13 +44,16 @@ const theme = createTheme({
 ReactDOM.createRoot(container).render(
   <React.StrictMode>
     <MantineProvider theme={theme} defaultColorScheme="light">
-      <BrowserRouter>
-        <AuthProvider>
-          <StreamSocketProvider>
-            <App />
-          </StreamSocketProvider>
-        </AuthProvider>
-      </BrowserRouter>
+      <Notifications />
+      <ModalsProvider>
+        <BrowserRouter>
+          <AuthProvider>
+            <StreamSocketProvider>
+              <App />
+            </StreamSocketProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </ModalsProvider>
     </MantineProvider>
   </React.StrictMode>
 );
