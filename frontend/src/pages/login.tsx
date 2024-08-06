@@ -1,5 +1,15 @@
 import { MinimalLayout } from "@/layout/MinimalLayout";
-import { Button, Divider, Flex, PasswordInput, TextInput } from "@mantine/core";
+import {
+  Anchor,
+  Button,
+  Divider,
+  Group,
+  Paper,
+  PasswordInput,
+  Stack,
+  Text,
+  TextInput,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useDisclosure } from "@mantine/hooks";
 import { useNavigate } from "react-router-dom";
@@ -20,7 +30,6 @@ function LoginCard() {
     useDisclosure(false);
 
   const form = useForm({
-    mode: "uncontrolled",
     initialValues: {
       email: "",
       password: "",
@@ -35,41 +44,48 @@ function LoginCard() {
   });
 
   return (
-    <div className="border-2 rounded-md p-4 flex flex-col gap-4 w-96">
-      <Flex justify={"center"}>
-        <h1 className="text-2xl font-bold">Login</h1>
-      </Flex>
-      <form
-        className="flex flex-col gap-2 min-h-96"
-        onSubmit={form.onSubmit((values) => console.log(values))}
-      >
-        <TextInput
-          withAsterisk
-          label="email"
-          placeholder="your@email.com"
-          key={form.key("email")}
-          {...form.getInputProps("email")}
-        />
-        <PasswordInput
-          withAsterisk
-          label="password"
-          visible={passwordVisible}
-          onVisibilityChange={togglePasswordVisibility}
-          key={form.key("password")}
-          {...form.getInputProps("password")}
-        />
-        <div className="flex-grow"></div>
-        <Divider />
-        <Flex direction={"column"} gap={"4px"}>
-          <Button type="submit">Login</Button>
-          <Button
-            onClick={() => navigate("/register", { replace: true })}
-            variant="outline"
+    <Paper radius={"md"} p={"xl"} withBorder>
+      <Text size="lg" w={300} fw={500}>
+        Selamat datang di Bye Cheating!
+      </Text>
+      <Group grow></Group>
+      <Divider my={"md"} />
+      <form onSubmit={form.onSubmit(() => {})}>
+        <Stack>
+          <TextInput
+            required
+            label="email"
+            placeholder="nama@email.com"
+            onChange={(event) =>
+              form.setFieldValue("email", event.currentTarget.value)
+            }
+            value={form.values.email}
+            error={form.errors.email}
+          />
+          <PasswordInput
+            required
+            label="Password"
+            placeholder="Your password"
+            onChange={(e) =>
+              form.setFieldValue("password", e.currentTarget.value)
+            }
+            value={form.values.password}
+            error={form.errors.password}
+          />
+        </Stack>
+        <Group justify="space-between" mt={"xl"}>
+          <Anchor
+            component="button"
+            type="button"
+            variant="text"
+            onClick={() => navigate("/register")}
+            size="xs"
           >
-            Create new account
-          </Button>
-        </Flex>
+            Tidak memiliki akun? Register
+          </Anchor>
+          <Button type="submit">Login</Button>
+        </Group>
       </form>
-    </div>
+    </Paper>
   );
 }

@@ -29,7 +29,7 @@ export default function MainLayout() {
       navbar={{
         width: 300,
 
-        breakpoint: "sm",
+        breakpoint: "md",
         collapsed: { mobile: !mobileOpened },
       }}
       header={{ height: 100 }}
