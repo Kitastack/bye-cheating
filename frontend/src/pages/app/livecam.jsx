@@ -14,7 +14,7 @@ import { sampleDataCCTV } from "@/model/dataset";
 
 const CameraView = () => {
   return (
-    <Flex direction={"column"} gap={"xs"} p={"xs"}>
+    <Flex direction={"column"} gap={"xs"} p={"xs"} mah={"100vh"}>
         <MainView />
     </Flex>
   );
