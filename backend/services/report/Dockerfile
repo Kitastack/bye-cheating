@@ -12,4 +12,4 @@ RUN npm install
 COPY . .
 # setup port
 # EXPOSE 8091
-CMD [ "npm", "run", "start" ]
+ENTRYPOINT [ "npm", "run", "start" ]
