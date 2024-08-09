@@ -5,6 +5,7 @@ import {
   ActionIcon,
   AppShell,
   Burger,
+  Button,
   Card,
   Divider,
   Flex,
@@ -14,7 +15,11 @@ import {
 } from "@mantine/core";
 import TitleDashboard from "@/components/titleDashboard";
 import { useDisclosure } from "@mantine/hooks";
-import {IconDotsVertical, IconPlayerPlay} from "@tabler/icons-react"
+import {
+  IconDotsVertical,
+  IconPlayerPlay,
+  IconPlus,
+} from "@tabler/icons-react";
 
 export default function MainLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -22,9 +27,9 @@ export default function MainLayout() {
   return (
     <AppShell
       navbar={{
-        width: 200,
+        width: 300,
 
-        breakpoint: "sm",
+        breakpoint: "md",
         collapsed: { mobile: !mobileOpened },
       }}
       header={{ height: 100 }}
@@ -58,11 +63,11 @@ export default function MainLayout() {
       <AppShell.Main className="flex flex-col">
         <Outlet />
       </AppShell.Main>
-      <AppShell.Footer zIndex={300}>
+      {/* <AppShell.Footer zIndex={300}>
         <Group w={"100%"} h={"100%"} bg={"myColor"} px={8}>
           <p>this is footer</p>
         </Group>
-      </AppShell.Footer>
+      </AppShell.Footer> */}
     </AppShell>
   );
 }
@@ -82,10 +87,23 @@ const Inspector = () => {
       <Divider />
 
       <Text fw={600}>Daftar Kamera</Text>
-      <Flex direction={"column"}>
+      <Flex direction={"column"} gap={"md"}>
+        <Button
+          variant="outline"
+          style={{ borderStyle: "dashed", cursor: "pointer" }}
+          onClick={() => {}}
+          radius={"sm"}
+        >
+          <Flex align={"center"} justify={"center"}>
+            <IconPlus size={18} />
+            <Text size="sm">Add Camera</Text>
+          </Flex>
+        </Button>
         <Card padding={"xs"} radius={"sm"} withBorder>
           <Group justify="space-between">
-            <Text fw={400} size="sm">Camera 2</Text>
+            <Text fw={400} size="sm">
+              Camera 2
+            </Text>
             <ActionIcon variant="subtle">
               <IconDotsVertical />
             </ActionIcon>
