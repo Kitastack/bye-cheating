@@ -11,7 +11,6 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useDisclosure } from "@mantine/hooks";
 import { useNavigate } from "react-router-dom";
 
 export function LoginPage() {
@@ -26,8 +25,6 @@ export function LoginPage() {
 
 function LoginCard() {
   const navigate = useNavigate();
-  const [passwordVisible, { toggle: togglePasswordVisibility }] =
-    useDisclosure(false);
 
   const form = useForm({
     initialValues: {

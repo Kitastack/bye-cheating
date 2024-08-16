@@ -1,7 +1,16 @@
 import { MinimalLayout } from "@/layout/MinimalLayout";
-import { Button, Divider, Flex, PasswordInput, TextInput } from "@mantine/core";
+import {
+  Anchor,
+  Button,
+  Divider,
+  Text,
+  Group,
+  Paper,
+  PasswordInput,
+  Stack,
+  TextInput,
+} from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useDisclosure } from "@mantine/hooks";
 import { useNavigate } from "react-router-dom";
 
 export function RegisterPage() {
@@ -16,15 +25,13 @@ export function RegisterPage() {
 
 function LoginCard() {
   const navigate = useNavigate();
-  const [passwordVisible, { toggle: togglePasswordVisibility }] =
-    useDisclosure(false);
 
   const form = useForm({
-    mode: "uncontrolled",
     initialValues: {
       email: "",
       name: "",
       password: "",
+      repeatedPassword: "",
     },
     validate: {
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
@@ -33,53 +40,74 @@ function LoginCard() {
         /^(?=.*[A-Z])[A-Za-z\d]{8,}$/.test(value)
           ? null
           : "At least 8 chars and contain at least 1 uppercase",
+      repeatedPassword: (value,e) =>
+        value == e.password ? null : "Password harus sama",
     },
   });
 
   return (
-    <div className="border-2 rounded-md p-4 flex flex-col gap-4 w-96">
-      <Flex justify={"center"}>
-        <h1 className="text-2xl font-bold">Register</h1>
-      </Flex>
-      <form
-        className="flex flex-col gap-2 min-h-96"
-        onSubmit={form.onSubmit((values) => console.log(values))}
-      >
-        <TextInput
-          withAsterisk
-          label="Email"
-          placeholder="your@email.com"
-          key={form.key("email")}
-          {...form.getInputProps("email")}
-        />
-        <TextInput
-          withAsterisk
-          label="Name"
-          placeholder="your name"
-          key={form.key("name")}
-          {...form.getInputProps("name")}
-        />
-        <PasswordInput
-          withAsterisk
-          label="password"
-          visible={passwordVisible}
-          onVisibilityChange={togglePasswordVisibility}
-          key={form.key("password")}
-          {...form.getInputProps("password")}
-        />
-        <div className="flex-grow"></div>
-
-        <Divider />
-        <Flex direction={"column"} gap={"4px"}>
-          <Button type="submit">Register</Button>
-          <Button
-            onClick={() => navigate("/login", { replace: true })}
-            variant="outline"
+    <Paper radius={"md"} p={"xl"} withBorder>
+      <Text size="lg" w={300} fw={500}>
+        Selamat Datang di Bye Cheating!
+      </Text>
+      <Group grow></Group>
+      <Divider my={"md"} />
+      <form onSubmit={form.onSubmit(() => {})}>
+        <Stack>
+          <TextInput
+            required
+            label={"Email"}
+            placeholder="nama@email.com"
+            onChange={(event) =>
+              form.setFieldValue("email", event.currentTarget.value)
+            }
+            value={form.values.email}
+            error={form.errors.email}
+          />
+          <TextInput
+            required
+            label={"Nama"}
+            placeholder="Nama anda"
+            onChange={(e) => {
+              form.setFieldValue("name", e.currentTarget.value);
+            }}
+            value={form.values.name}
+            error={form.errors.name}
+          />
+          <PasswordInput
+            required
+            label={"Password"}
+            placeholder="Password anda"
+            onChange={(e) =>
+              form.setFieldValue("password", e.currentTarget.value)
+            }
+            value={form.values.password}
+            error={form.errors.password}
+          />
+          <PasswordInput
+            required
+            label={"Ulangi Password"}
+            placeholder="Password anda"
+            onChange={(e) =>
+              form.setFieldValue("repeatedPassword", e.currentTarget.value)
+            }
+            value={form.values.repeatedPassword}
+            error={form.errors.repeatedPassword}
+          />
+        </Stack>
+        <Group justify="space-between" mt={"xl"}>
+          <Anchor
+            component="button"
+            type="button"
+            variant="text"
+            onClick={() => navigate("/login")}
+            size="xs"
           >
-            Back to Login
-          </Button>
-        </Flex>
+            Sudah punya akun? Login
+          </Anchor>
+          <Button type="submit">Register</Button>
+        </Group>
       </form>
-    </div>
+    </Paper>
   );
 }
