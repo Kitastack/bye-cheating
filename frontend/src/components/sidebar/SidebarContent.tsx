@@ -1,10 +1,15 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { NavLink, Text } from "@mantine/core";
+import { Divider, NavLink, Text } from "@mantine/core";
 import { useState } from "react";
-import {IconDeviceDesktop, IconBook2,IconLogout} from "@tabler/icons-react"
+import { IconDeviceDesktop, IconBook2, IconLogout } from "@tabler/icons-react";
+import { UserCardInfo } from "./UserInfo";
 
 const menuLists = [
-  { title: "Tampilan Langsung", path: "/app", icon: <IconDeviceDesktop size={20} /> },
+  {
+    title: "Tampilan Langsung",
+    path: "/app",
+    icon: <IconDeviceDesktop size={20} />,
+  },
   {
     title: "Laporan",
     path: "/app/laporan",
@@ -12,22 +17,22 @@ const menuLists = [
   },
 ];
 
-function TitleSidebar() {
-  return (
-    <div className="flex min-h-6 items-center justify-center p-4">
-      <img
-        src="/LogoBgWhite.png"
-        className={`float-left block h-12 w-12 duration-500 ${
-          !open && "hidden"
-        }`}
-      />
-      <div className="p-1" />
-      <Text variant="text">Dashboard</Text>
-    </div>
-  );
-}
+// function TitleSidebar() {
+//   return (
+//     <div className="flex min-h-6 items-center justify-center p-4">
+//       <img
+//         src="/LogoBgWhite.png"
+//         className={`float-left block h-12 w-12 duration-500 ${
+//           !open && "hidden"
+//         }`}
+//       />
+//       <div className="p-1" />
+//       <Text variant="text">Dashboard</Text>
+//     </div>
+//   );
+// }
 
-export default function NavbarContent() {
+export default function SidebarContent() {
   const location = useLocation();
   const navigate = useNavigate();
   const [active, setActive] = useState(
@@ -36,11 +41,11 @@ export default function NavbarContent() {
 
   return (
     <>
-      <TitleSidebar />
+      <UserCardInfo />
+      <Divider my={""} />
       {menuLists.map((val, idx) => (
         <NavLink
           variant="filled"
-          
           key={val.title}
           component={"button"}
           label={val.title}
@@ -58,7 +63,7 @@ export default function NavbarContent() {
         component="button"
         label={"Log out"}
         color="red"
-        leftSection={<IconLogout  size={20}/>}
+        leftSection={<IconLogout size={20} />}
         onClick={() => {
           console.log("logout");
         }}

@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import NavbarContent from "../components/sidebar";
+import SidebarContent from "@/components/sidebar/SidebarContent";
 import {
   Accordion,
   ActionIcon,
@@ -41,7 +41,7 @@ export default function MainLayout() {
       // layout="alt"
     >
       <AppShell.Navbar>
-        <NavbarContent />
+        <SidebarContent />
       </AppShell.Navbar>
       <AppShell.Header>
         <TitleDashboard
