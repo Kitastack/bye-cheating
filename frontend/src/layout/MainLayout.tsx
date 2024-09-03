@@ -20,6 +20,8 @@ import {
   IconPlayerPlay,
   IconPlus,
 } from "@tabler/icons-react";
+import { modals } from "@mantine/modals";
+import { AddCameraModalContent } from "@/components/main/AddCameraModal";
 
 export default function MainLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -80,7 +82,6 @@ const Inspector = () => {
           <Accordion.Control>Metadata</Accordion.Control>
           <Accordion.Panel>
             <Text size="sm">URL: rtsp://localhost:8888/a301.live</Text>
-            <RtspInput />
           </Accordion.Panel>
         </Accordion.Item>
       </Accordion>
@@ -91,7 +92,14 @@ const Inspector = () => {
         <Button
           variant="outline"
           style={{ borderStyle: "dashed", cursor: "pointer" }}
-          onClick={() => {}}
+          onClick={() => {
+            modals.open({
+              title: "Tambah Kamera",
+              children: (
+                <AddCameraModalContent onSubmit={()=>{}} />
+              )
+            })
+          }}
           radius={"sm"}
         >
           <Flex align={"center"} justify={"center"}>
