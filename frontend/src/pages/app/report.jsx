@@ -2,7 +2,7 @@ import { Divider, Table } from "@mantine/core";
 import { ReportTable } from "@/components/ReportTable";
 import { sampleDataCCTV } from "@/model/dataset";
 
-export default function Laporan() {
+export default function ReportPage() {
   return (
     <div className="w-full mx-auto p-4">
       <div className="flex flex-col">

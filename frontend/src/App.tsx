@@ -1,14 +1,12 @@
 import { Outlet, Route, Routes, useNavigate } from "react-router-dom";
 import MainLayout from "@/layout/MainLayout";
-import {
-  default as CameraView,
-  default as WebSocketDemo,
-} from "@/pages/app/livecam";
-import Laporan from "@/pages/app/report";
+import ReportPage from "@/pages/app/report";
 import { LoginPage } from "@/pages/login";
 import { RegisterPage } from "./pages/register";
 import { ErrorScreen } from "./components/ui/ErrorScreen";
 import { Box, Button } from "@mantine/core";
+import UsersPage from "./pages/app/users";
+import LiveCamPage from "./pages/app/LiveCamPage";
 
 function App() {
   const navigate = useNavigate();
@@ -19,9 +17,10 @@ function App() {
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
         <Route path="app" element={<MainLayout />}>
-          <Route index element={<CameraView />} />
-          <Route path="laporan" element={<Laporan />} />
-          <Route path="websoket" element={<WebSocketDemo />} />
+          <Route index element={<LiveCamPage />} />
+          <Route path="users" element={<UsersPage/>}/>
+          <Route path="laporan" element={<ReportPage />} />
+          {/* <Route path="websoket" element={<WebSocketDemo />} /> */}
           <Route path="test" element={<div>test view</div>} />
           <Route
             path="*"

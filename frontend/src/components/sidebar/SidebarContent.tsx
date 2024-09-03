@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Divider, NavLink, Text } from "@mantine/core";
+import { Divider, NavLink } from "@mantine/core";
 import { useState } from "react";
 import { IconDeviceDesktop, IconBook2, IconLogout } from "@tabler/icons-react";
 import { UserCardInfo } from "./UserInfo";
