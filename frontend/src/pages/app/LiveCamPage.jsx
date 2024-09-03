@@ -11,8 +11,9 @@ import {
 import { useState } from "react";
 import { ReportTable } from "@/components/ReportTable";
 import { sampleDataCCTV } from "@/model/dataset";
+import { LiveCamComponent } from "@/components/LiveCamComponent";
 
-const CameraView = () => {
+const LiveCamPage = () => {
   return (
     <Flex direction={"column"} gap={"xs"} p={"xs"} mah={"100vh"}>
         <MainView />
@@ -63,11 +64,11 @@ const MainView = () => {
           <ReportTable data={sampleDataCCTV} />
         </Table.ScrollContainer>
       ) : (
-        <ImageStreamViewer base64Data={stream.base64data} minW={500} />
+        <LiveCamComponent mlCamData="" rawCamData={stream.base64data} />
       )}
       <br />
     </>
   );
 };
 
-export default CameraView;
+export default LiveCamPage;
