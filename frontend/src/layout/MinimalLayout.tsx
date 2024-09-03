@@ -1,7 +1,7 @@
 import TitleDashboard from "@/components/titleDashboard";
 import { AppShell } from "@mantine/core";
+import { Outlet } from "@tanstack/react-router";
 import React from "react";
-import { Outlet } from "react-router-dom";
 
 export function MinimalLayout({ children }: { children?: React.ReactNode }) {
   return (

@@ -1,4 +1,3 @@
-import { Outlet } from "react-router-dom";
 import SidebarContent from "@/components/sidebar/SidebarContent";
 import {
   Accordion,
@@ -11,17 +10,16 @@ import {
   Flex,
   Group,
   Text,
-  TextInput,
 } from "@mantine/core";
 import TitleDashboard from "@/components/titleDashboard";
 import { useDisclosure } from "@mantine/hooks";
 import {
   IconDotsVertical,
-  IconPlayerPlay,
   IconPlus,
 } from "@tabler/icons-react";
 import { modals } from "@mantine/modals";
 import { AddCameraModalContent } from "@/components/main/AddCameraModal";
+import { Outlet } from "@tanstack/react-router";
 
 export default function MainLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
@@ -63,7 +61,7 @@ export default function MainLayout() {
         <Inspector />
       </AppShell.Aside>
       <AppShell.Main className="flex flex-col">
-        <Outlet />
+        <Outlet/>
       </AppShell.Main>
       {/* <AppShell.Footer zIndex={300}>
         <Group w={"100%"} h={"100%"} bg={"myColor"} px={8}>
@@ -122,18 +120,18 @@ const Inspector = () => {
   );
 };
 
-const RtspInput = () => {
-  return (
-    <>
-      <TextInput
-        label="RTSP URL"
-        placeholder="rtsp://urlname"
-        rightSection={
-          <ActionIcon variant="filled">
-            <IconPlayerPlay size={16} />
-          </ActionIcon>
-        }
-      />
-    </>
-  );
-};
+// const RtspInput = () => {
+//   return (
+//     <>
+//       <TextInput
+//         label="RTSP URL"
+//         placeholder="rtsp://urlname"
+//         rightSection={
+//           <ActionIcon variant="filled">
+//             <IconPlayerPlay size={16} />
+//           </ActionIcon>
+//         }
+//       />
+//     </>
+//   );
+// };

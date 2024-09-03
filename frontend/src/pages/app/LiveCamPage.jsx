@@ -1,4 +1,3 @@
-import { ImageStreamViewer } from "@/components/ImageStreamViewer";
 import { useStreamSocket } from "@/context/CameraSocketContext";
 import {IconCamera, IconTable} from "@tabler/icons-react"
 import {

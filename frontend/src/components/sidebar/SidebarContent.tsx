@@ -1,8 +1,8 @@
-import { useLocation, useNavigate } from "react-router-dom";
 import { Divider, NavLink } from "@mantine/core";
 import { useState } from "react";
 import { IconDeviceDesktop, IconBook2, IconLogout } from "@tabler/icons-react";
 import { UserCardInfo } from "./UserInfo";
+import { useNavigate } from "@tanstack/react-router";
 
 const menuLists = [
   {
@@ -33,7 +33,6 @@ const menuLists = [
 // }
 
 export default function SidebarContent() {
-  const location = useLocation();
   const navigate = useNavigate();
   const [active, setActive] = useState(
     menuLists.findIndex((item) => item.path == (location.pathname ?? "/app"))
@@ -52,7 +51,7 @@ export default function SidebarContent() {
           leftSection={val.icon}
           active={active == idx}
           onClick={() => {
-            navigate(val.path);
+            navigate({to: val.path});
             setActive(idx);
           }}
         />

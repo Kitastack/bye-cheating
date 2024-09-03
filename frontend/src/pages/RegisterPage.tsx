@@ -11,7 +11,7 @@ import {
   TextInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 
 export function RegisterPage() {
   return (
@@ -100,7 +100,7 @@ function LoginCard() {
             component="button"
             type="button"
             variant="text"
-            onClick={() => navigate("/login")}
+            onClick={() => navigate({to: "/login"})}
             size="xs"
           >
             Sudah punya akun? Login

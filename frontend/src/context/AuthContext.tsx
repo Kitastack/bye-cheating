@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "@/constant";
 import { notifications } from "@mantine/notifications";
+import { useNavigate } from "@tanstack/react-router";
 
 type IAuthContext = {
   login: (email: string, password: string) => Promise<void>;
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout() {
         setAccessToken("");
         setRefreshToken("");
-        navigate("/", { replace: true });
+        navigate({to: "/", replace: true});
       },
       async register(
         email: string,
