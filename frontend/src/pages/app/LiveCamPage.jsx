@@ -1,26 +1,15 @@
 import { useStreamSocket } from "@/context/CameraSocketContext";
-import {IconCamera, IconTable} from "@tabler/icons-react"
-import {
-  ActionIcon,
-  Card,
-  Flex,
-  Table,
-  Tooltip,
-} from "@mantine/core";
-import { useState } from "react";
+import { IconCamera, IconTable } from "@tabler/icons-react";
+import { ActionIcon, Card, Flex, Table, Tooltip } from "@mantine/core";
+import { useEffect, useState } from "react";
 import { ReportTable } from "@/components/ReportTable";
 import { sampleDataCCTV } from "@/model/dataset";
 import { LiveCamComponent } from "@/components/LiveCamComponent";
+import { useAside } from "@/context/AsideContext";
+import { AsideCameraInspector } from "@/components/layout/AsideCameraInspector";
 
-const LiveCamPage = () => {
-  return (
-    <Flex direction={"column"} gap={"xs"} p={"xs"} mah={"100vh"}>
-        <MainView />
-    </Flex>
-  );
-};
 
-const MainView = () => {
+function MainView () {
   const stream = useStreamSocket();
   const [showTable, setShowTable] = useState(false);
   return (
@@ -49,7 +38,7 @@ const MainView = () => {
                 onClick={() => setShowTable(true)}
                 aria-label="Table View"
               >
-                <IconTable  size={20}  />
+                <IconTable size={20} />
               </ActionIcon>
             </Tooltip>
           </ActionIcon.Group>
@@ -70,4 +59,14 @@ const MainView = () => {
   );
 };
 
-export default LiveCamPage;
+export default function LiveCamPage () {
+  const { setAsideComponent } = useAside();
+  useEffect(() => {
+    setAsideComponent(AsideCameraInspector);
+  }, []);
+  return (
+    <Flex direction={"column"} gap={"xs"} p={"xs"} mah={"100vh"}>
+      <MainView />
+    </Flex>
+  );
+};

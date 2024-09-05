@@ -1,7 +1,7 @@
 import { Divider, NavLink } from "@mantine/core";
 import { useState } from "react";
 import { IconDeviceDesktop, IconUsers } from "@tabler/icons-react";
-import { UserCardInfo } from "./UserInfo";
+import { UserCardInfo } from "@/components/ui/UserInfo";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 const menuLists = [

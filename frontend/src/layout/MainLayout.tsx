@@ -1,124 +1,66 @@
-import SidebarContent from "@/components/sidebar/SidebarContent";
+import SidebarContent from "@/components/layout/SidebarContent";
 import {
-  Accordion,
-  ActionIcon,
   AppShell,
   Burger,
-  Button,
-  Card,
-  Divider,
-  Flex,
-  Group,
-  Text,
 } from "@mantine/core";
 import TitleDashboard from "@/components/titleDashboard";
 import { useDisclosure } from "@mantine/hooks";
-import {
-  IconDotsVertical,
-  IconPlus,
-} from "@tabler/icons-react";
-import { modals } from "@mantine/modals";
-import { AddCameraModalContent } from "@/components/main/AddCameraModal";
 import { Outlet } from "@tanstack/react-router";
+import { useAside } from "@/context/AsideContext";
 
 export default function MainLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();
   const [asideMobileOpened] = useDisclosure();
+  const {asideComponent} = useAside()
   return (
-    <AppShell
-      navbar={{
-        width: 300,
+      <AppShell
+        navbar={{
+          width: 300,
 
-        breakpoint: "md",
-        collapsed: { mobile: !mobileOpened },
-      }}
-      header={{ height: 100 }}
-      aside={{
-        width: 300,
-        breakpoint: "sm",
-        collapsed: { mobile: !asideMobileOpened },
-      }}
-      // layout="alt"
-    >
-      <AppShell.Navbar>
-        <SidebarContent />
-      </AppShell.Navbar>
-      <AppShell.Header>
-        <TitleDashboard
-          leftSection={
-            <>
-              <Burger
-                opened={mobileOpened}
-                onClick={toggleMobile}
-                hiddenFrom="sm"
-                size="sm"
-              />
-            </>
-          }
-        />
-      </AppShell.Header>
-      <AppShell.Aside>
-        <Inspector />
-      </AppShell.Aside>
-      <AppShell.Main className="flex flex-col">
-        <Outlet/>
-      </AppShell.Main>
-      {/* <AppShell.Footer zIndex={300}>
+          breakpoint: "md",
+          collapsed: { mobile: !mobileOpened },
+        }}
+        header={{ height: 100 }}
+        aside={{
+          width: 300,
+          breakpoint: "sm",
+          collapsed: { mobile: !asideMobileOpened },
+        }}
+        // layout="alt"
+      >
+        <AppShell.Navbar>
+          <SidebarContent />
+        </AppShell.Navbar>
+        <AppShell.Header>
+          <TitleDashboard
+            leftSection={
+              <>
+                <Burger
+                  opened={mobileOpened}
+                  onClick={toggleMobile}
+                  hiddenFrom="sm"
+                  size="sm"
+                />
+              </>
+            }
+          />
+        </AppShell.Header>
+        <AppShell.Aside>
+          {asideComponent}
+        </AppShell.Aside>
+        <AppShell.Main className="flex flex-col">
+          <Outlet />
+        </AppShell.Main>
+        {/* <AppShell.Footer zIndex={300}>
         <Group w={"100%"} h={"100%"} bg={"myColor"} px={8}>
           <p>this is footer</p>
         </Group>
       </AppShell.Footer> */}
-    </AppShell>
+      </AppShell>
   );
 }
 
-const Inspector = () => {
-  return (
-    <div className="flex flex-col p-2 gap-2 w-full">
-      <Accordion variant="contained">
-        <Accordion.Item value="metadata">
-          <Accordion.Control>Metadata</Accordion.Control>
-          <Accordion.Panel>
-            <Text size="sm">URL: rtsp://localhost:8888/a301.live</Text>
-          </Accordion.Panel>
-        </Accordion.Item>
-      </Accordion>
-      <Divider />
 
-      <Text fw={600}>Daftar Kamera</Text>
-      <Flex direction={"column"} gap={"md"}>
-        <Button
-          variant="outline"
-          style={{ borderStyle: "dashed", cursor: "pointer" }}
-          onClick={() => {
-            modals.open({
-              title: "Tambah Kamera",
-              children: (
-                <AddCameraModalContent onSubmit={()=>{}} />
-              )
-            })
-          }}
-          radius={"sm"}
-        >
-          <Flex align={"center"} justify={"center"}>
-            <IconPlus size={18} />
-            <Text size="sm">Add Camera</Text>
-          </Flex>
-        </Button>
-        <Card padding={"xs"} radius={"sm"} withBorder>
-          <Group justify="space-between">
-            <Text fw={400} size="sm">
-              Camera 2
-            </Text>
-            <ActionIcon variant="subtle">
-              <IconDotsVertical />
-            </ActionIcon>
-          </Group>
-        </Card>
-      </Flex>
-    </div>
-  );
-};
 
 // const RtspInput = () => {
 //   return (

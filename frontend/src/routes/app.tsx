@@ -1,14 +1,17 @@
 import { ErrorScreen } from "@/components/ui/ErrorScreen";
+import { AsideContextProvider } from "@/context/AsideContext";
 import MainLayout from "@/layout/MainLayout";
 import { Button, Center } from "@mantine/core";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app")({
   component: () => (
-    <MainLayout/>    
+    <AsideContextProvider>
+      <MainLayout />
+    </AsideContextProvider>
   ),
   notFoundComponent: () => {
-    const router = useRouter()
+    const router = useRouter();
     return (
       <Center>
         <ErrorScreen
@@ -17,8 +20,7 @@ export const Route = createFileRoute("/app")({
             <Button onClick={() => router.history.back()}>Back</Button>
           }
         />
-
       </Center>
-    )
-  }
+    );
+  },
 });

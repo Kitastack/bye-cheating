@@ -1,8 +1,14 @@
+import { useAside } from "@/context/AsideContext";
 import { Avatar, Button, Divider, Flex, Text, Title } from "@mantine/core";
 import { IconLogout } from "@tabler/icons-react";
+import { useEffect } from "react";
 
 
 export function ProfilePage() {
+    const { setAsideComponent } = useAside();
+    useEffect(() => {
+      setAsideComponent();
+    }, []);
     return (
         <Flex direction={"column"} gap={"sm"} p={"xs"} align={"center"} w={"100%"}>
             <Title>Profile</Title>
