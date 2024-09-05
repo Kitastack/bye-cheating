@@ -7,7 +7,7 @@ import {
   useMantineColorScheme,
 } from "@mantine/core";
 import { IconMoon, IconSun } from "@tabler/icons-react";
-import { AppIcon } from "./Icon";
+import { AppIcon } from "./HeaderIcon";
 
 export default function TitleDashboard({
   leftSection,
