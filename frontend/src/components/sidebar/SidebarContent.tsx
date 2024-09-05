@@ -1,19 +1,19 @@
 import { Divider, NavLink } from "@mantine/core";
 import { useState } from "react";
-import { IconDeviceDesktop, IconBook2, IconLogout } from "@tabler/icons-react";
+import { IconDeviceDesktop, IconUsers } from "@tabler/icons-react";
 import { UserCardInfo } from "./UserInfo";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
 
 const menuLists = [
   {
-    title: "Tampilan Langsung",
+    title: "Livecam",
     path: "/app",
     icon: <IconDeviceDesktop size={20} />,
   },
   {
-    title: "Laporan",
-    path: "/app/laporan",
-    icon: <IconBook2 size={20} />,
+    title: "Pengguna",
+    path: "/app/users",
+    icon: <IconUsers size={20} />,
   },
 ];
 
@@ -22,9 +22,7 @@ const menuLists = [
 //     <div className="flex min-h-6 items-center justify-center p-4">
 //       <img
 //         src="/LogoBgWhite.png"
-//         className={`float-left block h-12 w-12 duration-500 ${
-//           !open && "hidden"
-//         }`}
+//         className={`float-left block h-12 w-12 duration-500`}
 //       />
 //       <div className="p-1" />
 //       <Text variant="text">Dashboard</Text>
@@ -34,13 +32,14 @@ const menuLists = [
 
 export default function SidebarContent() {
   const navigate = useNavigate();
+  const router = useRouterState()
   const [active, setActive] = useState(
     menuLists.findIndex((item) => item.path == (location.pathname ?? "/app"))
   );
 
   return (
     <>
-      <UserCardInfo />
+      <UserCardInfo active={router.location.pathname == "/app/profile"} onClick={()=> navigate({to: "/app/profile"})} />
       <Divider my={""} />
       {menuLists.map((val, idx) => (
         <NavLink
@@ -49,24 +48,13 @@ export default function SidebarContent() {
           component={"button"}
           label={val.title}
           leftSection={val.icon}
-          active={active == idx}
+          active={val.path == router.location.pathname}
           onClick={() => {
             navigate({to: val.path});
             setActive(idx);
           }}
         />
       ))}
-      <NavLink
-        key={"logout"}
-        variant="subtle"
-        component="button"
-        label={"Log out"}
-        color="red"
-        leftSection={<IconLogout size={20} />}
-        onClick={() => {
-          console.log("logout");
-        }}
-      />
     </>
   );
 }
