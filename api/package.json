@@ -1,0 +1,17 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "scripts": {
+    "start:dev": "node ./src/server.js",
+    "start": "node ./src/server.js"
+  },
+  "author": "dxxta",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.11.1",
+    "@grpc/proto-loader": "^0.7.13",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

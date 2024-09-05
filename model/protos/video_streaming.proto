@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package videoStreaming;
+
+enum State {
+  INITIALIZING = 0;
+  PROCESSING = 1;
+  COMPLETED = 2;
+  ERROR = 3;
+}
+
+message StreamResponseModel {
+  State state = 1;
+  string detail = 2;
+  bytes data = 3;
+  bytes raw = 4;
+}
+
+message StreamRequest {
+  string url = 1;
+}
+
+message StreamResponse {
+  State state = 1;
+  bytes data = 2;
+}
+
+service VideoStreaming {
+  rpc getStream(StreamRequest) returns (stream StreamResponse);
+  rpc getStreamModel(StreamRequest) returns (stream StreamResponseModel);
+}
