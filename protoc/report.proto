@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package report;
+
+message ReportRequest {
+    string streamId = 1;
+    string userId = 2;
+    string title = 3;
+    string description = 4;
+    bool isFrameStored = 5;
+}
+
+message ReportResponse {
+    string message = 1;
+    bool success = 2;
+    string result = 3;
+}
+
+service ReportService {
+    rpc createReport(ReportRequest) returns (ReportResponse) {};
+}

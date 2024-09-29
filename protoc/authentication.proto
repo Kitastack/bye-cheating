@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package authentication;
+
+message AuthenticationResult {
+  string id = 1;
+  string token = 2;
+  string username = 3;
+  string email = 4;
+  string _createdDate = 5;
+  int64 iat = 6;
+  int64 exp = 7;
+}
+
+message AuthenticationRequest {
+  string token = 1;
+}
+
+message AuthenticationResponse {
+  string message = 1;
+  bool success = 2;
+  AuthenticationResult result = 3;
+}
+
+service AuthenticationService {
+  rpc validateToken(AuthenticationRequest) returns (AuthenticationResponse);
+}

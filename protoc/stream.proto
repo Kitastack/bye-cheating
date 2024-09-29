@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package stream;
+
+message StreamRequest {
+    string streamId = 1;
+}
+
+message StreamCreateRequest {
+    string url = 1;
+}
+
+message StreamResponse {
+    string message = 1;
+    bool success = 2;
+    string result = 3;
+}
+
+service StreamService {
+    rpc createStream(StreamCreateRequest) returns (StreamResponse);
+    rpc getStream(StreamRequest) returns (StreamResponse);
+}

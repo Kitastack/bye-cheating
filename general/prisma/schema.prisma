@@ -1,0 +1,72 @@
+datasource db {
+    provider   = "postgresql"
+    url        = env("DATABASE_URL")
+    extensions = [pgcrypto]
+}
+
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["driverAdapters", "typedSql", "postgresqlExtensions"]
+}
+
+enum Role {
+    admin      @map("Admin")
+    superadmin @map("Super Admin")
+}
+
+enum ReportStatus {
+    ongoing   @map("On Going")
+    completed @map("Completed")
+}
+
+model User {
+    id             String           @id @default(uuid()) @map("_id")
+    email          String           @unique
+    username       String?
+    password       String
+    roles          Role[]           @default([])
+    createdDate    DateTime         @default(now()) @map("_createdDate")
+    updatedDate    DateTime?        @map("_updatedDate")
+    Stream         Stream[]
+    Report         Report[]
+    Authentication Authentication[]
+}
+
+model Authentication {
+    id          String    @id @default(uuid()) @map("_id")
+    User        User      @relation(fields: [id], references: [id])
+    createdDate DateTime  @default(now()) @map("_createdDate")
+    updatedDate DateTime? @map("_updatedDate")
+}
+
+model Stream {
+    id          String    @id @default(uuid()) @map("_id")
+    url         String
+    createdDate DateTime  @default(now()) @map("_createdDate")
+    updatedDate DateTime? @map("_updatedDate")
+    userId      String
+    User        User      @relation(fields: [userId], references: [id])
+    Report      Report[]
+}
+
+model Report {
+    id            String    @id @default(uuid()) @map("_id")
+    streamId      String
+    Stream        Stream    @relation(fields: [streamId], references: [id])
+    userId        String
+    User          User      @relation(fields: [userId], references: [id])
+    title         String
+    description   String?
+    isFrameStored Boolean   @default(false)
+    createdDate   DateTime  @default(now()) @map("_createdDate")
+    updatedDate   DateTime? @map("_updatedDate")
+}
+
+model ReportItems {
+    id            String    @id @default(uuid()) @map("_id")
+    labels        Json?
+    frame         String?
+    originalFrame String?
+    createdDate   DateTime  @default(now()) @map("_createdDate")
+    updatedDate   DateTime? @map("_updatedDate")
+}
