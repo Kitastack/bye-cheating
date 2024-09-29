@@ -1,7 +1,9 @@
+import { time } from "console";
+import { Timeout } from "node_modules/@tanstack/react-router/dist/esm/utils";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io";
 import { io } from "socket.io-client";
-
+const BASE_URL = "http://localhost:7000"
 /**
 interface of `StreamSocketContext`
  */
@@ -11,12 +13,6 @@ export interface IStreamSocketContext {
    */
   base64data: string | undefined;
 
-  /**
-   * change websocket url, changing this won't stop the current running websocket.
-   * @param url - websocket url, ex: `ws://localhost/v1/test`
-   * @returns
-   */
-  setWebsocketURL: (url: string) => void;
   /**
    * start new connection to websocket source, and don't create new instance if existing instance is active.
    *
@@ -32,14 +28,14 @@ export interface IStreamSocketContext {
 }
 
 const StreamSocketContext = createContext<IStreamSocketContext | undefined>(
-  undefined,
+  undefined
 );
 
 export const useStreamSocket = () => {
   const context = useContext(StreamSocketContext);
   if (context === undefined) {
     throw new Error(
-      "useStreamSocket must be used inside of `<StreamSocketProvider>` component",
+      "useStreamSocket must be used inside of `<StreamSocketProvider>` component"
     );
   }
   return context as IStreamSocketContext;
@@ -51,66 +47,23 @@ export const useStreamSocket = () => {
  */
 export function StreamSocketProvider({ children }: { children: JSX.Element }) {
   const initialized = useRef(false);
-  const [currentUrl, setCurrentUrl] = useState("http://localhost:7000");
-  const [wsInstance, setWsInstance] = useState<WebSocket | undefined>(
-    undefined,
-  );
-
-  const [socketInstance, setSocketInstance] = useState<Socket | undefined>(
-    undefined,
-  );
+  // const [currentUrl, setCurrentUrl] = useState(BASE_URL);
+  const [mytimer, setMytimer] = useState<Timeout | undefined>(undefined);
 
   const [base64Stream, setBase64Stream] = useState("");
 
   const data: IStreamSocketContext = {
     base64data: base64Stream,
-    setWebsocketURL(url) {
-      setCurrentUrl(url);
-    },
     start() {
-      if (socketInstance) {
-        return;
-      }
-
-      setSocketInstance((prevVal) => {
-        if (prevVal) {
-          return prevVal;
-        }
-        const socket = io(currentUrl);
-        socket.on("connect", () => {
-          console.log(`socket established: ${socket.id}`);
+      const timer = setInterval(() => {
+        fetch(`${BASE_URL}/camera`).then((value) => {
+          setBase64Stream(value.body as unknown as string);
         });
-        socket.on("disconnect", () => {
-          console.log(`socket closed: ${socket.id}`);
-        });
-        socket.on("data", (val) => {
-          console.log(`data: ${val}`);
-          setBase64Stream(val)
-        });
-        return socket as unknown as Socket;
-      });
-
-      // if (wsInstance) {
-      //   this.stop();
-      // }
-      // const ws = new WebSocket(currentUrl);
-      // ws.onopen = (ev) => {
-      //   console.log(`connection established`)
-      // }
-      // ws.onmessage = (ev) => {
-      //   setBase64Stream(ev.data);
-      // };
-      // ws.onclose = (ev) => {
-      //   console.log("WS: close from");
-      //   ev.stopPropagation();
-      // };
-      // setWsInstance(ws);
+      }, 500);
+      setMytimer(timer);
     },
     stop() {
-      wsInstance?.close();
-      socketInstance?.disconnect(true);
-      setWsInstance(undefined);
-      setSocketInstance(undefined);
+      clearInterval(mytimer)
     },
   };
 
