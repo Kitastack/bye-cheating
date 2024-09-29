@@ -1,12 +1,26 @@
-import { ActionIcon, Center, Flex, Table, Text, Title } from "@mantine/core";
+import { useAside } from "@/components/context/AsideContext";
+import {
+  ActionIcon,
+  Box,
+  Button,
+  Center,
+  Flex,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+  Title,
+} from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { IconEdit } from "@tabler/icons-react";
+import { useEffect } from "react";
 
-const sample:UserData[] = [
+const sample: UserData[] = [
   {
-    id:"3",
+    id: "3",
     username: "guest 1",
-    email: "affinitas89@gmail.com"
-  }
+    email: "affinitas89@gmail.com",
+  },
 ];
 
 type UserData = {
@@ -54,7 +68,58 @@ function UserLists(props: UserListProps) {
   );
 }
 
+function UserFormInspector(): JSX.Element {
+  const form = useForm({
+    mode: "controlled",
+    initialValues: {
+      email: "",
+      name: "",
+      password: "",
+      avatar: "",
+    },
+    validate: {
+      email: (val) => (/^\S+@\S+$/.test(val) ? null : "Invalid email"),
+      password: (val) => (val.length > 7 ? null : "Invalid password"),
+      name: (val) => (val.length > 0 ? null : "Name must not be empty"),
+    },
+  });
+  return (
+    <Stack p={12}>
+      <Title order={5} >User Form</Title>
+      <form onSubmit={form.onSubmit(val=> console.log(val))}>
+        <TextInput
+          withAsterisk
+          label="Name"
+          placeholder="Your name"
+          key={form.key("name")}
+          {...form.getInputProps("name")}
+        />
+        <TextInput
+          withAsterisk
+          label="Email"
+          placeholder="your@email.com"
+          key={form.key("email")}
+          {...form.getInputProps("email")}
+        />
+        <TextInput
+          withAsterisk
+          label="Password"
+          placeholder="your password"
+          key={form.key("password")}
+          {...form.getInputProps("password")}
+        />
+        <Box p={8} />
+        <Button type="submit">Add User</Button>
+      </form>
+    </Stack>
+  );
+}
+
 export default function UsersPage() {
+  const { setAsideComponent } = useAside();
+  useEffect(() => {
+    setAsideComponent(<UserFormInspector />);
+  }, []);
   return (
     <>
       <Flex direction={"column"} gap={"xs"} p={"xs"} mah={"100vh"}>
