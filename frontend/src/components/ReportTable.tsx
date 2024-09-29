@@ -1,4 +1,4 @@
-import { DetectionData } from "@/model/dataset";
+import { DetectionData } from "@/components/model/dataset";
 import { Table } from "@mantine/core";
 
 export function ReportTable({ data }: { data: DetectionData[] }) {

@@ -1,11 +1,11 @@
-import { useStreamSocket } from "@/context/CameraSocketContext";
+import { useStreamSocket } from "@/components/context/CameraSocketContext";
 import { IconCamera, IconTable } from "@tabler/icons-react";
 import { ActionIcon, Card, Flex, Table, Tooltip } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { ReportTable } from "@/components/ReportTable";
-import { sampleDataCCTV } from "@/model/dataset";
+import { sampleDataCCTV } from "@/components/model/dataset";
 import { LiveCamComponent } from "@/components/LiveCamComponent";
-import { useAside } from "@/context/AsideContext";
+import { useAside } from "@/components/context/AsideContext";
 import { AsideCameraInspector } from "@/components/layout/AsideCameraInspector";
 
 

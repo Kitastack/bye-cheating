@@ -7,7 +7,7 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import i18n from "@/lib/i18n";
 import { MantineProvider } from "@mantine/core";
-import { StreamSocketProvider } from "./context/CameraSocketContext";
+import { StreamSocketProvider } from "./components/context/CameraSocketContext";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import { I18nextProvider } from "react-i18next";

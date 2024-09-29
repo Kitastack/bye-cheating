@@ -1,6 +1,6 @@
 import { Divider, Table } from "@mantine/core";
 import { ReportTable } from "@/components/ReportTable";
-import { sampleDataCCTV } from "@/model/dataset";
+import { sampleDataCCTV } from "@/components/model/dataset";
 
 export default function ReportPage() {
   return (

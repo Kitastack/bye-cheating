@@ -6,7 +6,7 @@ import {
 import TitleDashboard from "@/components/titleDashboard";
 import { useDisclosure } from "@mantine/hooks";
 import { Outlet } from "@tanstack/react-router";
-import { useAside } from "@/context/AsideContext";
+import { useAside } from "@/components/context/AsideContext";
 
 export default function MainLayout() {
   const [mobileOpened, { toggle: toggleMobile }] = useDisclosure();

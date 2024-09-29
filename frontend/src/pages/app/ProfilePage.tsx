@@ -1,4 +1,4 @@
-import { useAside } from "@/context/AsideContext";
+import { useAside } from "@/components/context/AsideContext";
 import { Avatar, Button, Divider, Flex, Text, Title } from "@mantine/core";
 import { IconLogout } from "@tabler/icons-react";
 import { useEffect } from "react";
