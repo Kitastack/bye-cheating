@@ -1,7 +1,13 @@
 import { ActionIcon, Center, Flex, Table, Text, Title } from "@mantine/core";
 import { IconEdit } from "@tabler/icons-react";
 
-const sample:UserData[] = [];
+const sample:UserData[] = [
+  {
+    id:"3",
+    username: "guest 1",
+    email: "affinitas89@gmail.com"
+  }
+];
 
 type UserData = {
   id: string;
@@ -24,7 +30,7 @@ function UserLists(props: UserListProps) {
         </Table.Tr>
       </Table.Thead>
       <Table.Tbody>
-        {props.data.length > 1 ? (
+        {props.data.length >= 1 ? (
           props.data.map((element) => {
             return (
               <Table.Tr key={element.email}>

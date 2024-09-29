@@ -71,7 +71,7 @@ function LoginCard() {
           />
         </Stack>
         <Group justify="space-between" mt={"xl"}>
-          <Anchor
+          {/* <Anchor
             component="button"
             type="button"
             variant="text"
@@ -79,7 +79,7 @@ function LoginCard() {
             size="xs"
           >
             Tidak memiliki akun? Register
-          </Anchor>
+          </Anchor> */}
           <Button type="submit">Login</Button>
         </Group>
       </form>

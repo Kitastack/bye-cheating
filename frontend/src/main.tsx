@@ -33,7 +33,7 @@ ReactDOM.createRoot(container).render(
         <Notifications />
         <ModalsProvider>
           <StreamSocketProvider>
-            <RouterProvider router={router} />
+            <RouterProvider router={router}  />
           </StreamSocketProvider>
         </ModalsProvider>
       </MantineProvider>
