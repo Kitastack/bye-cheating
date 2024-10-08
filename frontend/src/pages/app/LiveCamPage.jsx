@@ -62,7 +62,7 @@ function MainView () {
 export default function LiveCamPage () {
   const { setAsideComponent } = useAside();
   useEffect(() => {
-    setAsideComponent(AsideCameraInspector);
+    setAsideComponent(<AsideCameraInspector/>);
   }, []);
   return (
     <Flex direction={"column"} gap={"xs"} p={"xs"} mah={"100vh"}>
