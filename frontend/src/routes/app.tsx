@@ -1,6 +1,6 @@
 import { ErrorScreen } from "@/components/ui/ErrorScreen";
 import { AsideContextProvider } from "@/components/context/AsideContext";
-import MainLayout from "@/layout/MainLayout";
+import MainLayout from "@/components/layout/MainLayout";
 import { Button, Center } from "@mantine/core";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 

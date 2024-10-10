@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconPlus, IconDotsVertical } from "@tabler/icons-react";
-import { AddCameraModalContent } from "../main/AddCameraModal";
+import { AddCameraModalContent } from "../../main/AddCameraModal";
 import { useState } from "react";
 
 interface CameraListItem {
