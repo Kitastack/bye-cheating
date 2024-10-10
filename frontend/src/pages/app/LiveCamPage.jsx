@@ -6,7 +6,7 @@ import { ReportTable } from "@/components/ReportTable";
 import { sampleDataCCTV } from "@/components/model/dataset";
 import { LiveCamComponent } from "@/components/LiveCamComponent";
 import { useAside } from "@/components/context/AsideContext";
-import { AsideCameraInspector } from "@/components/layout/AsideCameraInspector";
+import { AsideCameraInspector } from "@/components/layout/part/AsideCameraInspector";
 
 
 function MainView () {

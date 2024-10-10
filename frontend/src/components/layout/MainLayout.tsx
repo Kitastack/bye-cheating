@@ -1,4 +1,4 @@
-import SidebarContent from "@/components/layout/SidebarContent";
+import SidebarContent from "@/components/layout/part/SidebarContent";
 import {
   AppShell,
   Burger,
