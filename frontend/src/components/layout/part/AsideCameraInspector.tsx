@@ -8,11 +8,13 @@ import {
   ActionIcon,
   Text,
   Center,
+  Menu,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { IconPlus, IconDotsVertical } from "@tabler/icons-react";
 import { AddCameraModalContent } from "../../main/AddCameraModal";
 import { useState } from "react";
+import { useCameraManagement } from "@/hooks/useCameraManagement";
 
 interface CameraListItem {
   name: string;
@@ -35,7 +37,7 @@ function CameraItem({ name, url }: { name: string; url: string }) {
 }
 
 export function AsideCameraInspector() {
-  const [cameras, setCameras] = useState<CameraListItem[]>([]);
+  const { cameras, addCamera, removeCamera } = useCameraManagement();
   return (
     <div className="flex flex-col p-2 gap-2 w-full">
       <Accordion variant="contained">
@@ -59,7 +61,8 @@ export function AsideCameraInspector() {
               children: (
                 <AddCameraModalContent
                   onSubmit={(name, url) => {
-                    setCameras((prev) => [...prev, { name, url }]);
+                    addCamera(name, url);
+                    modals.closeAll();
                   }}
                 />
               ),
@@ -79,9 +82,22 @@ export function AsideCameraInspector() {
                 <Text fw={400} size="sm">
                   {val.name}
                 </Text>
-                <ActionIcon variant="subtle">
-                  <IconDotsVertical />
-                </ActionIcon>
+                <Menu>
+                  <Menu.Target>
+                  <ActionIcon variant="subtle">
+                    <IconDotsVertical />
+                  </ActionIcon>
+                  </Menu.Target>
+                  <Menu.Dropdown>
+                    <Menu.Item
+                      onClick={() => {
+                        removeCamera(val.url);
+                      }}
+                    >
+                      Delete Camera
+                    </Menu.Item>
+                  </Menu.Dropdown>
+                </Menu>
               </Group>
             </Card>
           ))
