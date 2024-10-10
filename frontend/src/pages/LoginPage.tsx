@@ -1,4 +1,4 @@
-import { MinimalLayout } from "@/layout/MinimalLayout";
+import { MinimalLayout } from "@/components/layout/MinimalLayout";
 import {
   Anchor,
   Button,
