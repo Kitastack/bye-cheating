@@ -6,7 +6,6 @@ import "@/index.css";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 import { MantineProvider } from "@mantine/core";
-import { StreamSocketProvider } from "./components/context/CameraSocketContext";
 import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import { appTheme } from "./theme";
@@ -29,9 +28,7 @@ ReactDOM.createRoot(container).render(
     <MantineProvider theme={appTheme} defaultColorScheme="light">
       <Notifications />
       <ModalsProvider>
-        <StreamSocketProvider>
           <RouterProvider router={router} />
-        </StreamSocketProvider>
       </ModalsProvider>
     </MantineProvider>
   </React.StrictMode>

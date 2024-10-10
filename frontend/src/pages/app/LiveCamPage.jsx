@@ -1,4 +1,4 @@
-import { useStreamSocket } from "@/components/context/CameraSocketContext";
+// import { useStreamSocket } from "@/components/context/CameraSocketContext";
 import { IconCamera, IconTable } from "@tabler/icons-react";
 import { ActionIcon, Card, Flex, Table, Tooltip } from "@mantine/core";
 import { useEffect, useState } from "react";
@@ -10,7 +10,7 @@ import { AsideCameraInspector } from "@/components/layout/AsideCameraInspector";
 
 
 function MainView () {
-  const stream = useStreamSocket();
+  // const stream = useStreamSocket();
   const [showTable, setShowTable] = useState(false);
   return (
     <>
@@ -52,7 +52,7 @@ function MainView () {
           <ReportTable data={sampleDataCCTV} />
         </Table.ScrollContainer>
       ) : (
-        <LiveCamComponent mlCamData="" rawCamData={stream.base64data} />
+        <LiveCamComponent mlCamData="" rawCamData={""} />
       )}
       <br />
     </>
