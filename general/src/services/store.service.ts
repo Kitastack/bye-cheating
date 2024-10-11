@@ -32,24 +32,32 @@ export default class StoreService {
         throw new Error("report data not found");
       }
 
-      StoreController.updateReport(
+      const success = await StoreController.updateReport(
         JSON.parse(report_data) as any,
         (await this.redis.lRange(`prediction#${report_id}`, 0, -1))?.reverse(),
-        (await this.redis.lRange(`rawframe#${report_id}`, 0, -1))?.reverse()
+        (await this.redis.lRange(`frame#${report_id}`, 0, -1))?.reverse()
       );
 
-      //   this.redis
-      //     .lRange(`prediction#${report_id}`, 0, -1)
-      //     .then((predictions) => {
-      //       if (!(predictions?.length > 0)) throw new Error("An error occurs");
-      //       for (let prediction of predictions) {
-      //         prediction = JSON.parse(prediction);
-      //         console.log(prediction);
-      //         return;
-      //       }
-      //     });
+      const deleteUnusedData = async () => {
+        if (!JSON.parse(await this.redis.get(report_id))?.is_done) {
+          setTimeout(deleteUnusedData, 1 * 60 * 10000);
+        } else {
+          // delete all keys contain
+          for await (const key_scanned of this.redis.scanIterator({
+            MATCH: `*${report_id}`,
+          })) {
+            console.log(`deleting ${key_scanned}`);
+            await this.redis.del(key_scanned);
+          }
+        }
+      };
 
-      callback(null, new StoreResponse().setMessage("ok").setSuccess(true));
+      deleteUnusedData();
+
+      callback(
+        null,
+        new StoreResponse().setMessage("store data report").setSuccess(success)
+      );
     } catch (error: any) {
       callback(
         null,

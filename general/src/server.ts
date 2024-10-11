@@ -90,22 +90,19 @@ class Server {
           });
         }
       );
-      this.app.post(
+      this.app.get(
         "/upload-file",
         async (req: express.Request, res: express.Response) => {
           try {
-            const file_path = path.join(__dirname, "test.png");
-            // readFile(file_path, null, async (err, image_data) => {
-            //   try {
-            //     if (!err) {
+            const file_path = path.join(__dirname, "test.jpeg");
             const formData = new FormData();
             formData.append("file", createReadStream(file_path));
             const response = await axios.post(
-              "http://192.168.137.1:8000/upload/test",
+              `${process.env.STORAGE_URL}/upload/${process.env.STORAGE_BUCKET}`,
               formData,
               {
                 params: {
-                  token: "h8ts8futpdtp7n2l1l2jdjfe3zorwi",
+                  token: process.env.STORAGE_TOKEN,
                 },
                 headers: {
                   "Content-Type": "multipart",
@@ -117,15 +114,6 @@ class Server {
               message: "Berhasil upload",
               detail: response.data,
             });
-            // }
-            //   } catch (error) {
-            //     console.log(error);
-            //     return res.status(500).json({
-            //       success: false,
-            //       message: "error",
-            //     });
-            //   }
-            // });
           } catch (error: any) {
             return res.status(500).json({
               success: false,

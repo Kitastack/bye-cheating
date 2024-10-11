@@ -109,18 +109,21 @@ def route_validation(request: Request):
 
 
 # method
-def delete_task(report_data: dict):
-    return None
-    # report_data = getRedisJson(rd, report_data.get("id"))
-    # if not report_data is None and "id" in report_data:
-    #     delRedisGroup(rd=rd, key=report_data.get("id"))
+# def delete_task(report_data: dict):
+#     return None
+#     # report_data = getRedisJson(rd, report_data.get("id"))
+#     # if not report_data is None and "id" in report_data:
+#     #     delRedisGroup(rd=rd, key=report_data.get("id"))
 
 
 def save_task(report_data: dict):
-    # delete_task(report_data)
-    # delRedisGroup(rd=rd, key=report_data.get("id"))
-    # delRedisGroup(rd=rd, key=report_data.get("id"))
     """do some logic to store the data into cloud storage and database"""
+    store_response = storeStub.saveReport(
+        store_pb2.StoreRequest(
+            report_id=report_data.get("id"),
+        )
+    )
+    print(f"save response {store_response.success}")
 
 
 def update_model_status(report_data: dict):
@@ -164,8 +167,12 @@ def resize_image(frame_buffer, width: int = None, height: int = None):
 
 def capture_frame_task(vs: VideoStream, report_data: dict):
     frame = vs.read()
-    if frame is None or report_data is None:
-        False
+    if (
+        frame is None
+        or report_data is None
+        or report_data.get("is_rawframe_live") == False
+    ):
+        return False
 
     _, encoded_frame = cv2.imencode(image_format, frame)
     # return frame, encoded_frame.tobytes()
@@ -190,7 +197,7 @@ async def capture_task(
     try:
         vs = VideoStream(src=report_data.get("url")).start()
         start_time = time.time()
-        while (time.time() - start_time) < report_data.get("time"):
+        while (time.time() - start_time) < report_data.get("live_time"):
             with ThreadPoolExecutor(max_workers=2) as executor:
                 report_data = getRedisJson(rd=rd, key=report_data.get("id"))
 
@@ -214,8 +221,12 @@ async def capture_task(
 def capture_model_frame(frame: str, report_data: dict):
     # time.sleep(1)
     string_frame = base64.b64decode(frame)
-    if string_frame is None or report_data is None:
-        False
+    if (
+        string_frame is None
+        or report_data is None
+        or report_data.get("is_frame_live") == False
+    ):
+        return False
 
     image = Image.open(io.BytesIO(string_frame))
     decode_image = cv2.imdecode(np.frombuffer(string_frame, np.uint8), cv2.IMREAD_COLOR)
@@ -250,16 +261,16 @@ def capture_model_frame(frame: str, report_data: dict):
                 cv2.rectangle(decode_image, (x1, y1), (x2, y2), color, 4)
             else:
                 curr_class: str = classNames[cls_idx]  # type: ignore
-                cv2.rectangle(decode_image, (x1, y1), (x2, y2), (255, 0, 255), 4)
+                color: tuple[int, int, int] = classNames[cls_idx].color
+                cv2.rectangle(decode_image, (x1, y1), (x2, y2), color, 4)
 
             # Label
-            lbl = f"(ID_{data_prediction[idx].get('track_id')}) {curr_class}: {confidence}"
+            lbl = f"(id_{data_prediction[idx].get('track_id')}) {curr_class}: {confidence}"
 
             # object details
             org = [x1, y1]
             font = cv2.FONT_HERSHEY_SIMPLEX
             fontScale = 1
-            color = (0, 0, 255)
             thickness = 2
 
             cv2.putText(
@@ -299,7 +310,7 @@ async def capture_model_task(
 ):
     try:
         last_index = -1
-        skip_time = time.time() + 1
+        # skip_time = time.time() + 1
         while True:
             with ThreadPoolExecutor(max_workers=4) as executor:
                 report_data = getRedisJson(rd=rd, key=report_data.get("id"))
@@ -311,7 +322,7 @@ async def capture_model_task(
                     rd=rd, key="rawframe", group=report_data.get("id"), index=last_index
                 )
 
-                if frame_data is None and report_data.get("time") > (
+                if frame_data is None and report_data.get("live_time") > (
                     lambda runtime: 0 if runtime is None else round(runtime)
                 )(report_data.get("runtime")):
                     continue
@@ -388,6 +399,7 @@ async def startReportStream(
 
         report_data: dict = json.loads(report_data.result)
         report_data["time"] = body.get("time")
+        report_data["live_time"] = body.get("time")
         report_data["stream"] = stream_data
         report_data["url"] = stream_data.get("url")
         report_data["is_rawframe_live"] = True
@@ -425,8 +437,10 @@ async def endReportStream(
         if "id" not in last_report_data:
             raise Exception(f"None of report has id of {body.get("id")}")
 
-        last_report_data["time"] = 0
+        last_report_data["live_time"] = 0
         setRedisJson(rd=rd, key=last_report_data.get("id"), value=last_report_data)
+        update_raw_status(last_report_data)
+        update_model_status(last_report_data)
 
         return JSONResponse(
             content={
@@ -452,7 +466,7 @@ def capture_live_report_frame(
             raise Exception()
 
         if (
-            round(report_data.get("runtime")) >= report_data.get("time")
+            round(report_data.get("runtime")) >= report_data.get("live_time")
             and is_raw == True
         ):
             return None

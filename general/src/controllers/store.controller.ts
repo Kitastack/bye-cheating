@@ -1,17 +1,13 @@
-import database from "@config/prisma.db";
-import { v4 } from "uuid";
 import { Report, ReportItems, Stream } from "@prisma/client";
+import { error, info } from "@src/utils/logger";
+import { v4 } from "uuid";
+import database from "@config/prisma.db";
 import ffmpeg from "fluent-ffmpeg";
-import { Blob } from "node:buffer";
-import { writeFile } from "node:fs";
-import { join } from "node:path";
 import axios from "axios";
 import Formdata from "form-data";
 import stream from "node:stream";
-import { info } from "@src/utils/logger";
 
 export default class StoreController {
-  static readonly tableName: string = "Report";
   static async updateReport(
     report_data: Report,
     report_predictions: string[],
@@ -80,60 +76,103 @@ export default class StoreController {
         });
 
         videoStream.on("end", async () => {
-          const formData = new Formdata();
-          formData.append("file", Buffer.concat(buffers), {
+          info("update-report", "video saved to pipeline");
+          const form_video = new Formdata();
+          form_video.append("file", Buffer.concat(buffers), {
             contentType: "video/mpeg",
             filename: `${report_data.id}.mp4`,
           });
 
-          info("update-report", "video saved to pipeline");
+          axios
+            .post(
+              `${process.env.STORAGE_URL}/upload/${process.env.STORAGE_BUCKET}`,
+              form_video,
+              {
+                params: {
+                  token: process.env.STORAGE_TOKEN,
+                  id: report_data.id,
+                },
+                headers: {
+                  "Content-Type": "multipart",
+                },
+              }
+            )
+            .then((response) => {
+              info("update-report", "video uploaded");
+              const { data } = response;
+              database.report.update({
+                where: {
+                  id: last_data_report.id,
+                },
+                data: {
+                  recordUrl: `${process.env.STORAGE_URL}/${data.url}`,
+                  updatedDate: new Date(),
+                },
+              });
+            })
+            .catch((err) => {
+              error("update-report", err?.message);
+            });
 
-          await axios.post(
-            `${process.env.STORAGE_URL}/upload/${process.env.STORAGE_BUCKET}`,
-            formData,
+          const form_thumbnail = new Formdata();
+          form_thumbnail.append(
+            "file",
+            Buffer.from(report_frame[0], "base64"),
             {
-              params: {
-                token: process.env.STORAGE_TOKEN,
-                id: report_data.id,
-              },
-              headers: {
-                "Content-Type": "multipart",
-              },
+              contentType: "image/jpeg",
+              filename: `${report_data.id}.jpeg`,
             }
           );
 
-          info("update-report", "video uploaded");
+          axios
+            .post(
+              `${process.env.STORAGE_URL}/upload/${process.env.STORAGE_BUCKET}`,
+              form_thumbnail,
+              {
+                params: {
+                  token: process.env.STORAGE_TOKEN,
+                  id: report_data.id,
+                },
+                headers: {
+                  "Content-Type": "multipart",
+                },
+              }
+            )
+            .then((response) => {
+              info("update-report", "thumbnail created and uploaded");
+              const { data } = response;
+              database.report.update({
+                where: {
+                  id: last_data_report.id,
+                },
+                data: {
+                  thumbnailUrl: `${process.env.STORAGE_URL}/${data.url}`,
+                  updatedDate: new Date(),
+                },
+              });
+            })
+            .catch((err) => {
+              error("update-report", err?.message);
+            });
         });
       }
 
       await database.$transaction([
         database.reportItems.createMany({
           data: report_predictions?.map(
-            (item, idx) =>
+            (item) =>
               ({
                 id: v4(),
                 data: item,
+                reportId: last_data_report.id,
                 createdDate: new Date(),
               } as ReportItems)
           ),
         }),
       ]);
 
-      //   if (last_data_report.isFrameStored) {
-      //   }
-      //   console.log(last_data_report, report_data);
-      //   const find_stream = await database.stream.findFirst({
-      //     where: {
-      //       id: {
-      //         equals: streamId,
-      //       },
-      //     },
-      //   });
-      //   if (!find_stream) throw new Error();
-      //   return find_stream;
       return true;
     } catch (error) {
-      console.log(error);
       return false;
     }
   }
