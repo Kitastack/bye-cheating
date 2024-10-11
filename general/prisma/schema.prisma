@@ -50,24 +50,27 @@ model Stream {
 }
 
 model Report {
-    id            String    @id @default(uuid()) @map("_id")
+    id            String        @id @default(uuid()) @map("_id")
     streamId      String
-    Stream        Stream    @relation(fields: [streamId], references: [id])
+    Stream        Stream        @relation(fields: [streamId], references: [id])
     userId        String
-    User          User      @relation(fields: [userId], references: [id])
+    User          User          @relation(fields: [userId], references: [id])
     title         String
     description   String?
-    time          Int       @default(0)
-    contentType   String    @default("image/jpeg")
-    isFrameStored Boolean   @default(false)
+    time          Int           @default(0)
+    contentType   String        @default("image/jpeg")
+    isFrameStored Boolean       @default(false)
     thumbnailUrl  String?
     recordUrl     String?
-    createdDate   DateTime  @default(now()) @map("_createdDate")
-    updatedDate   DateTime? @map("_updatedDate")
+    createdDate   DateTime      @default(now()) @map("_createdDate")
+    updatedDate   DateTime?     @map("_updatedDate")
+    ReportItems   ReportItems[]
 }
 
 model ReportItems {
     id          String    @id @default(uuid()) @map("_id")
+    reportId    String
+    Report      Report    @relation(fields: [reportId], references: [id])
     data        Json?
     createdDate DateTime  @default(now()) @map("_createdDate")
     updatedDate DateTime? @map("_updatedDate")

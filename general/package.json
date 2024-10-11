@@ -12,7 +12,7 @@
     "postinstall": "sh ./protoc.build.sh",
     "start": "npx ts-node --files ./src/server.ts",
     "prisma:dev:push": "npx prisma db push",
-    "prisma:dev:migrate": "npx prisma migrate dev --name adjust-thumbnailUrl-into-nullable",
+    "prisma:dev:migrate": "npx prisma migrate dev --name add-relation-by-report-id",
     "prisma:init": "npx prisma generate --sql"
   },
   "dependencies": {
