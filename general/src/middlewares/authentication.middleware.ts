@@ -44,6 +44,7 @@ export const validateToken = (
   roles?: Array<string>
 ): jwt.JwtPayload | null => {
   try {
+    console.log(token);
     if (!token) throw new Error("Please sign-in first");
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     if (!payload) throw new Error("invalid");

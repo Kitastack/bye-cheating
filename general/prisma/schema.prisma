@@ -57,16 +57,18 @@ model Report {
     User          User      @relation(fields: [userId], references: [id])
     title         String
     description   String?
+    time          Int       @default(0)
+    contentType   String    @default("image/jpeg")
     isFrameStored Boolean   @default(false)
+    thumbnailUrl  String?
+    recordUrl     String?
     createdDate   DateTime  @default(now()) @map("_createdDate")
     updatedDate   DateTime? @map("_updatedDate")
 }
 
 model ReportItems {
-    id            String    @id @default(uuid()) @map("_id")
-    labels        Json?
-    frame         String?
-    originalFrame String?
-    createdDate   DateTime  @default(now()) @map("_createdDate")
-    updatedDate   DateTime? @map("_updatedDate")
+    id          String    @id @default(uuid()) @map("_id")
+    data        Json?
+    createdDate DateTime  @default(now()) @map("_createdDate")
+    updatedDate DateTime? @map("_updatedDate")
 }

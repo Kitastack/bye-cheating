@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bstore.proto\x12\x05store\"U\n\x0cStoreRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0f\n\x07payload\x18\x02 \x01(\t\x12\x10\n\x08rawImage\x18\x03 \x01(\x0c\x12\x16\n\x0epredictedImage\x18\x04 \x01(\x0c\"1\n\rStoreResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\"q\n\x12StoreReportRequest\x12\x10\n\x08streamId\x18\x01 \x01(\t\x12\x0e\n\x06userId\x18\x02 \x01(\t\x12\r\n\x05title\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x15\n\risFrameStored\x18\x05 \x01(\x08\"G\n\x13StoreReportResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x12\x0e\n\x06result\x18\x03 \x01(\t2\x95\x01\n\x0cStoreService\x12<\n\rtemporarySave\x12\x13.store.StoreRequest\x1a\x14.store.StoreResponse\"\x00\x12G\n\x0c\x63reateReport\x12\x19.store.StoreReportRequest\x1a\x1a.store.StoreReportResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0bstore.proto\x12\x05store\"!\n\x0cStoreRequest\x12\x11\n\treport_id\x18\x01 \x01(\t\"1\n\rStoreResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x32I\n\x0cStoreService\x12\x39\n\nsaveReport\x12\x13.store.StoreRequest\x1a\x14.store.StoreResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -32,13 +32,9 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'store_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_STOREREQUEST']._serialized_start=22
-  _globals['_STOREREQUEST']._serialized_end=107
-  _globals['_STORERESPONSE']._serialized_start=109
-  _globals['_STORERESPONSE']._serialized_end=158
-  _globals['_STOREREPORTREQUEST']._serialized_start=160
-  _globals['_STOREREPORTREQUEST']._serialized_end=273
-  _globals['_STOREREPORTRESPONSE']._serialized_start=275
-  _globals['_STOREREPORTRESPONSE']._serialized_end=346
-  _globals['_STORESERVICE']._serialized_start=349
-  _globals['_STORESERVICE']._serialized_end=498
+  _globals['_STOREREQUEST']._serialized_end=55
+  _globals['_STORERESPONSE']._serialized_start=57
+  _globals['_STORERESPONSE']._serialized_end=106
+  _globals['_STORESERVICE']._serialized_start=108
+  _globals['_STORESERVICE']._serialized_end=181
 # @@protoc_insertion_point(module_scope)

@@ -28,7 +28,8 @@ export default class StreamService {
     try {
       // "rtsp://rtspstream:07451b4ef79b34a8473a745fd99a50e0@zephyr.rtsp.stream/movie"
       const streamId = call.request.getStreamid();
-      const userData = validateToken(call.metadata.get("token").toString());
+      // disabled temp
+      // const userData = validateToken(call.metadata.get("token").toString());
       const getStream = await StreamController.getStream(streamId);
       callback(
         null,

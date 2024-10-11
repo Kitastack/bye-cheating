@@ -21,11 +21,8 @@ export const validatePassword = async (
   target_password: string
 ) => {
   try {
-    if (
-      !provided_password ||
-      !target_password ||
-      !(await bcrypt.compare(provided_password, target_password))
-    ) {
+    const result = await bcrypt.compare(target_password, provided_password);
+    if (!provided_password || !target_password || !result) {
       throw new Error("Password does not matched");
     }
   } catch (error) {

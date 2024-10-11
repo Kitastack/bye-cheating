@@ -44,19 +44,23 @@ export default class UserController {
     next: NextFunction
   ): Promise<Response | void> {
     try {
-      let user: User = null;
+      let user: User | null = null;
       const validatedBody = await UserSignInValidation(req);
       try {
-        if (Object.values(validatedBody.validate).length > 0) throw new Error();
-      } catch (error) {
+        if (Object.values(validatedBody.validate).length > 0)
+          throw new Error("Please check the form again");
+
+        if (!validatedBody.payload?.email && !validatedBody.payload?.username)
+          throw new Error("Either email or username must provided");
+      } catch (error: any) {
         return res.status(400).json({
           success: false,
-          message: "Please check the form again",
+          message: error?.message,
           result: validatedBody.validate,
         });
       }
 
-      console.log(validatedBody);
+      console.log(validatedBody.payload);
 
       // todo: check user
       try {
@@ -64,19 +68,16 @@ export default class UserController {
           where: {
             OR: [
               {
-                email: {
-                  equals: validatedBody.payload?.email ?? "",
-                },
+                email: validatedBody.payload?.email ?? undefined,
               },
-              //   {
-              //     username: validatedBody.payload?.username ?? undefined,
-              //   },
+              {
+                username: validatedBody.payload?.username ?? undefined,
+              },
             ],
           },
-          select: {
-            password: false,
-          },
         })) as User;
+
+        console.log(user);
 
         if (!user?.id) {
           throw new Error();
@@ -98,6 +99,8 @@ export default class UserController {
           success: false,
           message: error?.message,
         });
+      } finally {
+        delete user.password;
       }
 
       res.status(201).json({
@@ -105,8 +108,8 @@ export default class UserController {
         result: {
           ...user,
           key: {
-            accessToken: generateAccessToken(user),
-            refreshToken: generateRefreshToken(user.id),
+            accessToken: await generateAccessToken(user),
+            refreshToken: await generateRefreshToken(user),
           },
         },
         message: "Successfully create user",

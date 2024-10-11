@@ -34,28 +34,17 @@ class StoreServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.temporarySave = channel.unary_unary(
-                '/store.StoreService/temporarySave',
+        self.saveReport = channel.unary_unary(
+                '/store.StoreService/saveReport',
                 request_serializer=store__pb2.StoreRequest.SerializeToString,
                 response_deserializer=store__pb2.StoreResponse.FromString,
-                _registered_method=True)
-        self.createReport = channel.unary_unary(
-                '/store.StoreService/createReport',
-                request_serializer=store__pb2.StoreReportRequest.SerializeToString,
-                response_deserializer=store__pb2.StoreReportResponse.FromString,
                 _registered_method=True)
 
 
 class StoreServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def temporarySave(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def createReport(self, request, context):
+    def saveReport(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -64,15 +53,10 @@ class StoreServiceServicer(object):
 
 def add_StoreServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'temporarySave': grpc.unary_unary_rpc_method_handler(
-                    servicer.temporarySave,
+            'saveReport': grpc.unary_unary_rpc_method_handler(
+                    servicer.saveReport,
                     request_deserializer=store__pb2.StoreRequest.FromString,
                     response_serializer=store__pb2.StoreResponse.SerializeToString,
-            ),
-            'createReport': grpc.unary_unary_rpc_method_handler(
-                    servicer.createReport,
-                    request_deserializer=store__pb2.StoreReportRequest.FromString,
-                    response_serializer=store__pb2.StoreReportResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -86,7 +70,7 @@ class StoreService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def temporarySave(request,
+    def saveReport(request,
             target,
             options=(),
             channel_credentials=None,
@@ -99,36 +83,9 @@ class StoreService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/store.StoreService/temporarySave',
+            '/store.StoreService/saveReport',
             store__pb2.StoreRequest.SerializeToString,
             store__pb2.StoreResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def createReport(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/store.StoreService/createReport',
-            store__pb2.StoreReportRequest.SerializeToString,
-            store__pb2.StoreReportResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -3,10 +3,7 @@ syntax = "proto3";
 package store;
 
 message StoreRequest {
-    string id = 1;
-    string payload = 2;
-    bytes rawImage = 3;
-    bytes predictedImage = 4;
+    string report_id = 1;
 }
 
 message StoreResponse {
@@ -14,21 +11,6 @@ message StoreResponse {
     bool success = 2;
 }
 
-message StoreReportRequest {
-    string streamId = 1;
-    string userId = 2;
-    string title = 3;
-    string description = 4;
-    bool isFrameStored = 5;
-}
-
-message StoreReportResponse {
-    string message = 1;
-    bool success = 2;
-    string result = 3;
-}
-
 service StoreService {
-    rpc temporarySave(StoreRequest) returns (StoreResponse) {};
-    rpc createReport(StoreReportRequest) returns (StoreReportResponse) {};
+    rpc saveReport(StoreRequest) returns (StoreResponse) {};
 }

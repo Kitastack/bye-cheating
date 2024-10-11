@@ -121,8 +121,8 @@ export default class UserController {
         result: {
           ...created_user,
           key: {
-            accessToken: generateAccessToken(created_user),
-            refreshToken: generateRefreshToken(created_user.id),
+            accessToken: await generateAccessToken(created_user),
+            refreshToken: await generateRefreshToken(created_user.id),
           },
         },
         message: "Successfully create user",

@@ -17,12 +17,10 @@ const message = {
 };
 
 class UserSignIn {
-  @IsNotEmpty({
-    message: message.required,
-  })
+  @IsOptional()
   @IsString()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @IsOptional()
   @IsString()

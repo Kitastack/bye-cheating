@@ -1,3 +1,4 @@
+import base64
 from fastapi import (
     status as Status,
     Request,
@@ -19,6 +20,14 @@ class JSONException(Exception):
     ):
         self.message = message
         self.statusCode = statusCode
+
+
+class Label:
+    def __init__(self, name: str, color: tuple[int, int, int]) -> None:
+        """label with color (b,g,r), range 0 - 255"""
+        self.name = name
+        self.color = color
+        pass
 
 
 async def disconnect_poller(request: Request, result: Any):
@@ -70,6 +79,10 @@ def cancel_on_disconnect(handler: Callable[[Request], Awaitable[Any]]):
     return cancel_on_disconnect_decorator
 
 
+def imageToBase64(image: Any):
+    return base64.b64encode(image.tobytes()).decode("utf-8")
+
+
 def setRedisJson(rd: Redis, key: str, value: dict):
     value = json.dumps(value)
     rd.set(key, value)
@@ -77,6 +90,8 @@ def setRedisJson(rd: Redis, key: str, value: dict):
 
 
 def getRedisJson(rd: Redis, key: str):
+    if rd.exists(key) == False:
+        return None
     value = rd.get(key)
     if value is None:
         return None
@@ -96,12 +111,17 @@ def setRedisListGroup(rd: Redis, key: str, group: str, value: str | int):
 def getLastElRedisListGroup(rd: Redis, key: str, group: str):
     # get last by the tail
     key = getKeyPairs(key, group)
+
+    if rd.exists(key) == False:
+        return None
     return rd.lindex(key, 0)
 
 
 def getElByKeyRedisListGroup(rd: Redis, key: str, group: str, index: int = 0):
     key = getKeyPairs(key, group)
 
+    if rd.exists(key) == False:
+        return None
     return rd.lindex(key, index)
 
 
@@ -133,7 +153,16 @@ def delRedis(rd: Redis, key: str):
 
 
 def getRedis(rd: Redis, key: str):
+    if rd.exists(key) == False:
+        return None
+
     value = rd.get(key)
     if value is None:
         return None
+
+    return value
+
+
+def setRedis(rd: Redis, key: str, value: str | int | float):
+    rd.set(key, value)
     return value

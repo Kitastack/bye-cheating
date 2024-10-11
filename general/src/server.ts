@@ -8,21 +8,36 @@ import { createServer } from "http";
 import helmet from "helmet";
 import cors from "cors";
 import path from "path";
+import http from "http";
+import axios from "axios";
+import FormData from "form-data";
+import { readFile, createReadStream } from "fs";
+import { v4 } from "uuid";
+import { createClient } from "redis";
+dotenv.config({ path: path.join(__dirname, ".env") });
+
 import UserRoutes from "@routes/user.routes";
 import AuthenticationRoutes from "@routes/authentication.routes";
 import AuthenticationService from "@services/authentication.service";
 import StreamService from "@services/stream.service";
-import ReportService from "./services/report.service";
-dotenv.config({ path: path.join(__dirname, ".env") });
+import ReportService from "@services/report.service";
+import StoreService from "@services/store.service";
 
 class Server {
   port: number = +(process.env.PORT ?? 8080);
   app: Application = express();
+  redis = createClient({
+    url: process.env.REDIS_URL,
+  });
   server = createServer(this.app);
   grpcServer = new grpcServer();
 
   async preload(): Promise<void> {
     await testDBConnection();
+    await this.redis
+      .connect()
+      .then(() => loggerInfo("redis", "successfully connected"))
+      .catch(() => loggerInfo("redis", "failed to connect"));
   }
 
   async plugins(): Promise<void> {
@@ -68,15 +83,55 @@ class Server {
       this.app.use("/user", UserRoutes.router);
       this.app.use(
         "/ping",
-        async (
-          req: express.Request,
-          res: express.Response,
-          next: express.NextFunction
-        ) => {
+        async (req: express.Request, res: express.Response) => {
           return res.status(200).json({
             success: true,
             message: "pong!",
           });
+        }
+      );
+      this.app.post(
+        "/upload-file",
+        async (req: express.Request, res: express.Response) => {
+          try {
+            const file_path = path.join(__dirname, "test.png");
+            // readFile(file_path, null, async (err, image_data) => {
+            //   try {
+            //     if (!err) {
+            const formData = new FormData();
+            formData.append("file", createReadStream(file_path));
+            const response = await axios.post(
+              "http://192.168.137.1:8000/upload/test",
+              formData,
+              {
+                params: {
+                  token: "h8ts8futpdtp7n2l1l2jdjfe3zorwi",
+                },
+                headers: {
+                  "Content-Type": "multipart",
+                },
+              }
+            );
+            return res.status(201).json({
+              success: true,
+              message: "Berhasil upload",
+              detail: response.data,
+            });
+            // }
+            //   } catch (error) {
+            //     console.log(error);
+            //     return res.status(500).json({
+            //       success: false,
+            //       message: "error",
+            //     });
+            //   }
+            // });
+          } catch (error: any) {
+            return res.status(500).json({
+              success: false,
+              message: error?.message,
+            });
+          }
         }
       );
       this.app.use((err: any, req: any, res: any, next: any) => {
@@ -103,6 +158,7 @@ class Server {
     new AuthenticationService(this.grpcServer).addService();
     new StreamService(this.grpcServer).addService();
     new ReportService(this.grpcServer).addService();
+    new StoreService(this.grpcServer, this.redis);
 
     this.grpcServer.bindAsync(
       `${process.env.GRPC_HOST ?? "0.0.0.0"}:${process.env.GRPC_PORT ?? 50051}`,
