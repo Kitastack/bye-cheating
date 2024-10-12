@@ -1,0 +1,1 @@
+docker build --pull --no-cache -t byecheating-streaming .

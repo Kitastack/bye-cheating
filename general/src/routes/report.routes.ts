@@ -4,7 +4,7 @@ import { Role } from "@prisma/client";
 import RouteExpress from ".";
 import ReportController from "@src/controllers/report.controller";
 
-class UserRoute extends RouteExpress {
+class ReportRoute extends RouteExpress {
   useRoutes() {
     try {
       this.router.get("/", validateTokenHTTP(), ReportController.getReport);
@@ -24,4 +24,4 @@ class UserRoute extends RouteExpress {
   }
 }
 
-export default new UserRoute();
+export default new ReportRoute();

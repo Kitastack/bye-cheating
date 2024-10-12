@@ -1,0 +1,4 @@
+venv
+docker*.sh
+__pycache__
+req-copy.txt

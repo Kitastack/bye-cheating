@@ -17,7 +17,14 @@ export default class UserController {
     next: NextFunction
   ): Promise<Response | void> {
     try {
-      if (!req.user) {
+      if (
+        !req.user ||
+        !(await database.authentication.findFirst({
+          where: {
+            id: req.user.id,
+          },
+        }))
+      ) {
         return res.status(404).json({
           success: false,
           message: "You already logout",
@@ -31,7 +38,7 @@ export default class UserController {
       });
 
       return res.status(201).json({
-        success: false,
+        success: true,
         message: null,
       });
     } catch (error: any) {
@@ -76,8 +83,6 @@ export default class UserController {
             ],
           },
         })) as User;
-
-        console.log(user);
 
         if (!user?.id) {
           throw new Error();

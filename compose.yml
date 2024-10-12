@@ -1,0 +1,20 @@
+networks:
+  byecheating-net:
+services:
+  general-service:
+    build: ./general
+    networks:
+      - byecheating-net
+    ports:
+      - 8880:8880
+      - 8881:8881
+    env_file: "./general/.env"
+  streaming-service:
+    build: ./streaming
+    networks:
+      - byecheating-net
+    ports:
+      - 8882:8882
+    depends_on:
+      - general-service
+    env_file: "./streaming/.env"

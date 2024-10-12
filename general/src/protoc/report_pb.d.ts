@@ -63,3 +63,46 @@ export namespace ReportResponse {
         result: string,
     }
 }
+
+export class ReportStoreRequest extends jspb.Message { 
+    getReportId(): string;
+    setReportId(value: string): ReportStoreRequest;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): ReportStoreRequest.AsObject;
+    static toObject(includeInstance: boolean, msg: ReportStoreRequest): ReportStoreRequest.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: ReportStoreRequest, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): ReportStoreRequest;
+    static deserializeBinaryFromReader(message: ReportStoreRequest, reader: jspb.BinaryReader): ReportStoreRequest;
+}
+
+export namespace ReportStoreRequest {
+    export type AsObject = {
+        reportId: string,
+    }
+}
+
+export class ReportStoreResponse extends jspb.Message { 
+    getMessage(): string;
+    setMessage(value: string): ReportStoreResponse;
+    getSuccess(): boolean;
+    setSuccess(value: boolean): ReportStoreResponse;
+
+    serializeBinary(): Uint8Array;
+    toObject(includeInstance?: boolean): ReportStoreResponse.AsObject;
+    static toObject(includeInstance: boolean, msg: ReportStoreResponse): ReportStoreResponse.AsObject;
+    static extensions: {[key: number]: jspb.ExtensionFieldInfo<jspb.Message>};
+    static extensionsBinary: {[key: number]: jspb.ExtensionFieldBinaryInfo<jspb.Message>};
+    static serializeBinaryToWriter(message: ReportStoreResponse, writer: jspb.BinaryWriter): void;
+    static deserializeBinary(bytes: Uint8Array): ReportStoreResponse;
+    static deserializeBinaryFromReader(message: ReportStoreResponse, reader: jspb.BinaryReader): ReportStoreResponse;
+}
+
+export namespace ReportStoreResponse {
+    export type AsObject = {
+        message: string,
+        success: boolean,
+    }
+}

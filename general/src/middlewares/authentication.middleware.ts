@@ -1,6 +1,7 @@
 import { Role, User } from "@prisma/client";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import database from "@config/prisma.db";
 
 export const roles: Array<string> = [Role.admin];
 
@@ -22,10 +23,10 @@ export const validateTokenHTTP =
     next: NextFunction
   ): Promise<Response | void> => {
     try {
-      req.user = validateToken(
+      req.user = (await validateToken(
         req.headers.authorization?.split(" ")[1],
         roles_required
-      ) as any;
+      )) as any;
 
       if (req.user) {
         return next();
@@ -43,14 +44,25 @@ export const validateTokenHTTP =
     }
   };
 
-export const validateToken = (
+export const validateToken = async (
   token?: string,
   roles_required?: Array<string>
-): jwt.JwtPayload | null => {
+): Promise<jwt.JwtPayload | null> => {
   try {
     if (!token) throw new Error("Please sign-in first");
     const payload: any = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-    if (!payload) throw new Error("invalid");
+    if (
+      !payload ||
+      (payload?.id &&
+        !(
+          (await database.authentication.count({
+            where: {
+              id: payload?.id,
+            },
+          })) > 0
+        ))
+    )
+      throw new Error("invalid");
     if (
       Array.isArray(roles_required) &&
       roles_required?.length > 0 &&
@@ -60,9 +72,9 @@ export const validateToken = (
     return payload;
   } catch (error: any) {
     if (error?.message?.includes("invalid")) {
-      throw new Error("Your token is invalid");
+      throw new Error("Your session is invalid");
     } else if (error?.message?.includes("expired")) {
-      throw new Error("Your token is expired");
+      throw new Error("Your session is expired");
     }
     throw error;
   }

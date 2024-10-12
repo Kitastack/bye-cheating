@@ -1,0 +1,1 @@
+ls & npm run prisma:init & npm run start

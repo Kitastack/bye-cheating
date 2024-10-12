@@ -39,12 +39,23 @@ class ReportServiceStub(object):
                 request_serializer=report__pb2.ReportRequest.SerializeToString,
                 response_deserializer=report__pb2.ReportResponse.FromString,
                 _registered_method=True)
+        self.saveReport = channel.unary_unary(
+                '/report.ReportService/saveReport',
+                request_serializer=report__pb2.ReportStoreRequest.SerializeToString,
+                response_deserializer=report__pb2.ReportStoreResponse.FromString,
+                _registered_method=True)
 
 
 class ReportServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def createReport(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def saveReport(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -57,6 +68,11 @@ def add_ReportServiceServicer_to_server(servicer, server):
                     servicer.createReport,
                     request_deserializer=report__pb2.ReportRequest.FromString,
                     response_serializer=report__pb2.ReportResponse.SerializeToString,
+            ),
+            'saveReport': grpc.unary_unary_rpc_method_handler(
+                    servicer.saveReport,
+                    request_deserializer=report__pb2.ReportStoreRequest.FromString,
+                    response_serializer=report__pb2.ReportStoreResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -86,6 +102,33 @@ class ReportService(object):
             '/report.ReportService/createReport',
             report__pb2.ReportRequest.SerializeToString,
             report__pb2.ReportResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def saveReport(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/report.ReportService/saveReport',
+            report__pb2.ReportStoreRequest.SerializeToString,
+            report__pb2.ReportStoreResponse.FromString,
             options,
             channel_credentials,
             insecure,

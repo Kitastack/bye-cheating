@@ -26,6 +26,28 @@ function deserialize_report_ReportResponse(buffer_arg) {
   return report_pb.ReportResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_report_ReportStoreRequest(arg) {
+  if (!(arg instanceof report_pb.ReportStoreRequest)) {
+    throw new Error('Expected argument of type report.ReportStoreRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_report_ReportStoreRequest(buffer_arg) {
+  return report_pb.ReportStoreRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_report_ReportStoreResponse(arg) {
+  if (!(arg instanceof report_pb.ReportStoreResponse)) {
+    throw new Error('Expected argument of type report.ReportStoreResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_report_ReportStoreResponse(buffer_arg) {
+  return report_pb.ReportStoreResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 
 var ReportServiceService = exports.ReportServiceService = {
   createReport: {
@@ -38,6 +60,17 @@ var ReportServiceService = exports.ReportServiceService = {
     requestDeserialize: deserialize_report_ReportRequest,
     responseSerialize: serialize_report_ReportResponse,
     responseDeserialize: deserialize_report_ReportResponse,
+  },
+  saveReport: {
+    path: '/report.ReportService/saveReport',
+    requestStream: false,
+    responseStream: false,
+    requestType: report_pb.ReportStoreRequest,
+    responseType: report_pb.ReportStoreResponse,
+    requestSerialize: serialize_report_ReportStoreRequest,
+    requestDeserialize: deserialize_report_ReportStoreRequest,
+    responseSerialize: serialize_report_ReportStoreResponse,
+    responseDeserialize: deserialize_report_ReportStoreResponse,
   },
 };
 

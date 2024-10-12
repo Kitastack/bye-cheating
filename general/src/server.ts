@@ -1,5 +1,4 @@
 import { Server as grpcServer, ServerCredentials } from "@grpc/grpc-js";
-import dotenv from "dotenv";
 import { info as loggerInfo, error as loggerError } from "@utils/logger";
 import rateLimit, { MemoryStore } from "express-rate-limit";
 import { testDBConnection } from "@src/config/prisma.db";
@@ -8,12 +7,8 @@ import { createServer } from "http";
 import helmet from "helmet";
 import cors from "cors";
 import path from "path";
-import http from "http";
-import axios from "axios";
-import FormData from "form-data";
-import { readFile, createReadStream } from "fs";
-import { v4 } from "uuid";
 import { createClient } from "redis";
+import dotenv from "dotenv";
 dotenv.config({ path: path.join(__dirname, ".env") });
 
 import userRoutes from "@routes/user.routes";
@@ -22,7 +17,6 @@ import reportRoutes from "@routes/report.routes";
 import AuthenticationService from "@services/authentication.service";
 import StreamService from "@services/stream.service";
 import ReportService from "@services/report.service";
-import StoreService from "@services/store.service";
 
 class Server {
   port: number = +(process.env.PORT ?? 8080);
@@ -92,38 +86,6 @@ class Server {
           });
         }
       );
-      this.app.get(
-        "/upload-file",
-        async (req: express.Request, res: express.Response) => {
-          try {
-            const file_path = path.join(__dirname, "test.jpeg");
-            const formData = new FormData();
-            formData.append("file", createReadStream(file_path));
-            const response = await axios.post(
-              `${process.env.STORAGE_URL}/upload/${process.env.STORAGE_BUCKET}`,
-              formData,
-              {
-                params: {
-                  token: process.env.STORAGE_TOKEN,
-                },
-                headers: {
-                  "Content-Type": "multipart",
-                },
-              }
-            );
-            return res.status(201).json({
-              success: true,
-              message: "Berhasil upload",
-              detail: response.data,
-            });
-          } catch (error: any) {
-            return res.status(500).json({
-              success: false,
-              message: error?.message,
-            });
-          }
-        }
-      );
       this.app.use((err: any, req: any, res: any, next: any) => {
         if (err.status === 400 && "body" in err) {
           loggerError("request", ` ${err}`);
@@ -147,11 +109,10 @@ class Server {
   async startGrpcServer(): Promise<void> {
     new AuthenticationService(this.grpcServer).addService();
     new StreamService(this.grpcServer).addService();
-    new ReportService(this.grpcServer).addService();
-    new StoreService(this.grpcServer, this.redis);
+    new ReportService(this.grpcServer, this.redis).addService();
 
     this.grpcServer.bindAsync(
-      `${process.env.GRPC_HOST ?? "0.0.0.0"}:${process.env.GRPC_PORT ?? 50051}`,
+      `0.0.0.0:${process.env.GRPC_PORT ?? 50051}`,
       ServerCredentials.createInsecure(),
       (error: any, port: any) => {
         if (error) {

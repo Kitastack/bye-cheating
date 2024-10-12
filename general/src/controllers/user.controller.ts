@@ -18,11 +18,17 @@ export default class UserController {
     next: NextFunction
   ): Promise<Response | void> {
     try {
-      const userId = req.params.id;
-      console.log(userId);
+      const result = await database.user.findFirst({
+        where: {
+          id: req.user.id,
+        },
+      });
+
+      delete result.password;
       res.status(201).json({
         success: true,
         message: null,
+        result,
       });
     } catch (error: any) {
       errorHandler(UserController.tableName, error, req, res);
@@ -34,11 +40,69 @@ export default class UserController {
     next: NextFunction
   ): Promise<Response | void> {
     try {
-      const userId = req.params.id;
-      console.log(userId);
-      res.status(201).json({
+      const user_id = req.params.id;
+      const result = await database.user.findFirst({
+        where: {
+          id: user_id,
+        },
+      });
+
+      delete result.password;
+      res.status(200).json({
         success: true,
         message: null,
+        result,
+      });
+    } catch (error: any) {
+      errorHandler(UserController.tableName, error, req, res);
+    }
+  }
+  static async getAll(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<Response | void> {
+    try {
+      const query = await new Promise((resolve) => {
+        try {
+          resolve(JSON.parse(req.query?.query as string));
+        } catch (error) {
+          resolve(null);
+        }
+      });
+
+      const order = await new Promise((resolve) => {
+        try {
+          resolve(JSON.parse(req.query?.order as string));
+        } catch (error) {
+          resolve(null);
+        }
+      });
+
+      const is_show_authentication = Boolean(req.query.Authentication ?? false);
+      const is_show_report = Boolean(req.query.Report ?? false);
+      const is_show_stream = Boolean(req.query.Stream ?? false);
+
+      const results = await database.user.findMany({
+        where: {
+          ...(query ?? ({} as any)),
+          id: req.user.id,
+        },
+        orderBy: order ?? {},
+        include: {
+          Authentication: is_show_authentication,
+          Report: is_show_report,
+          Stream: is_show_stream,
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: null,
+        result: results?.map((result) => {
+          delete result.password;
+          return result;
+        }),
       });
     } catch (error: any) {
       errorHandler(UserController.tableName, error, req, res);

@@ -16,7 +16,7 @@ class UserRoute extends RouteExpress {
       this.router.get(
         "/",
         validateTokenHTTP([Role.admin]),
-        UserController.getById
+        UserController.getAll
       );
       this.router.post(
         "/",

@@ -10,7 +10,7 @@ class AuthenticationRoute extends RouteExpress {
       this.router.post("/signin", AuthenticationController.signin);
       this.router.delete(
         "/signout",
-        validateTokenHTTP,
+        validateTokenHTTP(),
         AuthenticationController.signout
       );
     } catch (error: any) {

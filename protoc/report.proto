@@ -16,6 +16,16 @@ message ReportResponse {
     string result = 3;
 }
 
+message ReportStoreRequest {
+    string report_id = 1;
+}
+
+message ReportStoreResponse {
+    string message = 1;
+    bool success = 2;
+}
+
 service ReportService {
     rpc createReport(ReportRequest) returns (ReportResponse) {};
+    rpc saveReport(ReportStoreRequest) returns (ReportStoreResponse) {};
 }

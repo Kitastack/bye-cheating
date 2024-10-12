@@ -1,12 +1,12 @@
 import { Server, ServerUnaryCall, sendUnaryData } from "@grpc/grpc-js";
+import { StreamServiceService } from "@protoc/stream_grpc_pb";
+import StreamController from "@src/controllers/stream.controller";
+import { validateToken } from "@src/middlewares/authentication.middleware";
 import {
   StreamRequest,
   StreamResponse,
   StreamCreateRequest,
 } from "@protoc/stream_pb";
-import { StreamServiceService } from "@protoc/stream_grpc_pb";
-import StreamController from "@src/controllers/stream.controller";
-import { validateToken } from "@src/middlewares/authentication.middleware";
 
 export default class StreamService {
   protected grpcServer: Server;
@@ -26,10 +26,8 @@ export default class StreamService {
     callback: sendUnaryData<StreamResponse>
   ): Promise<void> {
     try {
-      // "rtsp://rtspstream:07451b4ef79b34a8473a745fd99a50e0@zephyr.rtsp.stream/movie"
+      // await validateToken(call.metadata.get("token").toString());
       const streamId = call.request.getStreamid();
-      // disabled temp
-      // const userData = validateToken(call.metadata.get("token").toString());
       const getStream = await StreamController.getStream(streamId);
       callback(
         null,
@@ -54,7 +52,9 @@ export default class StreamService {
   ): Promise<void> {
     try {
       const streamUrl = call.request.getUrl();
-      const userData = validateToken(call.metadata.get("token").toString());
+      const userData = await validateToken(
+        call.metadata.get("token").toString()
+      );
       const createdStream = await StreamController.createStream(
         streamUrl,
         userData.id

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0creport.proto\x12\x06report\"l\n\rReportRequest\x12\x10\n\x08streamId\x18\x01 \x01(\t\x12\x0e\n\x06userId\x18\x02 \x01(\t\x12\r\n\x05title\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x15\n\risFrameStored\x18\x05 \x01(\x08\"B\n\x0eReportResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x12\x0e\n\x06result\x18\x03 \x01(\t2P\n\rReportService\x12?\n\x0c\x63reateReport\x12\x15.report.ReportRequest\x1a\x16.report.ReportResponse\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0creport.proto\x12\x06report\"l\n\rReportRequest\x12\x10\n\x08streamId\x18\x01 \x01(\t\x12\x0e\n\x06userId\x18\x02 \x01(\t\x12\r\n\x05title\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x15\n\risFrameStored\x18\x05 \x01(\x08\"B\n\x0eReportResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x12\x0e\n\x06result\x18\x03 \x01(\t\"\'\n\x12ReportStoreRequest\x12\x11\n\treport_id\x18\x01 \x01(\t\"7\n\x13ReportStoreResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x0f\n\x07success\x18\x02 \x01(\x08\x32\x99\x01\n\rReportService\x12?\n\x0c\x63reateReport\x12\x15.report.ReportRequest\x1a\x16.report.ReportResponse\"\x00\x12G\n\nsaveReport\x12\x1a.report.ReportStoreRequest\x1a\x1b.report.ReportStoreResponse\"\x00\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,6 +35,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_REPORTREQUEST']._serialized_end=132
   _globals['_REPORTRESPONSE']._serialized_start=134
   _globals['_REPORTRESPONSE']._serialized_end=200
-  _globals['_REPORTSERVICE']._serialized_start=202
-  _globals['_REPORTSERVICE']._serialized_end=282
+  _globals['_REPORTSTOREREQUEST']._serialized_start=202
+  _globals['_REPORTSTOREREQUEST']._serialized_end=241
+  _globals['_REPORTSTORERESPONSE']._serialized_start=243
+  _globals['_REPORTSTORERESPONSE']._serialized_end=298
+  _globals['_REPORTSERVICE']._serialized_start=301
+  _globals['_REPORTSERVICE']._serialized_end=454
 # @@protoc_insertion_point(module_scope)

@@ -1,3 +1,5 @@
+import { AuthenticationServiceService } from "@protoc/authentication_grpc_pb";
+import { validateToken } from "@src/middlewares/authentication.middleware";
 import {
   Server as grpcServer,
   ServerUnaryCall,
@@ -8,9 +10,6 @@ import {
   AuthenticationResponse,
   AuthenticationResult,
 } from "@protoc/authentication_pb";
-import { AuthenticationServiceService } from "@protoc/authentication_grpc_pb";
-import { join } from "path";
-import { validateToken } from "@src/middlewares/authentication.middleware";
 
 export default class AuthenticationService {
   grpcServer: grpcServer;
@@ -20,13 +19,13 @@ export default class AuthenticationService {
 
   async addService(): Promise<Response | void> {
     this.grpcServer.addService(AuthenticationServiceService, {
-      validateToken: (
+      validateToken: async (
         call: ServerUnaryCall<AuthenticationRequest, AuthenticationResponse>,
         callback: sendUnaryData<AuthenticationResponse>
       ) => {
         try {
           const token = call.request.getToken();
-          const payload = validateToken(token);
+          const payload = await validateToken(token);
 
           const result = new AuthenticationResult();
           result.setId(payload.id);

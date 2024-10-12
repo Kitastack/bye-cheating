@@ -1,14 +1,21 @@
+import sys
+
+sys.path.append("./protoc")
+
 from fastapi.responses import JSONResponse, StreamingResponse, Response
 from asgi_correlation_id import CorrelationIdMiddleware, correlation_id
-from authentication_pb2_grpc import AuthenticationServiceStub
+from protoc.authentication_pb2_grpc import AuthenticationServiceStub
 from concurrent.futures import ThreadPoolExecutor
-from report_pb2_grpc import ReportServiceStub
-from stream_pb2_grpc import StreamServiceStub
-from store_pb2_grpc import StoreServiceStub
+from protoc.report_pb2_grpc import ReportServiceStub
+from protoc.stream_pb2_grpc import StreamServiceStub
 from imutils.video import VideoStream
+from protoc import authentication_pb2
+from protoc import stream_pb2
+from protoc import report_pb2
 from ultralytics import YOLO
 from config import settings
 from PIL import Image
+
 from utils import (
     JSONException,
     Label,
@@ -30,11 +37,7 @@ from fastapi import (
 )
 
 import asyncio
-import authentication_pb2
 import numpy as np
-import stream_pb2
-import store_pb2
-import report_pb2
 import uvicorn
 import base64
 import redis
@@ -47,21 +50,19 @@ import io
 
 # "rtsp://rtspstream:07451b4ef79b34a8473a745fd99a50e0@zephyr.rtsp.stream/movie
 # grpc server
-generalServerChannel = grpc.insecure_channel(
-    f"{settings.grpc_host}:{str(settings.grpc_port)}"
-)
+generalServerChannel = grpc.insecure_channel(settings.grpc_url)
 authenticationStub = AuthenticationServiceStub(generalServerChannel)
 reportStub = ReportServiceStub(generalServerChannel)
 streamStub = StreamServiceStub(generalServerChannel)
-storeStub = StoreServiceStub(generalServerChannel)
 
 # http server
 image_format = ".jpeg"
 app = FastAPI()
 model = YOLO(settings.path_model)
-rd = redis.Redis(
-    host=settings.redis_host, port=settings.redis_port, decode_responses=True
-)
+# rd = redis.Redis(
+#     host=settings.redis_host, port=settings.redis_port, decode_responses=True
+# )
+rd = redis.from_url(url=settings.redis_url, decode_responses=True)
 classNames = [
     Label("Cheat Sheet", (47, 52, 212)),
     Label("Exchange Paper", (47, 135, 212)),
@@ -85,10 +86,16 @@ async def json_exception_handler(_: Request, exc: JSONException):
 def route_validation(request: Request):
     try:
         request.state.token = request.headers.get("Authorization")
-        request.state.token = request.state.token.split(" ")[1]
 
         if request.state.token == None:
-            raise Exception("Could not validate token")
+            raise Exception("Please sign in first")
+
+        request.state.token = request.state.token.split(" ")[1]
+
+        print("running")
+
+        if request.state.token == None:
+            raise Exception("Could not validate session")
 
         payload = authenticationStub.validateToken(
             authentication_pb2.AuthenticationRequest(token=request.state.token)
@@ -98,7 +105,7 @@ def route_validation(request: Request):
             raise Exception(payload.message)
 
         if payload.result.id == None:
-            raise Exception("Please login again")
+            raise Exception("Please sign in again")
 
         request.state.current_user = payload.result
     except Exception as error:
@@ -118,8 +125,8 @@ def route_validation(request: Request):
 
 def save_task(report_data: dict):
     """do some logic to store the data into cloud storage and database"""
-    store_response = storeStub.saveReport(
-        store_pb2.StoreRequest(
+    store_response = reportStub.saveReport(
+        report_pb2.ReportStoreRequest(
             report_id=report_data.get("id"),
         ),
         metadata=[("token", report_data.get("token"))],
@@ -349,7 +356,7 @@ async def capture_model_task(
     except Exception as e:
         raise GeneratorExit
     finally:
-        print(f"{report_data.get("id")} capture task stopped")
+        print(f"{report_data.get('id')} capture task stopped")
         update_model_status(report_data)
         save_task(report_data)
 
@@ -440,12 +447,12 @@ async def endReportStream(
 ):
     try:
         body: dict = await request.json()
-        if "id" not in body:
+        if body is None or "id" not in body:
             raise Exception("None of reportId is provided")
 
         last_report_data: dict = getRedisJson(rd=rd, key=body.get("id"))
-        if "id" not in last_report_data:
-            raise Exception(f"None of report has id of {body.get("id")}")
+        if last_report_data is None or "id" not in last_report_data:
+            raise Exception(f"None of report has id of {body.get('id')}")
 
         last_report_data["live_time"] = 0
         setRedisJson(rd=rd, key=last_report_data.get("id"), value=last_report_data)
@@ -460,7 +467,6 @@ async def endReportStream(
             }
         )
     except Exception as e:
-        print(e)
         raise JSONException(
             statusCode=Status.HTTP_400_BAD_REQUEST,
             message=str(e),
@@ -549,9 +555,9 @@ async def capture_live_report(
         raise GeneratorExit
     finally:
         print("live capture stopped")
-        print(f"{report_data.get("id")} live watching stopped")
 
 
+# @app.get("/report/{report_id}/watch", dependencies=[Depends(route_validation)])
 @app.get("/report/{report_id}/watch")
 async def liveReportStream(
     request: Request,
@@ -629,10 +635,10 @@ async def capture_live_prediction_report(request: Request, report_data: dict):
     except Exception as e:
         raise GeneratorExit
     finally:
-        print(f"{report_data.get("id")} live prediction stopped")
+        print(f"{report_data.get('id')} live prediction stopped")
 
 
-@app.get("/report/{report_id}/prediction")
+@app.get("/report/{report_id}/prediction", dependencies=[Depends(route_validation)])
 async def liveReportPredictionStream(request: Request, report_id: str):
     try:
         report_data = getRedisJson(rd, report_id)
@@ -675,8 +681,9 @@ async def capture_live_stream(
     request: Request, stream_data: dict, width: int = None, height: int = None
 ):
     try:
-        id = f"{stream_data.get("id")}#{stream_data.get("id")}"
-        vs = VideoStream(src=f"{stream_data.get("url")}").start()
+        id = f"{request.state.current_user.id}#{stream_data.get('id')}"
+        # id = f"#{stream_data.get("id")}"
+        vs = VideoStream(src=f"{stream_data.get('url')}").start()
 
         if rd.exists(id) == True:
             start_time = float(getRedis(rd, id))
@@ -684,7 +691,7 @@ async def capture_live_stream(
             start_time = float(setRedis(rd, id, time.time()))
 
         while not await request.is_disconnected():
-            if (time.time() - start_time) >= int(5 * 60):
+            if (time.time() - start_time) > int(5 * 60):
                 print(f"delete {id}")
                 raise Exception()
 
@@ -704,20 +711,20 @@ async def capture_live_stream(
                 )
             start_time = float(getRedis(rd, id))
     except Exception as e:
-        delRedis(rd, id)
         raise GeneratorExit
     finally:
+        delRedis(rd, id)
         vs.stop()
         print("live stream stopped")
 
 
-@app.get("/stream/{stream_id}/extend")
+@app.get("/stream/{stream_id}/extend", dependencies=[Depends(route_validation)])
 async def extendLiveStream(request: Request, stream_id: str):
     try:
-        id = f"{stream_id}#{stream_id}"
+        id = f"{request.state.current_user.id}#{stream_id}"
 
         if rd.exists(id) == False:
-            raise Exception(f"your stream with stream id {stream_id} does not exist")
+            raise Exception(f"your stream with id {stream_id} does not exist")
 
         setRedis(rd, id, time.time())
 
@@ -734,14 +741,15 @@ async def extendLiveStream(request: Request, stream_id: str):
         )
 
 
-@app.get("/stream/{stream_id}/watch")
+@app.get("/stream/{stream_id}/watch", dependencies=[Depends(route_validation)])
+# @app.get("/stream/{stream_id}/watch")
 async def liveStream(
     request: Request, stream_id: str, width: int = None, height: int = None
 ):
     try:
         stream_data = streamStub.getStream(
             stream_pb2.StreamRequest(streamId=stream_id),
-            # metadata=[("token", request.state.token)],
+            metadata=[("token", request.state.token)],
         )
 
         if (
