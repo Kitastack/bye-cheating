@@ -6,9 +6,11 @@ import ffmpeg from "fluent-ffmpeg";
 import axios from "axios";
 import Formdata from "form-data";
 import stream from "node:stream";
+import type { RedisClientType } from "redis";
 
 export default class StoreController {
   static async updateReport(
+    redis: RedisClientType,
     report_data: Report,
     report_predictions: string[],
     report_frame?: string[]
@@ -70,90 +72,85 @@ export default class StoreController {
           .outputOptions("-movflags frag_keyframe+empty_moov")
           .writeToStream(videoStream);
 
-        const buffers: any[] = [];
-        videoStream.on("data", (buffer) => {
-          buffers.push(buffer);
+        const videoResult: Buffer = await new Promise(function (
+          resolve,
+          reject
+        ) {
+          const buffers: any[] = [];
+          videoStream.on("data", (buffer) => {
+            buffers.push(buffer);
+          });
+          videoStream.on("end", () => {
+            resolve(Buffer.concat(buffers));
+          });
+          videoStream.on("error", (err) => {
+            reject(err);
+          });
         });
 
-        videoStream.on("end", async () => {
-          info("update-report", "video saved to pipeline");
-          const form_video = new Formdata();
-          form_video.append("file", Buffer.concat(buffers), {
-            contentType: "video/mpeg",
-            filename: `${report_data.id}.mp4`,
-          });
+        info("update-report", "video saved to pipeline");
 
-          axios
-            .post(
-              `${process.env.STORAGE_URL}/upload/${process.env.STORAGE_BUCKET}`,
-              form_video,
-              {
-                params: {
-                  token: process.env.STORAGE_TOKEN,
-                  id: report_data.id,
-                },
-                headers: {
-                  "Content-Type": "multipart",
-                },
-              }
-            )
-            .then((response) => {
-              info("update-report", "video uploaded");
-              const { data } = response;
-              database.report.update({
-                where: {
-                  id: last_data_report.id,
-                },
-                data: {
-                  recordUrl: `${process.env.STORAGE_URL}/${data.url}`,
-                  updatedDate: new Date(),
-                },
-              });
-            })
-            .catch((err) => {
-              error("update-report", err?.message);
-            });
+        const form_video = new Formdata();
+        form_video.append("file", videoResult, {
+          contentType: "video/mpeg",
+          filename: `${report_data.id}.mp4`,
+        });
 
-          const form_thumbnail = new Formdata();
-          form_thumbnail.append(
-            "file",
-            Buffer.from(report_frame[0], "base64"),
-            {
-              contentType: "image/jpeg",
-              filename: `${report_data.id}.jpeg`,
-            }
-          );
+        const response_video = await axios.post(
+          `${process.env.STORAGE_URL}/upload/${process.env.STORAGE_BUCKET}`,
+          form_video,
+          {
+            params: {
+              token: process.env.STORAGE_TOKEN,
+              //   id: report_data.id,
+            },
+            headers: {
+              "Content-Type": "multipart",
+            },
+          }
+        );
 
-          axios
-            .post(
-              `${process.env.STORAGE_URL}/upload/${process.env.STORAGE_BUCKET}`,
-              form_thumbnail,
-              {
-                params: {
-                  token: process.env.STORAGE_TOKEN,
-                  id: report_data.id,
-                },
-                headers: {
-                  "Content-Type": "multipart",
-                },
-              }
-            )
-            .then((response) => {
-              info("update-report", "thumbnail created and uploaded");
-              const { data } = response;
-              database.report.update({
-                where: {
-                  id: last_data_report.id,
-                },
-                data: {
-                  thumbnailUrl: `${process.env.STORAGE_URL}/${data.url}`,
-                  updatedDate: new Date(),
-                },
-              });
-            })
-            .catch((err) => {
-              error("update-report", err?.message);
-            });
+        info("update-report", "video uploaded");
+
+        await database.report.update({
+          where: {
+            id: report_data.id,
+          },
+          data: {
+            recordUrl: `${process.env.STORAGE_URL}${response_video.data.url}`,
+            updatedDate: new Date(),
+          },
+        });
+
+        const form_thumbnail = new Formdata();
+        form_thumbnail.append("file", Buffer.from(report_frame[0], "base64"), {
+          contentType: "image/jpeg",
+          filename: `${report_data.id}.jpeg`,
+        });
+
+        const response_thumbnail = await axios.post(
+          `${process.env.STORAGE_URL}/upload/${process.env.STORAGE_BUCKET}`,
+          form_thumbnail,
+          {
+            params: {
+              token: process.env.STORAGE_TOKEN,
+            },
+            headers: {
+              "Content-Type": "multipart",
+            },
+          }
+        );
+
+        info("update-report", "thumbnail created and uploaded");
+
+        await database.report.updateMany({
+          where: {
+            id: report_data.id,
+          },
+          data: {
+            thumbnailUrl: `${process.env.STORAGE_URL}${response_thumbnail.data.url}`,
+            updatedDate: new Date(),
+          },
         });
       }
 

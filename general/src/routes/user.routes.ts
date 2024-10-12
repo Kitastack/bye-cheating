@@ -10,17 +10,17 @@ class UserRoute extends RouteExpress {
       this.router.get("/my", validateTokenHTTP(), UserController.getMyUser);
       this.router.get(
         "/:id",
-        validateTokenHTTP([Role.superadmin]),
+        validateTokenHTTP([Role.admin]),
         UserController.getById
       );
       this.router.get(
         "/",
-        validateTokenHTTP([Role.superadmin]),
+        validateTokenHTTP([Role.admin]),
         UserController.getById
       );
       this.router.post(
         "/",
-        // validateTokenHTTP([Role.superadmin]),
+        // validateTokenHTTP([Role.admin]),
         UserController.create
       );
     } catch (error: any) {

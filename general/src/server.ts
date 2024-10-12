@@ -16,8 +16,9 @@ import { v4 } from "uuid";
 import { createClient } from "redis";
 dotenv.config({ path: path.join(__dirname, ".env") });
 
-import UserRoutes from "@routes/user.routes";
-import AuthenticationRoutes from "@routes/authentication.routes";
+import userRoutes from "@routes/user.routes";
+import authenticationRoutes from "@routes/authentication.routes";
+import reportRoutes from "@routes/report.routes";
 import AuthenticationService from "@services/authentication.service";
 import StreamService from "@services/stream.service";
 import ReportService from "@services/report.service";
@@ -79,8 +80,9 @@ class Server {
 
   async routes(): Promise<void> {
     try {
-      this.app.use("/authentication", AuthenticationRoutes.router);
-      this.app.use("/user", UserRoutes.router);
+      this.app.use("/authentication", authenticationRoutes.router);
+      this.app.use("/user", userRoutes.router);
+      this.app.use("/report", reportRoutes.router);
       this.app.use(
         "/ping",
         async (req: express.Request, res: express.Response) => {

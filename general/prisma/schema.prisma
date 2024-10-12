@@ -10,8 +10,7 @@ generator client {
 }
 
 enum Role {
-    admin      @map("Admin")
-    superadmin @map("Super Admin")
+    admin @map("Admin")
 }
 
 enum ReportStatus {

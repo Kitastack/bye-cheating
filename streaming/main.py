@@ -121,7 +121,8 @@ def save_task(report_data: dict):
     store_response = storeStub.saveReport(
         store_pb2.StoreRequest(
             report_id=report_data.get("id"),
-        )
+        ),
+        metadata=[("token", report_data.get("token"))],
     )
     print(f"save response {store_response.success}")
 
@@ -167,6 +168,8 @@ def resize_image(frame_buffer, width: int = None, height: int = None):
 
 def capture_frame_task(vs: VideoStream, report_data: dict):
     frame = vs.read()
+    report_data = getRedisJson(rd=rd, key=report_data.get("id"))
+
     if (
         frame is None
         or report_data is None
@@ -193,7 +196,6 @@ def capture_frame_task(vs: VideoStream, report_data: dict):
 async def capture_task(
     report_data: dict,
 ):
-    # src=report_data.get("url") rtsp://localhost:8554/live
     try:
         vs = VideoStream(src=report_data.get("url")).start()
         start_time = time.time()
@@ -205,9 +207,15 @@ async def capture_task(
                     break
 
                 report_data["runtime"] = time.time() - start_time
+                setRedisJson(
+                    rd=rd,
+                    key=report_data.get("id"),
+                    value=report_data,
+                )
 
                 future = executor.submit(capture_frame_task, vs, report_data)
                 result = await asyncio.to_thread(future.result)
+
                 if result != True:
                     break
     except Exception as e:
@@ -221,6 +229,8 @@ async def capture_task(
 def capture_model_frame(frame: str, report_data: dict):
     # time.sleep(1)
     string_frame = base64.b64decode(frame)
+    report_data = getRedisJson(rd=rd, key=report_data.get("id"))
+
     if (
         string_frame is None
         or report_data is None
@@ -231,10 +241,10 @@ def capture_model_frame(frame: str, report_data: dict):
     image = Image.open(io.BytesIO(string_frame))
     decode_image = cv2.imdecode(np.frombuffer(string_frame, np.uint8), cv2.IMREAD_COLOR)
 
-    predictions = model.track(source=image, conf=0.35, line_width=1)
+    predictions = model.track(source=image, conf=0.5, line_width=1, device="cpu")
 
     if predictions[0] is None:
-        return None
+        return False
 
     # Process the predictions (e.g., draw bounding boxes)
     for prediction in predictions:
@@ -272,15 +282,10 @@ def capture_model_frame(frame: str, report_data: dict):
             font = cv2.FONT_HERSHEY_SIMPLEX
             fontScale = 1
             thickness = 2
+            lineType = cv2.LINE_AA
 
             cv2.putText(
-                decode_image,
-                lbl,
-                org,
-                font,
-                fontScale,
-                color,
-                thickness,
+                decode_image, lbl, org, font, fontScale, color, thickness, lineType
             )
 
             idx += 1
@@ -302,7 +307,8 @@ def capture_model_frame(frame: str, report_data: dict):
         value=predictions[0].tojson(),
     )
 
-    return image
+    # return image
+    return True
 
 
 async def capture_model_task(
@@ -336,7 +342,10 @@ async def capture_model_task(
                 #     continue
 
                 future = executor.submit(capture_model_frame, frame_data, report_data)
-                await asyncio.to_thread(future.result)
+                result = await asyncio.to_thread(future.result)
+
+                if result != True:
+                    break
     except Exception as e:
         raise GeneratorExit
     finally:
@@ -398,6 +407,7 @@ async def startReportStream(
             body["time"] = base_time
 
         report_data: dict = json.loads(report_data.result)
+        report_data["token"] = request.state.token
         report_data["time"] = body.get("time")
         report_data["live_time"] = body.get("time")
         report_data["stream"] = stream_data
@@ -450,6 +460,7 @@ async def endReportStream(
             }
         )
     except Exception as e:
+        print(e)
         raise JSONException(
             statusCode=Status.HTTP_400_BAD_REQUEST,
             message=str(e),
@@ -465,7 +476,7 @@ def capture_live_report_frame(
         if report_data is None:
             raise Exception()
 
-        if (
+        if report_data.get("runtime") is None or (
             round(report_data.get("runtime")) >= report_data.get("live_time")
             and is_raw == True
         ):
@@ -527,7 +538,7 @@ async def capture_live_report(
                 decoded_frame: bytes | None = await asyncio.to_thread(future.result)
 
                 if decoded_frame is None:
-                    continue
+                    break
 
                 yield (
                     b"--frame\r\n"
@@ -541,7 +552,7 @@ async def capture_live_report(
         print(f"{report_data.get("id")} live watching stopped")
 
 
-@app.get("/report/{report_id}/live")
+@app.get("/report/{report_id}/watch")
 async def liveReportStream(
     request: Request,
     report_id: str,
@@ -723,7 +734,7 @@ async def extendLiveStream(request: Request, stream_id: str):
         )
 
 
-@app.get("/stream/{stream_id}/live")
+@app.get("/stream/{stream_id}/watch")
 async def liveStream(
     request: Request, stream_id: str, width: int = None, height: int = None
 ):

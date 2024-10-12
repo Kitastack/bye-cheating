@@ -3,6 +3,7 @@ import { StoreRequest, StoreResponse } from "@protoc/store_pb";
 import { StoreServiceService } from "@protoc/store_grpc_pb";
 import type { RedisClientType } from "redis";
 import StoreController from "@controllers/store.controller";
+import { validateToken } from "@src/middlewares/authentication.middleware";
 
 export default class StoreService {
   grpcServer: Server;
@@ -27,32 +28,45 @@ export default class StoreService {
     try {
       const report_id = call.request.getReportId();
       const report_data = await this.redis.get(report_id);
+      const userData = validateToken(call.metadata.get("token").toString());
 
       if (!report_data) {
         throw new Error("report data not found");
       }
 
       const success = await StoreController.updateReport(
+        this.redis,
         JSON.parse(report_data) as any,
         (await this.redis.lRange(`prediction#${report_id}`, 0, -1))?.reverse(),
         (await this.redis.lRange(`frame#${report_id}`, 0, -1))?.reverse()
       );
 
-      const deleteUnusedData = async () => {
-        if (!JSON.parse(await this.redis.get(report_id))?.is_done) {
-          setTimeout(deleteUnusedData, 1 * 60 * 10000);
-        } else {
-          // delete all keys contain
-          for await (const key_scanned of this.redis.scanIterator({
-            MATCH: `*${report_id}`,
-          })) {
-            console.log(`deleting ${key_scanned}`);
-            await this.redis.del(key_scanned);
-          }
-        }
-      };
+      for await (const key_scanned of this.redis.scanIterator({
+        MATCH: `*${report_id}`,
+      })) {
+        console.log(`deleting ${key_scanned}`);
+        await this.redis.del(key_scanned);
+      }
 
-      deleteUnusedData();
+      //   const deleteUnusedData = async () => {
+      //     const key_video = `video-${report_id}`;
+      //     const key_thumbnail = `thumbnail-${report_id}`;
+      //     if (
+      //       +((await this.redis.get(key_video)) ?? 0) != 1 &&
+      //       +((await this.redis.get(key_thumbnail)) ?? 0) != 1
+      //     ) {
+      //       setTimeout(deleteUnusedData, 1000);
+      //     } else {
+      //       // delete all keys contain
+      //       for await (const key_scanned of this.redis.scanIterator({
+      //         MATCH: `*${report_id}`,
+      //       })) {
+      //         console.log(`deleting ${key_scanned}`);
+      //         await this.redis.del(key_scanned);
+      //       }
+      //     }
+      //   };
+      //   deleteUnusedData();
 
       callback(
         null,
