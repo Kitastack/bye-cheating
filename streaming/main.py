@@ -11,7 +11,6 @@ from protoc.report_pb2_grpc import ReportServiceStub
 from protoc.stream_pb2_grpc import StreamServiceStub
 from imutils.video import VideoStream
 from protoc import authentication_pb2
-from urllib.parse import unquote
 from protoc import stream_pb2
 from protoc import report_pb2
 from ultralytics import YOLO

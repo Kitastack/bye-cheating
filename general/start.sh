@@ -1,1 +1,1 @@
-ls & npm run prisma:init & npm run start && ffmpeg
+ls & npm run prisma:dev:push & npm run prisma:init & npm run start && ffmpeg

@@ -1,16 +1,50 @@
 networks:
   byecheating-net:
+volumes:
+  postgres:
+  pgadmin:
 services:
+  redis:
+    image: "redis:latest"
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - byecheating-net
+  db:
+    image: "postgres"
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - PGDATA=/data/postgres
+    networks:
+      - byecheating-net
+    volumes:
+      - postgres:/data/postgres
+  storage:
+    image: "totalplatform/openfiles:latest"
+    ports:
+      - "1234:8000"
+    networks:
+      - byecheating-net
   general-service:
     build: ./general
+    restart: always
     networks:
       - byecheating-net
     ports:
       - 8880:8880
       - 8881:8881
     env_file: "./general/.env"
+    depends_on:
+      - db
+      - redis
+      - storage
   streaming-service:
     build: ./streaming
+    restart: always
     networks:
       - byecheating-net
     ports:
@@ -18,3 +52,15 @@ services:
     depends_on:
       - general-service
     env_file: "./streaming/.env"
+  nginx-reverse-proxy:
+    image: nginx:latest
+    restart: always
+    networks:
+      - byecheating-net
+    ports:
+      - 8000:8000
+    volumes:
+      - ./nginx_config.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - general-service
+      - streaming-service
