@@ -74,9 +74,9 @@ export default class ReportService {
     try {
       const report_id = call.request.getReportId();
       const report_data = await this.redis.get(report_id);
-      const userData = await validateToken(
-        call.metadata.get("token").toString()
-      );
+      // const userData = await validateToken(
+      //   call.metadata.get("token").toString()
+      // );
 
       if (!report_data) {
         throw new Error("report data not found");
@@ -103,8 +103,9 @@ export default class ReportService {
           .setSuccess(success)
       );
     } catch (error: any) {
+      console.log(error);
       callback(
-        null,
+        error,
         new ReportStoreResponse().setMessage(error?.message).setSuccess(false)
       );
     }

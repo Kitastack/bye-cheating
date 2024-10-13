@@ -2,17 +2,20 @@ import sys
 
 sys.path.append("./protoc")
 
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse, Response
 from asgi_correlation_id import CorrelationIdMiddleware, correlation_id
 from protoc.authentication_pb2_grpc import AuthenticationServiceStub
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from protoc.report_pb2_grpc import ReportServiceStub
 from protoc.stream_pb2_grpc import StreamServiceStub
 from imutils.video import VideoStream
 from protoc import authentication_pb2
+from urllib.parse import unquote
 from protoc import stream_pb2
 from protoc import report_pb2
 from ultralytics import YOLO
+from typing import Optional
 from config import settings
 from PIL import Image
 
@@ -59,9 +62,6 @@ streamStub = StreamServiceStub(generalServerChannel)
 image_format = ".jpeg"
 app = FastAPI()
 model = YOLO(settings.path_model)
-# rd = redis.Redis(
-#     host=settings.redis_host, port=settings.redis_port, decode_responses=True
-# )
 rd = redis.from_url(url=settings.redis_url, decode_responses=True)
 classNames = [
     Label("Cheat Sheet", (47, 52, 212)),
@@ -73,26 +73,34 @@ classNames = [
 
 # middleware
 app.add_middleware(CorrelationIdMiddleware)
+app.add_middleware(CORSMiddleware, allow_origins="*")
 
 
 @app.exception_handler(JSONException)
 async def json_exception_handler(_: Request, exc: JSONException):
     return JSONResponse(
-        status_code=Status.HTTP_404_NOT_FOUND,
+        status_code=exc.statusCode,
         content={"status": False, "message": exc.message},
     )
 
 
-def route_validation(request: Request):
+def route_validation(request: Request, token: Optional[str] = None):
     try:
-        request.state.token = request.headers.get("Authorization")
+
+        request.state.token = (
+            lambda header_auth: (
+                base64.b64decode(token).decode("utf-8")
+                if header_auth == None
+                else (
+                    lambda header_token: (
+                        header_auth.split(" ")[1] if header_token != None else None
+                    )
+                )(header_auth)
+            )
+        )(request.headers.get("Authorization"))
 
         if request.state.token == None:
             raise Exception("Please sign in first")
-
-        request.state.token = request.state.token.split(" ")[1]
-
-        print("running")
 
         if request.state.token == None:
             raise Exception("Could not validate session")
@@ -115,23 +123,23 @@ def route_validation(request: Request):
         )
 
 
-# method
-# def delete_task(report_data: dict):
-#     return None
-#     # report_data = getRedisJson(rd, report_data.get("id"))
-#     # if not report_data is None and "id" in report_data:
-#     #     delRedisGroup(rd=rd, key=report_data.get("id"))
-
-
 def save_task(report_data: dict):
-    """do some logic to store the data into cloud storage and database"""
-    store_response = reportStub.saveReport(
-        report_pb2.ReportStoreRequest(
-            report_id=report_data.get("id"),
-        ),
-        metadata=[("token", report_data.get("token"))],
-    )
-    print(f"save response {store_response.success}")
+    try:
+        store_response = reportStub.saveReport(
+            report_pb2.ReportStoreRequest(
+                report_id=report_data.get("id"),
+            ),
+            metadata=[("token", report_data.get("token"))],
+        )
+        print(f"save response {store_response.success}")
+    except Exception as e:
+        print(str(e))
+
+
+def is_stream_available(vs: VideoStream):
+    if vs.read() is None:
+        return False
+    return True
 
 
 def update_model_status(report_data: dict):
@@ -391,6 +399,12 @@ async def startReportStream(
             )
 
         stream_data = json.loads(stream_data.result)
+        if (
+            is_stream_available(VideoStream(src=f"{stream_data.get('url')}").start())
+            == False
+        ):
+            raise Exception("stream from the url is not available")
+
         report_data = reportStub.createReport(
             report_pb2.ReportRequest(
                 streamId=stream_data.get("id"),
@@ -557,8 +571,7 @@ async def capture_live_report(
         print("live capture stopped")
 
 
-# @app.get("/report/{report_id}/watch", dependencies=[Depends(route_validation)])
-@app.get("/report/{report_id}/watch")
+@app.get("/report/{report_id}/watch", dependencies=[Depends(route_validation)])
 async def liveReportStream(
     request: Request,
     report_id: str,
@@ -589,10 +602,9 @@ async def liveReportStream(
             media_type="multipart/x-mixed-replace;boundary=frame",
         )
     except Exception as e:
-        return Response(
-            content=str(e),
-            media_type="text/plain",
-            status_code=Status.HTTP_404_NOT_FOUND,
+        raise JSONException(
+            statusCode=Status.HTTP_404_NOT_FOUND,
+            message=str(e),
         )
 
 
@@ -635,7 +647,7 @@ async def capture_live_prediction_report(request: Request, report_data: dict):
     except Exception as e:
         raise GeneratorExit
     finally:
-        print(f"{report_data.get('id')} live prediction stopped")
+        print(f"live prediction stopped")
 
 
 @app.get("/report/{report_id}/prediction", dependencies=[Depends(route_validation)])
@@ -656,10 +668,9 @@ async def liveReportPredictionStream(request: Request, report_id: str):
             media_type="text/event-stream",
         )
     except Exception as e:
-        return Response(
-            content=str(e),
-            media_type="text/plain",
-            status_code=Status.HTTP_404_NOT_FOUND,
+        raise JSONException(
+            statusCode=Status.HTTP_404_NOT_FOUND,
+            message=str(e),
         )
 
 
@@ -668,13 +679,13 @@ def capture_live_stream_frame(
 ):
     frame_buffer = vs.read()
     if frame_buffer is None or stream_data is None:
-        False
+        return None
 
     if width != None and height != None:
         frame_buffer = resize_image(frame_buffer, width=width, height=height)
 
     _, encoded_frame = cv2.imencode(image_format, frame_buffer)
-    return frame_buffer, encoded_frame.tobytes()
+    return encoded_frame.tobytes()
 
 
 async def capture_live_stream(
@@ -699,17 +710,20 @@ async def capture_live_stream(
                 future = executor.submit(
                     capture_live_stream_frame, vs, stream_data, width, height
                 )
-                _, decoded_frame = await asyncio.to_thread(future.result)
+                encoded_frame = await asyncio.to_thread(future.result)
 
-                if decoded_frame is None:
-                    continue
+                if encoded_frame is None:
+                    break
 
                 yield (
                     b"--frame\r\n"
                     b"Connection: Keep-Alive\r\n"
-                    b"Content-Type: image/jpeg\r\n\r\n" + decoded_frame + b"\r\n"
+                    b"Content-Type: image/jpeg\r\n\r\n" + encoded_frame + b"\r\n"
                 )
-            start_time = float(getRedis(rd, id))
+
+            check_if_exist = getRedis(rd, id)
+            if check_if_exist is not None:
+                start_time = float(check_if_exist)
     except Exception as e:
         raise GeneratorExit
     finally:
@@ -764,6 +778,12 @@ async def liveStream(
         if stream_data.get("url") is None:
             raise Exception("cannot load stream url")
 
+        if (
+            is_stream_available(VideoStream(src=f"{stream_data.get('url')}").start())
+            == False
+        ):
+            raise Exception("stream from the url is not available")
+
         # correlation_id.get()
         return StreamingResponse(
             capture_live_stream(
@@ -772,10 +792,9 @@ async def liveStream(
             media_type="multipart/x-mixed-replace;boundary=frame",
         )
     except Exception as e:
-        return Response(
-            content=str(e),
-            media_type="text/plain",
-            status_code=Status.HTTP_404_NOT_FOUND,
+        raise JSONException(
+            statusCode=Status.HTTP_404_NOT_FOUND,
+            message=str(e),
         )
 
 

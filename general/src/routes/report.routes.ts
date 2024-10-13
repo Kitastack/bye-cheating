@@ -7,7 +7,7 @@ import ReportController from "@src/controllers/report.controller";
 class ReportRoute extends RouteExpress {
   useRoutes() {
     try {
-      this.router.get("/", validateTokenHTTP(), ReportController.getReport);
+      this.router.get("/", validateTokenHTTP([]), ReportController.getReport);
       this.router.get(
         "/",
         validateTokenHTTP([Role.admin]),
@@ -15,7 +15,7 @@ class ReportRoute extends RouteExpress {
       );
       this.router.get(
         "/:id",
-        validateTokenHTTP(),
+        validateTokenHTTP([]),
         ReportController.getReportById
       );
     } catch (error: any) {

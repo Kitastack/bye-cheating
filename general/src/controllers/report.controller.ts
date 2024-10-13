@@ -144,37 +144,24 @@ export default class ReportController {
     report_frame?: string[]
   ): Promise<boolean> {
     try {
-      const stream_data = (report_data as any)?.stream as Stream;
-      const last_stream_report = await database.stream.upsert({
-        where: {
-          id: stream_data.id,
-        },
-        create: {
-          id: stream_data.id,
-          url: stream_data.url,
-          createdDate: stream_data.createdDate,
-          userId: stream_data.userId,
-        },
-        update: {
-          updatedDate: new Date(),
-        },
-      });
+      delete (report_data as any)?.token;
+      delete (report_data as any)?.live_time;
+      delete (report_data as any)?.stream;
+      delete (report_data as any)?.url;
+      delete (report_data as any)?.is_rawframe_live;
+      delete (report_data as any)?.is_frame_live;
+      delete (report_data as any)?.runtime;
+
       const last_data_report = await database.report.upsert({
         where: {
           id: report_data.id,
         },
-        create: {
-          id: report_data.id,
-          title: report_data.title,
-          createdDate: report_data.createdDate,
-          description: report_data.description,
-          time: report_data.time,
-          contentType: report_data.contentType,
-          isFrameStored: report_data.isFrameStored,
-          streamId: last_stream_report.id,
-          userId: report_data.userId,
-        },
+        create: report_data,
         update: {
+          ...([JSON.parse(JSON.stringify(report_data))].map((item) => {
+            delete item.id;
+            return item;
+          })[0] ?? {}),
           updatedDate: new Date(),
         },
       });
@@ -298,6 +285,7 @@ export default class ReportController {
 
       return true;
     } catch (error) {
+      console.log(error);
       return false;
     }
   }

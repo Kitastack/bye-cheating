@@ -120,7 +120,7 @@ export default class UserController {
       } catch (error) {
         return res.status(400).json({
           success: false,
-          message: "Please check the form again",
+          message: "please check the form again",
           result: validatedBody.validate,
         });
       }
@@ -140,7 +140,7 @@ export default class UserController {
         });
         if (is_user_exist?.id)
           throw new Error(
-            `User with email ${validatedBody.payload?.email} already registered`
+            `user with email ${validatedBody.payload?.email} already registered`
           );
       } catch (error: any) {
         return res.status(400).json({
@@ -189,7 +189,7 @@ export default class UserController {
             refreshToken: await generateRefreshToken(created_user.id),
           },
         },
-        message: "Successfully create user",
+        message: "successfully create user",
       });
     } catch (error: any) {
       errorHandler(UserController.tableName, error, req, res);

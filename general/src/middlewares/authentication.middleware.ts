@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import database from "@config/prisma.db";
 
 export const roles: Array<string> = [Role.admin];
+type iroles = "admin" | "super_admin";
 
 const amongIncludes = (
   user_roles?: Array<string>,
@@ -16,12 +17,8 @@ const amongIncludes = (
 };
 
 export const validateTokenHTTP =
-  (roles_required?: Array<string>) =>
-  async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<Response | void> => {
+  (roles_required: Role[]) =>
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       req.user = (await validateToken(
         req.headers.authorization?.split(" ")[1],
@@ -32,21 +29,21 @@ export const validateTokenHTTP =
         return next();
       }
 
-      res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: "You have no right access",
+        message: "You have no access",
       });
     } catch (error: any) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
-        message: error?.message,
+        message: error?.message ?? "Please sign in",
       });
     }
   };
 
 export const validateToken = async (
   token?: string,
-  roles_required?: Array<string>
+  roles_required?: string[]
 ): Promise<jwt.JwtPayload | null> => {
   try {
     if (!token) throw new Error("Please sign-in first");
@@ -69,6 +66,12 @@ export const validateToken = async (
       !amongIncludes(payload?.roles as Array<any>, roles_required)
     )
       return null;
+
+    // console.log(
+    //   amongIncludes(payload?.roles as Array<any>, roles_required),
+    //   payload?.roles,
+    //   roles_required
+    // );
     return payload;
   } catch (error: any) {
     if (error?.message?.includes("invalid")) {

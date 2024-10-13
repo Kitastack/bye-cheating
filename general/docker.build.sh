@@ -1,1 +1,1 @@
-docker build -t byecheating-general .
+docker build --no-cache -t byecheating-general .

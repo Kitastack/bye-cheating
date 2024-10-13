@@ -7,6 +7,7 @@ import {
   StreamResponse,
   StreamCreateRequest,
 } from "@protoc/stream_pb";
+import { Stream } from "@prisma/client";
 
 export default class StreamService {
   protected grpcServer: Server;
@@ -55,10 +56,10 @@ export default class StreamService {
       const userData = await validateToken(
         call.metadata.get("token").toString()
       );
-      const createdStream = await StreamController.createStream(
-        streamUrl,
-        userData.id
-      );
+      const createdStream = await StreamController.createStream({
+        url: streamUrl,
+        userId: userData.id,
+      } as Stream);
       callback(
         null,
         new StreamResponse()

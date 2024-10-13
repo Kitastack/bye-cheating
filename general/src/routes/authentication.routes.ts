@@ -5,12 +5,12 @@ import AuthenticationController from "@controllers/authentication.controller";
 import RouteExpress from ".";
 
 class AuthenticationRoute extends RouteExpress {
-  useRoutes() {
+  async useRoutes() {
     try {
       this.router.post("/signin", AuthenticationController.signin);
       this.router.delete(
         "/signout",
-        validateTokenHTTP(),
+        validateTokenHTTP([]),
         AuthenticationController.signout
       );
     } catch (error: any) {

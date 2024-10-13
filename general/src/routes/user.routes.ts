@@ -7,7 +7,7 @@ import RouteExpress from ".";
 class UserRoute extends RouteExpress {
   useRoutes() {
     try {
-      this.router.get("/my", validateTokenHTTP(), UserController.getMyUser);
+      this.router.get("/my", validateTokenHTTP([]), UserController.getMyUser);
       this.router.get(
         "/:id",
         validateTokenHTTP([Role.admin]),
