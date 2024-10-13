@@ -1,2 +1,2 @@
-docker run --env-file ./.env -p 8880:8880 -p 8881:8881 --network sm-net -d --name general byecheating-general
-# docker run --env-file ./.env -p 8880:8880 -p 8881:8881 -d --name general byecheating-general
+# docker run --env-file ./.env -p 8880:8880 -p 8881:8881 --network sm-net -d --name general byecheating-general
+docker run --env-file ./.env -p 8880:8880 -p 8881:8881 -d --name general byecheating-general
