@@ -3,9 +3,11 @@ import { Avatar, Button, Divider, Flex, Text, Title } from "@mantine/core";
 import { IconLogout } from "@tabler/icons-react";
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { useAuthManager } from "@/hooks/useAuthManager";
 
 export function ProfilePage() {
   const navigate = useNavigate();
+  const { logout } = useAuthManager();
   const { setAsideComponent } = useAside();
   useEffect(() => {
     setAsideComponent();
@@ -20,7 +22,7 @@ export function ProfilePage() {
 
       <Button
         onClick={() => {
-          navigate({ to: "/", replace: true });
+          logout();
         }}
         variant="outline"
         color="red"

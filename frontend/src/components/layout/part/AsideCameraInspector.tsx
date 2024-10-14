@@ -13,7 +13,7 @@ import {
 import { modals } from "@mantine/modals";
 import { IconPlus, IconDotsVertical } from "@tabler/icons-react";
 import { AddCameraModalContent } from "../../main/AddCameraModal";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCameraManagement } from "@/hooks/useCameraManagement";
 
 interface CameraListItem {
@@ -37,7 +37,10 @@ function CameraItem({ name, url }: { name: string; url: string }) {
 }
 
 export function AsideCameraInspector() {
-  const { cameras, addCamera, removeCamera } = useCameraManagement();
+  const { cameras, addCamera, removeCamera,syncCameras } = useCameraManagement();
+  useEffect(()=> {
+    syncCameras()
+  },[])
   return (
     <div className="flex flex-col p-2 gap-2 w-full">
       <Accordion variant="contained">
@@ -80,7 +83,7 @@ export function AsideCameraInspector() {
             <Card key={i} padding={"xs"} radius={"sm"} withBorder>
               <Group justify="space-between">
                 <Text fw={400} size="sm">
-                  {val.name}
+                  {val.title}
                 </Text>
                 <Menu>
                   <Menu.Target>
@@ -91,7 +94,7 @@ export function AsideCameraInspector() {
                   <Menu.Dropdown>
                     <Menu.Item
                       onClick={() => {
-                        removeCamera(val.url);
+                        removeCamera(val.id);
                       }}
                     >
                       Delete Camera

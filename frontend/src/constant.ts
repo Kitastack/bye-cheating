@@ -1,1 +1,2 @@
-export const BASE_URL = "https://localhost:5500"
+export const BASE_URL = "http://localhost:8881"
+export const STREAM_URL = "http://localhost:8882"

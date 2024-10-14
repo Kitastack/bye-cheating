@@ -1,6 +1,6 @@
 import { MinimalLayout } from "@/components/layout/MinimalLayout";
+import { useAuthManager } from "@/hooks/useAuthManager";
 import {
-  Anchor,
   Button,
   Divider,
   Group,
@@ -26,6 +26,8 @@ export function LoginPage() {
 function LoginCard() {
   const navigate = useNavigate();
 
+  const {submitLogin} = useAuthManager();
+
   const form = useForm({
     initialValues: {
       email: "",
@@ -33,10 +35,7 @@ function LoginCard() {
     },
     validate: {
       email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
-      password: (value) =>
-        /^(?=.*[A-Z])[A-Za-z\d]{8,}$/.test(value)
-          ? null
-          : "At least 8 chars and contain at least 1 uppercase",
+      password: (value) => value.length >= 6 ? null : "Password is too short",
     },
   });
 
@@ -47,12 +46,15 @@ function LoginCard() {
       </Text>
       <Group grow></Group>
       <Divider my={"md"} />
-      <form onSubmit={form.onSubmit(() => {})}>
+      <form onSubmit={form.onSubmit(() => {
+        submitLogin(form.values.email, form.values.password)
+      })}>
         <Stack>
           <TextInput
             required
             label="email"
             placeholder="nama@email.com"
+            type="email"
             onChange={(event) =>
               form.setFieldValue("email", event.currentTarget.value)
             }
@@ -61,6 +63,7 @@ function LoginCard() {
           />
           <PasswordInput
             required
+            type="password"
             label="Password"
             placeholder="Your password"
             onChange={(e) =>
