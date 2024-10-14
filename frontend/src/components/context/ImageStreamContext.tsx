@@ -24,18 +24,11 @@ export function ImageStreamContextProvider({
   const [rawUrl, setRawUrl] = useState("");
   const [camName, setCamName] = useState("");
   const [mlUrl, setMlUrl] = useState("");
-  const { getAccessToken } = useAuthManager();
-
 
   async function setStreamUrl(name: string, streamId: string, reportId: string) {
-    const token = await getAccessToken();
-    if (!token) {
-      return;
-    }
-    const tokens = `${btoa(token)}`;
 
-    const url = `${STREAM_URL}/stream/${streamId}/watch?width=860&height=480&token=${tokens}`;
-    const mlUrl = `${STREAM_URL}/stream/${streamId}/watch?raw=false&width=860&height=480&token=${tokens}`;
+    const url = `${STREAM_URL}/stream/${streamId}/watch?width=860&height=480`;
+    const mlUrl = `${STREAM_URL}/stream/${streamId}/watch?width=860&height=480&raw=false`;
     
     setReportId(reportId)
     setStreamId(streamId)
