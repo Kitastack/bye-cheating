@@ -12,6 +12,7 @@ import { appTheme } from "./theme";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
 import { routeTree } from "./routeTree.gen";
+import { ImageStreamContextProvider } from "./components/context/ImageStreamContext";
 
 const router = createRouter({ routeTree });
 // Register the router instance for type safety
@@ -28,7 +29,7 @@ ReactDOM.createRoot(container).render(
     <MantineProvider theme={appTheme} defaultColorScheme="light">
       <Notifications />
       <ModalsProvider>
-          <RouterProvider router={router} />
+        <RouterProvider router={router} />
       </ModalsProvider>
     </MantineProvider>
   </React.StrictMode>

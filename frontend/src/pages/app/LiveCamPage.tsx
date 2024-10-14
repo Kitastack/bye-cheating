@@ -1,17 +1,20 @@
 // import { useStreamSocket } from "@/components/context/CameraSocketContext";
 import { IconCamera, IconTable } from "@tabler/icons-react";
 import { ActionIcon, Card, Flex, Table, Tooltip } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ReportTable } from "@/components/ReportTable";
 import { sampleDataCCTV } from "@/components/model/dataset";
 import { LiveCamComponent } from "@/components/LiveCamComponent";
 import { useAside } from "@/components/context/AsideContext";
 import { AsideCameraInspector } from "@/components/layout/part/AsideCameraInspector";
+import { imageStreamContext } from "@/components/context/ImageStreamContext";
 
-
-function MainView () {
+function MainView() {
   // const stream = useStreamSocket();
   const [showTable, setShowTable] = useState(false);
+  const { mlUrl, rawUrl } = useContext(
+    imageStreamContext
+  ) as import("@/components/context/ImageStreamContext").IImageStreamContext;
   return (
     <>
       <Flex justify={"space-between"} w={"100%"}>
@@ -52,21 +55,21 @@ function MainView () {
           <ReportTable data={sampleDataCCTV} />
         </Table.ScrollContainer>
       ) : (
-        <LiveCamComponent mlCamData="" rawCamData={""} />
+        <LiveCamComponent mlCamData={mlUrl} rawCamData={rawUrl} />
       )}
       <br />
     </>
   );
-};
+}
 
-export default function LiveCamPage () {
+export default function LiveCamPage() {
   const { setAsideComponent } = useAside();
   useEffect(() => {
-    setAsideComponent(<AsideCameraInspector/>);
+    setAsideComponent(<AsideCameraInspector />);
   }, []);
   return (
     <Flex direction={"column"} gap={"xs"} p={"xs"} mah={"100vh"}>
       <MainView />
     </Flex>
   );
-};
+}

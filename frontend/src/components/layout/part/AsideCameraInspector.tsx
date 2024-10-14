@@ -13,8 +13,9 @@ import {
 import { modals } from "@mantine/modals";
 import { IconPlus, IconDotsVertical } from "@tabler/icons-react";
 import { AddCameraModalContent } from "../../main/AddCameraModal";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useCameraManagement } from "@/hooks/useCameraManagement";
+import { IImageStreamContext, imageStreamContext, useImageStream } from "@/components/context/ImageStreamContext";
 
 interface CameraListItem {
   name: string;
@@ -38,8 +39,15 @@ function CameraItem({ name, url }: { name: string; url: string }) {
 
 export function AsideCameraInspector() {
   const { cameras, addCamera, removeCamera,syncCameras } = useCameraManagement();
+  const {setStreamUrl} = useContext(
+    imageStreamContext
+  ) as IImageStreamContext;
+  const [aInit, setAInit] = useState(true)
   useEffect(()=> {
-    syncCameras()
+    if(aInit) {
+      syncCameras()
+      setAInit(false)
+    }
   },[])
   return (
     <div className="flex flex-col p-2 gap-2 w-full">
@@ -80,7 +88,9 @@ export function AsideCameraInspector() {
         </Button>
         {cameras.length > 0 ? (
           cameras.map((val, i) => (
-            <Card key={i} padding={"xs"} radius={"sm"} withBorder>
+            <Card key={i} padding={"xs"} radius={"sm"} withBorder onClick={() => {
+              setStreamUrl(val.title,val.streamId,"")
+            }}>
               <Group justify="space-between">
                 <Text fw={400} size="sm">
                   {val.title}
