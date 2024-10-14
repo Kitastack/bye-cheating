@@ -12,7 +12,6 @@ import { appTheme } from "./theme";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 
 import { routeTree } from "./routeTree.gen";
-import { ImageStreamContextProvider } from "./components/context/ImageStreamContext";
 
 const router = createRouter({ routeTree });
 // Register the router instance for type safety

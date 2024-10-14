@@ -89,7 +89,7 @@ export function AsideCameraInspector() {
         {cameras.length > 0 ? (
           cameras.map((val, i) => (
             <Card key={i} padding={"xs"} radius={"sm"} withBorder onClick={() => {
-              setStreamUrl(val.title,val.streamId,"")
+              setStreamUrl(val.title,val.streamId,val.streamId)
             }}>
               <Group justify="space-between">
                 <Text fw={400} size="sm">

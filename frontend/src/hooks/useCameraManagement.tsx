@@ -5,6 +5,7 @@ import { BASE_URL } from "@/constant";
 
 interface CameraProps {
   streamId: string;
+  reportId: string;
   id: string;
   title: string;
   description: string;
@@ -29,6 +30,7 @@ export const useCameraManagement = () => {
           description: list.description,
           id: list.id,
           streamId: list.streamId,
+          reportId: list.reportId,
         } as CameraProps;
       });
       setCameras(cameras);

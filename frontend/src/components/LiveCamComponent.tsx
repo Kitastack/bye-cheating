@@ -12,9 +12,9 @@ export function LiveCamComponent(props: LiveCamProps) {
   return (
     <Flex style={{ position: "relative" }}>
       {visible ? (
-        <ImageStreamViewer title="ML View" base64Data={props.mlCamData} />
+        <ImageStreamViewer title="ML View" source={props.mlCamData} />
       ) : (
-        <ImageStreamViewer title="RAW View" base64Data={props.rawCamData} />
+        <ImageStreamViewer title="RAW View" source={props.rawCamData} />
       )}
       <Button
         style={{ position: "absolute", right:0}}

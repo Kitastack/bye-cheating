@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { STREAM_URL } from "@/constant";
 import { useAuthManager } from "@/hooks/useAuthManager";
 import { createContext, useContext, useState } from "react";
@@ -25,9 +26,6 @@ export function ImageStreamContextProvider({
   const [mlUrl, setMlUrl] = useState("");
   const { getAccessToken } = useAuthManager();
 
-  async function start() {
-    // const response = await fetch(`${STREAM_URL}/report/start`, )
-  }
 
   async function setStreamUrl(name: string, streamId: string, reportId: string) {
     const token = await getAccessToken();
@@ -36,8 +34,8 @@ export function ImageStreamContextProvider({
     }
     const tokens = `${btoa(token)}`;
 
-    const url = `${STREAM_URL}/stream/${streamId}/watch?width=640&height=480&token=${tokens}`;
-    const mlUrl = `${STREAM_URL}/stream/${streamId}/watch?raw=False&width=640&height=480&token=${tokens}`;
+    const url = `${STREAM_URL}/stream/${streamId}/watch?width=860&height=480&token=${tokens}`;
+    const mlUrl = `${STREAM_URL}/stream/${streamId}/watch?raw=false&width=860&height=480&token=${tokens}`;
     
     setReportId(reportId)
     setStreamId(streamId)

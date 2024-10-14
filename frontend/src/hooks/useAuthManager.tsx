@@ -24,15 +24,15 @@ export const useAuthManager = () => {
     if (key && typeof key === "string") {
       return key as string;
     }
-    return
-}
+    return;
+  }
 
   async function submitLogin(email: string, password: string) {
     const body = {
       email: email,
       password: password,
     };
-    
+
     const response = await fetch(`${BASE_URL}/authentication/signin`, {
       method: "POST",
       headers: {
@@ -61,5 +61,5 @@ export const useAuthManager = () => {
     console.error("Login failed", response.statusText);
     return;
   }
-  return { submitLogin, logout, getAccessToken};
+  return { submitLogin, logout, getAccessToken };
 };
