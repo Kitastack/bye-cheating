@@ -35,8 +35,10 @@ model notification {
     link        String?
     photo       String?
     title       String
-    description String
+    description String?
     caption     String?
+    entityId    String?
+    entityName  String?
     userId      String
     user        user      @relation(fields: [userId], references: [id])
     createdDate DateTime? @default(now())

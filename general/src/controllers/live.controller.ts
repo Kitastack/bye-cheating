@@ -34,7 +34,8 @@ export const generateLive = async (
       },
       include: {
         stream: true,
-        report: true
+        report: true,
+        user: true
       }
     })
     await ctx.audit.create({
@@ -92,7 +93,8 @@ export const createLive = async (
     )
     res.status(StatusCodes.CREATED).json({
       success: true,
-      result: createdLive
+      result: createdLive,
+      message: 'session will vanish next day'
     })
   } catch (error) {
     next(error)

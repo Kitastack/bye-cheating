@@ -5,6 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 from contextlib import asynccontextmanager
 from imutils.video import VideoStream
 from typing import Optional, Any
+from datetime import datetime, timedelta
 from ultralytics import YOLO
 from config import settings
 from minio import Minio
@@ -37,11 +38,35 @@ import cv2
 import io
 
 
+async def run_tomorrow(task_fn, *args, **kwargs):
+    now = datetime.now()
+    tomorrow = (now + timedelta(days=1)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    delay = (tomorrow - now).total_seconds()
+
+    print(f"Waiting {delay} seconds to run the task tomorrow...")
+    await asyncio.sleep(delay)
+    await task_fn(*args, **kwargs)
+
+
+async def cleanRedis():
+    try:
+        await redis_client.flushdb()
+        print("All keys have been deleted.")
+    except Exception as e:
+        print(f"Failed to clean Redis: {e}")
+    finally:
+        # Schedule next run regardless of success/failure
+        asyncio.create_task(run_tomorrow(cleanRedis))
+
+
 # lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("logs - background worker starting")
     asyncio.create_task(consumeIncomingRtspLive())
+    asyncio.create_task(run_tomorrow(cleanRedis))
     yield  # keeps the app running
     print("logs - shutting down")
 
@@ -393,6 +418,9 @@ async def recordLiveStream(id: str):
     data = await getRedisJson(rd=redis_client, key=id)
     if data is None:
         return
+    user_data = base64.b64encode(json.dumps(data["user"]).encode("utf-8")).decode(
+        "utf-8"
+    )
     rtsp_url = data["stream"]["url"]
     expiry_ts = data["report"]["expiryTimeInMinutes"]
     vs = VideoStream(src=rtsp_url).start()
@@ -425,6 +453,7 @@ async def recordLiveStream(id: str):
                     },
                     headers={
                         "x-from-internal": "true",  # headers must be strings
+                        "x-auth-user": user_data,
                     },
                 )
             await asyncio.sleep(1 / default_fps)  # ~30 FPS, sent 1 frame every 33ms
@@ -437,12 +466,6 @@ async def recordLiveStream(id: str):
             f"{data["report"]["id"]}",
             actual_fps,
         )
-    except Exception as e:
-        # handle error logs for user
-        print(f"Recording error: {e}")
-    finally:
-        if vs is not None:
-            vs.stop()
         # todo: update report data
         async with httpx.AsyncClient() as client:
             await client.patch(
@@ -454,8 +477,47 @@ async def recordLiveStream(id: str):
                 },
                 headers={
                     "x-from-internal": "true",  # headers must be strings
+                    "x-auth-user": user_data,
                 },
             )
+        # todo: add success notification
+        async with httpx.AsyncClient() as client:
+            await client.post(
+                f"{settings.general_service_url}/user/notification",
+                json={
+                    "entityId": data["report"]["id"],
+                    "entityName": "Report",
+                    "title": f"Recording is finished",
+                    "caption": data["report"]["title"] or None,
+                    "description": f"You can see it now!",
+                },
+                headers={
+                    "x-from-internal": "true",  # headers must be strings
+                    "x-auth-user": user_data,
+                },
+            )
+    except Exception as e:
+        # handle error logs for user
+        print(f"Recording error: {e}")
+        # todo: add falsy notification
+        async with httpx.AsyncClient() as client:
+            await client.post(
+                f"{settings.general_service_url}/user/notification",
+                json={
+                    "entityId": data["report"]["id"],
+                    "entityName": "Report",
+                    "title": f"Recording is failed",
+                    "caption": data["report"]["title"] or None,
+                    "description": f"Something is wrong with the streaming",
+                },
+                headers={
+                    "x-from-internal": "true",  # headers must be strings
+                    "x-auth-user": user_data,
+                },
+            )
+    finally:
+        if vs is not None:
+            vs.stop()
         print(f"record capture with {id} stopped")
         raise GeneratorExit
 
@@ -490,18 +552,16 @@ async def ping(request: Request):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
+# if __name__ == "__main__":
+#     print("logs - api starting")
+# Run the FastAPI server in the main thread
+# uvicorn.run(app, host=settings.host, port=settings.port, lifespan="on")
+# print("logs - worker starting")
+# # Start the async worker in a separate thread
+# threading.Thread(target=run_background_worker, daemon=True).start()
+
 # def run_background_worker():
 #     """worker is running on separate thread"""
 #     loop = asyncio.new_event_loop()
 #     asyncio.set_event_loop(loop)
 #     loop.run_until_complete(consumeIncomingRtspLive())
-
-
-if __name__ == "__main__":
-    # print("logs - worker starting")
-    # # Start the async worker in a separate thread
-    # threading.Thread(target=run_background_worker, daemon=True).start()
-
-    print("logs - api starting")
-    # Run the FastAPI server in the main thread
-    uvicorn.run(app, host=settings.host, port=settings.port)

@@ -3,7 +3,7 @@ import {
   InternalServerError,
   UnauthorizedError
 } from './error.lib'
-import jwt from 'jsonwebtoken'
+import jwt, { verify } from 'jsonwebtoken'
 import { sign } from 'jsonwebtoken'
 import { randomUUID } from 'crypto'
 import { user } from '@xprisma/client'
@@ -12,6 +12,7 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 
 const privateKey = readFileSync(join(__dirname, '../keys/private.pem'), 'utf8')
+const publicKey = readFileSync(join(__dirname, '../keys/public.pem'), 'utf8')
 
 export type extendedUserType = {
   authenticationId?: string
@@ -111,11 +112,11 @@ export const generateRefreshToken = async (
 
 export const authenticateToken =
   (roles?: role[]) => (req: Request, res: Response, next: NextFunction) => {
-    const isFromInternal = req.headers['x-from-internal'] === 'true'
-    console.log(req.headers['x-from-internal'], req.ip)
+    const isFromInternal = req.headers['x-from-internal'] == 'true'
     if (
       (isFromInternal && process.env.NODE_ENV == 'development') ||
-      (isFromInternal && req.ip?.startsWith('172.'))
+      (isFromInternal && req.ip?.includes('172.')) ||
+      req.headers['x-auth-user']
     ) {
       const userHeader = req.headers['x-auth-user'] as any
       if (userHeader) {
@@ -127,17 +128,23 @@ export const authenticateToken =
       return
     }
 
-    const authHeader = req.headers['x-auth-user']
+    const authHeader = req.headers.authorization?.toString()
     if (!authHeader) {
       throw new UnauthorizedError('you dont have right access')
     }
-    try {
-      req.user = JSON.parse(
-        Buffer.from(authHeader.toString(), 'base64').toString('utf-8')
-      )
-    } catch {
-      throw new ForbiddenError('please signin first')
-    }
+
+    const token = authHeader?.split(' ')[1]
+    verify(token, publicKey, { algorithms: ['RS256'] }, (err, userPayload) => {
+      if (err) {
+        throw new ForbiddenError('please signin first')
+      }
+      req.user = userPayload as any
+    })
+
+    // if (!(req.user?.isVerified == true)) {
+    //   throw new ForbiddenError('you are not verified yet')
+    // }
+
     if (req.user && Array.isArray(roles) && roles?.length > 0) {
       if (!('roles' in req.user)) {
         throw new UnauthorizedError('you dont have right access')
@@ -147,31 +154,4 @@ export const authenticateToken =
       }
     }
     next()
-    // @deprecated
-    // const authHeader = req.headers.authorization;
-    // if (!authHeader) {
-    //   throw new UnauthorizedError("you dont have right access");
-    // }
-    // const token = authHeader.split(" ")[1];
-    // jwt.verify(
-    //   token,
-    //   publicKey,
-    //   { algorithms: ["RS256"] },
-    //   (err, userPayload) => {
-    //     const user = userPayload as extendedUserType;
-    //     if (err) {
-    //       throw new ForbiddenError("please signin first");
-    //     }
-    //     if (Array.isArray(roles) && roles?.length > 0) {
-    //       if (!("roles" in user)) {
-    //         throw new UnauthorizedError("you dont have right access");
-    //       }
-    //       if (!user.roles.some((item) => roles.includes(item as role))) {
-    //         throw new UnauthorizedError("you dont have right access");
-    //       }
-    //     }
-    //     req.user = user;
-    //     next();
-    //   }
-    // );
   }

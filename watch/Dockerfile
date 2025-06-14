@@ -12,4 +12,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Define the entry point
-CMD ["sh", "start.sh"]
+# CMD ["sh", "start.sh"] moved to compose

@@ -1,1 +1,0 @@
-ls & python main.py
