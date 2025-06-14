@@ -1,0 +1,23 @@
+model report {
+    id                  String        @id @default(uuid())
+    title               String?
+    description         String?
+    userId              String
+    user                user          @relation(fields: [userId], references: [id])
+    thumbnailUrl        String?
+    recordUrl           String?
+    expiryTimeInMinutes Int?
+    createdDate         DateTime      @default(now())
+    updatedDate         DateTime?
+    reportItems         reportItems[]
+    live                live[]
+}
+
+model reportItems {
+    id          String    @id @default(uuid())
+    data        String?
+    reportId    String
+    report      report    @relation(fields: [reportId], references: [id])
+    createdDate DateTime  @default(now())
+    updatedDate DateTime?
+}

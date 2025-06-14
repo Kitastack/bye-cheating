@@ -1,0 +1,1 @@
+ls & npm run start 

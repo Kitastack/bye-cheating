@@ -1,0 +1,1 @@
+ls & npm run prisma:reset & npm run prisma:generate & npm run start 

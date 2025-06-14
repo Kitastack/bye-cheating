@@ -1,0 +1,13 @@
+# setup venv (pip3/python3 or pip/python, adjust with installed python)
+python3 -m venv venv
+source venv/bin/activate
+# install package
+# fastapi web-framework python
+# uvicorn server python
+pip3 install fastapi uvicorn
+# or with python 3.12.3 installed
+pip3 install -r requirements.txt 
+# dont forget to update requirements.txt if there is any changes made into packages
+pip freeze > requirements.txt 
+# run
+uvicorn main:app --reload

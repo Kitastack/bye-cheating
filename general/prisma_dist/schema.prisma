@@ -1,0 +1,121 @@
+model live {
+  id                  String    @id @default(uuid())
+  isPredictionEnabled Boolean   @default(false) // unused
+  path                String
+  streamId            String
+  stream              stream    @relation(fields: [streamId], references: [id])
+  userId              String
+  user                user      @relation(fields: [userId], references: [id])
+  reportId            String?
+  report              report?   @relation(fields: [reportId], references: [id])
+  expiryDate          DateTime?
+  expiryTimeInMinutes Int?
+  createdDate         DateTime  @default(now())
+  updatedDate         DateTime?
+}
+
+model report {
+  id                  String        @id @default(uuid())
+  title               String?
+  description         String?
+  userId              String
+  user                user          @relation(fields: [userId], references: [id])
+  thumbnailUrl        String?
+  recordUrl           String?
+  expiryTimeInMinutes Int?
+  createdDate         DateTime      @default(now())
+  updatedDate         DateTime?
+  reportItems         reportItems[]
+  live                live[]
+}
+
+model reportItems {
+  id          String    @id @default(uuid())
+  data        String?
+  reportId    String
+  report      report    @relation(fields: [reportId], references: [id])
+  createdDate DateTime  @default(now())
+  updatedDate DateTime?
+}
+
+model stream {
+  id          String    @id @default(uuid())
+  url         String
+  userId      String
+  user        user      @relation(fields: [userId], references: [id])
+  createdDate DateTime  @default(now())
+  updatedDate DateTime?
+  live        live[]
+}
+
+model user {
+  id             String           @id @default(uuid())
+  email          String           @unique
+  name           String
+  password       String
+  roles          String[]         @default([])
+  isVerified     Boolean          @default(false)
+  createdDate    DateTime         @default(now())
+  updatedDate    DateTime?
+  photo          String?
+  stream         stream[]
+  live           live[]
+  report         report[]
+  audit          audit[]
+  notification   notification[]
+  authentication authentication[]
+}
+
+model authentication {
+  id          String    @id @default(uuid())
+  userId      String
+  user        user      @relation(fields: [userId], references: [id])
+  ipAddress   String?
+  description String?
+  createdDate DateTime  @default(now())
+  updatedDate DateTime?
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgcrypto]
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../prisma_dist"
+  previewFeatures = ["driverAdapters", "typedSql", "postgresqlExtensions"]
+}
+
+model logs {
+  id          String    @id @default(uuid())
+  type        String    @default("traffic")
+  code        Int?
+  ip          String?
+  message     String
+  createdDate DateTime? @default(now())
+}
+
+model audit {
+  id          String    @id @default(uuid())
+  entityName  String
+  entityId    String
+  fieldName   String?
+  fieldValue  String?
+  userId      String?
+  user        user?     @relation(fields: [userId], references: [id])
+  createdDate DateTime? @default(now())
+}
+
+model notification {
+  id          String    @id @default(uuid())
+  link        String?
+  photo       String?
+  title       String
+  description String
+  caption     String?
+  userId      String
+  user        user      @relation(fields: [userId], references: [id])
+  createdDate DateTime? @default(now())
+}

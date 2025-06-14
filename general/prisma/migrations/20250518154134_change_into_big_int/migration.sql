@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "live" ALTER COLUMN "expiryTime" SET DATA TYPE BIGINT;

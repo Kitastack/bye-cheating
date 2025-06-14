@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ESNext",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "Node16",
+    "module": "Node16",
+    "baseUrl": "src",
+    "outDir": "dist",
+    "types": ["node"],
+    "paths": {
+      "@src/*": ["./*"],
+      "@libs/*": ["./libs/*"]
+    }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "files": ["src/libs/types/express/index.d.ts"],
+  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts"]
+}

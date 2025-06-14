@@ -1,0 +1,104 @@
+services:
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000" # S3 API
+      - "9001:9001" # Web console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    networks:
+      - default-net
+    command: server /data --console-address ":9001"
+  redis:
+    image: "redis:latest"
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - default-net
+  db:
+    image: "postgres"
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=admin
+      - POSTGRES_DB=sandbox
+      - PGDATA=/data/postgres
+    volumes:
+      - postgres_data:/data/postgres
+    networks:
+      - default-net
+  general-service:
+    build: ./general
+    restart: always
+    env_file:
+      - ./general/.env
+    environment:
+      - NODE_ENV=production
+      - PORT=8081
+      - DATABASE_URL=postgresql://admin:admin@db:5432/sandbox
+      - REDIS_CHANNEL=default
+      - REDIS_URL=redis://redis:6379
+    networks:
+      - default-net
+    ports:
+      - 8081:8081
+    depends_on:
+      - db
+      - redis
+      - minio
+  watch-service:
+    build: ./watch
+    restart: always
+    env_file:
+      - ./watch/.env
+    environment:
+      - NODE_ENV=production
+      - PORT=8082
+      - HOSTNAME=0.0.0.0
+      - REDIS_CHANNEL=default
+      - REDIS_URL=redis://redis:6379
+      - MINIO_HOSTNAME=minio:9000
+      - MINIO_BUCKET=default
+      - DEVICE=cpu
+      - GENERAL_SERVICE_URL=http://general-service:8081
+    networks:
+      - default-net
+    ports:
+      - 8082:8082
+    depends_on:
+      - db
+      - redis
+      - minio
+      - general-service
+  gateway-service:
+    build: ./gateway
+    restart: always
+    env_file:
+      - ./gateway/.env
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+      - GENERAL_SERVICE_URL=http://general-service:8081
+      - WATCH_SERVICE_URL=http://watch-service:8082
+    networks:
+      - default-net
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+      - redis
+      - minio
+      - general-service
+      - watch-service
+volumes:
+  minio_data:
+  postgres_data:
+networks:
+  default-net:

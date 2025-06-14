@@ -1,0 +1,6 @@
+{
+    "editor.formatOnSave": true,
+    "explorer.fileNesting.enabled": true,
+    "color-highlight.languages": ["python"],
+    "color-highlight.matchWords": true,
+}

@@ -1,0 +1,9 @@
+model stream {
+    id          String    @id @default(uuid())
+    url         String
+    userId      String
+    user        user      @relation(fields: [userId], references: [id])
+    createdDate DateTime  @default(now())
+    updatedDate DateTime?
+    live        live[]
+}

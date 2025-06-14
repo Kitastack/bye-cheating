@@ -1,0 +1,16 @@
+{
+  "editor.formatOnSave": true,
+  "explorer.fileNesting.enabled": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "explorer.fileNesting.patterns": {
+    "config.ts": "config.*.ts, logging*ts,",
+    "package.json": "*.json, pnpm*, .yarnrc*, yarn*, .eslint*, eslint*, .prettier*, prettier*, .editorconfig",
+    ".env": ".env*"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit"
+  },
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  }
+}

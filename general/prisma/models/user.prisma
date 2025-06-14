@@ -1,0 +1,27 @@
+model user {
+    id             String           @id @default(uuid())
+    email          String           @unique
+    name           String
+    password       String
+    roles          String[]         @default([])
+    isVerified     Boolean          @default(false)
+    createdDate    DateTime         @default(now())
+    updatedDate    DateTime?
+    photo          String?
+    stream         stream[]
+    live           live[]
+    report         report[]
+    audit          audit[]
+    notification   notification[]
+    authentication authentication[]
+}
+
+model authentication {
+    id          String    @id @default(uuid())
+    userId      String
+    user        user      @relation(fields: [userId], references: [id])
+    ipAddress   String?
+    description String?
+    createdDate DateTime  @default(now())
+    updatedDate DateTime?
+}
