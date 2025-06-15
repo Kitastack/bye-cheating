@@ -25,33 +25,33 @@ export const getReport = async (
       }).prefs({ convert: true }),
       req.populatedQuery
     )
+    const orQuery: any[] = []
+    if (req.populatedQuery?.id) {
+      orQuery.push({
+        id: req.populatedQuery?.id
+      })
+    }
+    if (req.populatedQuery?.title) {
+      orQuery.push({
+        title: {
+          contains: req.populatedQuery?.title
+        }
+      })
+    }
+    if (req.populatedQuery?.recordUrl) {
+      orQuery.push({
+        recordUrl: {
+          contains: req.populatedQuery?.recordUrl
+        }
+      })
+    }
     const foundReport = await database.report.findMany({
-      where:
-        Object.values(req.populatedQuery as any)?.length - 1 > 0
-          ? {
-              OR: [
-                {
-                  id: req.populatedQuery?.id as string | undefined
-                },
-                {
-                  title: {
-                    contains: req.populatedQuery?.title as string | undefined
-                  }
-                },
-                {
-                  recordUrl: {
-                    contains: req.populatedQuery?.recordUrl as
-                      | string
-                      | undefined
-                  }
-                }
-              ]
-            }
-          : {
-              userId: req.user?.roles?.includes(ROLE.Admin)
-                ? ((req.populatedQuery?.userId as string) ?? undefined)
-                : req.user?.id
-            },
+      where: {
+        OR: orQuery?.length > 0 ? orQuery : undefined,
+        userId: req.user?.roles?.includes(ROLE.Admin)
+          ? ((req.populatedQuery?.userId as string) ?? undefined)
+          : req.user?.id
+      },
       include: {
         reportItems: req.populatedQuery?.withItems == 'true' ? true : undefined
       },

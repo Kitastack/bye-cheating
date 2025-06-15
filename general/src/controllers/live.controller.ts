@@ -193,33 +193,36 @@ export const getLive = async (
       }).prefs({ convert: true }),
       req.populatedQuery
     )
-    const query = Object.assign({}, req.populatedQuery)
+    const orQuery: any[] = []
+    if (req.populatedQuery?.id) {
+      orQuery.push({
+        id: req.populatedQuery?.id
+      })
+    }
+    if (req.populatedQuery?.streamId) {
+      orQuery.push({
+        streamId: req.populatedQuery?.streamId
+      })
+    }
+    if (req.populatedQuery?.expiryDate) {
+      orQuery.push({
+        expiryDate: req.populatedQuery?.expiryDate
+      })
+    }
+    if (req.populatedQuery?.path) {
+      orQuery.push({
+        path: {
+          contains: req.populatedQuery.path
+        }
+      })
+    }
     const foundLive = await database.live.findMany({
-      where:
-        Object.values(query)?.length > 0
-          ? {
-              OR: [
-                {
-                  id: query.id as string | undefined
-                },
-                {
-                  path: {
-                    contains: query.path as string | undefined
-                  }
-                },
-                {
-                  streamId: query.streamId as string | undefined
-                },
-                {
-                  expiryDate: query.expiryDate as object | undefined
-                }
-              ]
-            }
-          : {
-              userId: req.user?.roles?.includes(ROLE.Admin)
-                ? ((query.userId as string) ?? undefined)
-                : req.user?.id
-            },
+      where: {
+        OR: orQuery?.length > 0 ? orQuery : undefined,
+        userId: req.user?.roles?.includes(ROLE.Admin)
+          ? ((req.populatedQuery?.userId as string) ?? undefined)
+          : req.user?.id
+      },
       skip: req.page,
       take: req.limit
     })

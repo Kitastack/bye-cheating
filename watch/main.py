@@ -1,3 +1,4 @@
+import traceback
 from fastapi.responses import JSONResponse, StreamingResponse, Response
 from asgi_correlation_id import CorrelationIdMiddleware, correlation_id
 from fastapi.middleware.cors import CORSMiddleware
@@ -390,6 +391,7 @@ async def captureTask(
                 + b"\r\n"
             )
     except Exception as e:
+        traceback.print_exc()
         raise GeneratorExit
     finally:
         if vs is not None:
@@ -473,32 +475,42 @@ async def liveStream(request: Request, liveId: str):
 #             message=str(e),
 #         )
 
+# user_data = base64.b64encode(json.dumps(data["user"]).encode("utf-8")).decode(
+#     "utf-8"
+# )
+
 
 async def recordLiveStream(id: str):
     data = await getRedisJson(rd=redis_client, key=id)
     if data is None:
         return
-    user_data = base64.b64encode(json.dumps(data["user"]).encode("utf-8")).decode(
-        "utf-8"
-    )
+    report_id = data["report"]["id"]
     rtsp_url = data["stream"]["url"]
     expiry_ts = data["report"]["expiryTimeInMinutes"]
+    user_data = json.loads(base64.b64decode(data["user"]).decode("utf-8"))
+    user_data_encoded = base64.b64encode(json.dumps(user_data).encode()).decode()
     vs = VideoStream(src=rtsp_url).start()
     start_time = time.time()
+
+    request_header = {
+        "x-from-internal": "true",  # headers must be strings
+        "x-auth-user": user_data_encoded,
+    }
     try:
         frame_count = 0
         while expiry_ts is None or time.time() < int(expiry_ts):
-            # Run processing in parallel
-            data = await getRedisJson(rd=redis_client, key=id)
-            if data is None:
-                break
+            # no need live changing
+            # data = await getRedisJson(rd=redis_client, key=id)
+            # if data is None:
+            #     break
 
             # predic
             frame, prediction_frame, prediction = await captureModelTask(vs)
 
             # store frames
-            object_name = f"{data["report"]["id"]}/{frame_count}{image_format}"
-            print(f"send {object_name}")
+
+            object_name = f"{report_id}/{frame_count}{image_format}"
+            print(f"logs - sending {object_name}")
             await asyncio.to_thread(
                 uploadFrameToMinio, settings.minio_bucket, object_name, prediction_frame
             )
@@ -508,13 +520,10 @@ async def recordLiveStream(id: str):
                 await client.patch(
                     f"{settings.general_service_url}/report/items",
                     json={
-                        "reportId": data["report"]["id"],
+                        "reportId": report_id,
                         "items": [{"data": prediction}],
                     },
-                    headers={
-                        "x-from-internal": "true",  # headers must be strings
-                        "x-auth-user": user_data,
-                    },
+                    headers=request_header,
                 )
             await asyncio.sleep(1 / default_fps)  # ~30 FPS, sent 1 frame every 33ms
         # todo: make the video
@@ -523,58 +532,48 @@ async def recordLiveStream(id: str):
         await asyncio.to_thread(
             framesIntoRecordVideoUploadToMinio,
             settings.minio_bucket,
-            f"{data["report"]["id"]}",
+            f"{report_id}",
             actual_fps,
         )
         # todo: update report data
         async with httpx.AsyncClient() as client:
-            # http://localhost:9000/default/c2c451b6-ac65-4a39-9471-6894b9a09c92/video.mp4
+            # url example http://localhost:9000/default/c2c451b6-ac65-4a39-9471-6894b9a09c92/video.mp4
             await client.patch(
                 f"{settings.general_service_url}/report",
                 json={
-                    "id": data["report"]["id"],
-                    "recordUrl": f"default/{data["report"]["id"]}/video{video_format}",
-                    "thumbnailUrl": f"{settings.minio_hostname_public}/{data["report"]["id"]}/0{image_format}",
+                    "id": report_id,
+                    "recordUrl": f"{settings.minio_hostname_public}default/{report_id}/video{video_format}",
+                    "thumbnailUrl": f"{settings.minio_hostname_public}/{report_id}/0{image_format}",
                 },
-                headers={
-                    "x-from-internal": "true",  # headers must be strings
-                    "x-auth-user": user_data,
-                },
+                headers=request_header,
             )
         # todo: add success notification
         async with httpx.AsyncClient() as client:
             await client.post(
                 f"{settings.general_service_url}/user/notification",
                 json={
-                    "entityId": data["report"]["id"],
+                    "entityId": report_id,
                     "entityName": "Report",
                     "title": f"Recording is finished",
                     "caption": data["report"]["title"] or None,
                     "description": f"You can see it now!",
                 },
-                headers={
-                    "x-from-internal": "true",  # headers must be strings
-                    "x-auth-user": user_data,
-                },
+                headers=request_header,
             )
     except Exception as e:
-        # handle error logs for user
-        print(f"Recording error: {e}")
+        traceback.print_exc()
         # todo: add falsy notification
         async with httpx.AsyncClient() as client:
             await client.post(
                 f"{settings.general_service_url}/user/notification",
                 json={
-                    "entityId": data["report"]["id"],
+                    "entityId": report_id,
                     "entityName": "Report",
                     "title": f"Recording is failed",
                     "caption": data["report"]["title"] or None,
                     "description": f"Something is wrong with the streaming",
                 },
-                headers={
-                    "x-from-internal": "true",  # headers must be strings
-                    "x-auth-user": user_data,
-                },
+                headers=request_header,
             )
     finally:
         if vs is not None:
@@ -617,12 +616,3 @@ if __name__ == "__main__":
     print("logs - api starting")
     # Run the FastAPI server in the main thread
     uvicorn.run(app, host=settings.host, port=settings.port)
-    # print("logs - worker starting")
-    # # Start the async worker in a separate thread
-    # threading.Thread(target=run_background_worker, daemon=True).start()
-
-# def run_background_worker():
-#     """worker is running on separate thread"""
-#     loop = asyncio.new_event_loop()
-#     asyncio.set_event_loop(loop)
-#     loop.run_until_complete(consumeIncomingRtspLive())

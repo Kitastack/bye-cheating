@@ -297,35 +297,35 @@ export const getUserListForAdmin = async (
       }).prefs({ convert: true }),
       req.populatedQuery
     )
-    const query = Object.assign({}, req.populatedQuery)
+    const orQuery: any[] = []
+    if (req.populatedQuery?.id) {
+      orQuery.push({
+        id: req.populatedQuery?.id
+      })
+      orQuery.push({
+        id: {
+          in: req.populatedQuery?.userIds
+        }
+      })
+    }
+    if (req.populatedQuery?.name) {
+      orQuery.push({
+        name: {
+          contains: req.populatedQuery?.name
+        }
+      })
+    }
+    if (req.populatedQuery?.email) {
+      orQuery.push({
+        email: {
+          contains: req.populatedQuery?.email?.toString()?.trim()?.toLowerCase()
+        }
+      })
+    }
     const foundUsers = await database.user.findMany({
-      where:
-        Object.values(query)?.length > 0
-          ? {
-              OR: [
-                {
-                  id: query?.id as string | undefined
-                },
-                {
-                  id: {
-                    in: query?.userIds as [] | undefined
-                  }
-                },
-                {
-                  name: {
-                    contains: (query?.name as string | undefined)?.trim()
-                  }
-                },
-                {
-                  email: {
-                    contains: (query?.email as string | undefined)
-                      ?.trim()
-                      ?.toLowerCase()
-                  }
-                }
-              ]
-            }
-          : undefined,
+      where: {
+        OR: orQuery?.length > 0 ? orQuery : undefined
+      },
       skip: req.page,
       take: req.limit
     })

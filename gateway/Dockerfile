@@ -15,7 +15,7 @@ COPY tsconfig.json .
 RUN npm install
 RUN npm run build
 
-# Remove source code and move dist
-RUN rm -rf src && ls
+# Remove source code
+RUN rm -rf src
 
 CMD ["sh", "start.sh"]

@@ -114,32 +114,31 @@ export const authenticateToken =
   (roles?: role[]) => (req: Request, res: Response, next: NextFunction) => {
     const isFromInternal = req.headers['x-from-internal'] == 'true'
     if (
-      (isFromInternal && process.env.NODE_ENV == 'development') ||
-      (isFromInternal && req.ip?.includes('172.')) ||
+      (((isFromInternal && process.env.NODE_ENV == 'development') ||
+        (isFromInternal && req.ip?.includes('172.'))) &&
+        req.headers['x-auth-user']) ||
       req.headers['x-auth-user']
     ) {
       const userHeader = req.headers['x-auth-user'] as any
-      if (userHeader) {
-        const decodedUser = Buffer.from(userHeader, 'base64').toString('utf-8')
-        const currentUser = JSON.parse(decodedUser)
-        req.user = currentUser
+      req.user = JSON.parse(Buffer.from(userHeader, 'base64').toString('utf-8'))
+    } else {
+      const authHeader = req.headers.authorization?.toString()
+      if (!authHeader) {
+        throw new UnauthorizedError('you dont have right access')
       }
-      next()
-      return
+      const token = authHeader?.split(' ')[1]
+      verify(
+        token,
+        publicKey,
+        { algorithms: ['RS256'] },
+        (err, userPayload) => {
+          if (err) {
+            throw new ForbiddenError('please signin first')
+          }
+          req.user = userPayload as any
+        }
+      )
     }
-
-    const authHeader = req.headers.authorization?.toString()
-    if (!authHeader) {
-      throw new UnauthorizedError('you dont have right access')
-    }
-
-    const token = authHeader?.split(' ')[1]
-    verify(token, publicKey, { algorithms: ['RS256'] }, (err, userPayload) => {
-      if (err) {
-        throw new ForbiddenError('please signin first')
-      }
-      req.user = userPayload as any
-    })
 
     // if (!(req.user?.isVerified == true)) {
     //   throw new ForbiddenError('you are not verified yet')
