@@ -7,6 +7,28 @@ import { createProxyMiddleware } from 'http-proxy-middleware'
 import { CustomError } from './libs/error.lib'
 import { StatusCodes } from 'http-status-codes'
 
+const pingUntilSuccess = async (
+  url: string,
+  label: string,
+  retryDelay = 5000,
+  maxRetries = 10
+) => {
+  for (let i = 1; i <= maxRetries; i++) {
+    try {
+      const res = await fetch(url)
+      if (res.ok) {
+        console.log(`${label} is available`)
+        return
+      } else {
+        console.warn(`responded with status ${res.status} (attempt ${i})`)
+      }
+    } catch (err: any) {
+      console.warn(`failed to ping ${label} (attempt ${i}):`, err.message)
+    }
+    await new Promise((resolve) => setTimeout(resolve, retryDelay))
+  }
+  console.error(`[💥] ${label} did not respond after ${maxRetries} attempts`)
+}
 const customProxyForwarder = (
   proxyReq: http.ClientRequest,
   req: http.IncomingMessage,
@@ -80,7 +102,17 @@ Application.use(
 
 const HttpServer: ReturnType<typeof http.createServer> =
   http.createServer(Application)
-HttpServer.listen(PORT, () => {
+HttpServer.listen(PORT, async () => {
   logging.log(`Server started on port ${PORT}`)
+  logging.divider()
+  if (process.env.WATCH_SERVICE_URL) {
+    pingUntilSuccess(`${process.env.WATCH_SERVICE_URL}/ping`, 'watch-service')
+  }
+  if (process.env.GENERAL_SERVICE_URL) {
+    pingUntilSuccess(
+      `${process.env.GENERAL_SERVICE_URL}/ping`,
+      'general-service'
+    )
+  }
   logging.divider()
 })

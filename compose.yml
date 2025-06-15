@@ -1,3 +1,4 @@
+version: "3.9"
 services:
   minio:
     image: minio/minio
@@ -13,6 +14,20 @@ services:
     networks:
       - default-net
     command: server /data --console-address ":9001"
+  minio-init:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+        sleep 5;
+        mc alias set myminio http://minio:9000 minioadmin minioadmin &&
+        mc mb -p myminio/default &&
+        mc anonymous set download myminio/default;
+        echo 'MinIO policy set';
+      "
+    networks:
+      - default-net
   redis:
     image: "redis:latest"
     restart: unless-stopped
@@ -65,6 +80,9 @@ services:
       - REDIS_CHANNEL=default
       - REDIS_URL=redis://redis:6379
       - MINIO_HOSTNAME=minio:9000
+      - MINIO_HOSTNAME_PUBLIC=http://localhost:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
       - MINIO_BUCKET=default
       - DEVICE=cpu
       - GENERAL_SERVICE_URL=http://general-service:8081
@@ -77,7 +95,6 @@ services:
       - redis
       - minio
       - general-service
-    command: uvicorn watch.main:app --host 0.0.0.0 --port 8082 --lifespan on
   gateway-service:
     build: ./gateway
     restart: always

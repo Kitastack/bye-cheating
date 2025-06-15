@@ -25,12 +25,9 @@ export const getReport = async (
       }).prefs({ convert: true }),
       req.populatedQuery
     )
-    console.log({
-      reportItems: req.populatedQuery?.withItems == 'true' ? true : undefined
-    })
     const foundReport = await database.report.findMany({
       where:
-        Object.values(req.populatedQuery as any)?.length > 0
+        Object.values(req.populatedQuery as any)?.length - 1 > 0
           ? {
               OR: [
                 {

@@ -20,6 +20,7 @@ export const generateLive = async (
   ctx: Prisma.TransactionClient
 ) => {
   try {
+    console.log('generateLive', user, body)
     const minutes = Number(body?.expiryTimeInMinutes ?? 5)
     const liveId = body.id ?? randomUUID()
     const live = await ctx.live.create({
@@ -33,9 +34,9 @@ export const generateLive = async (
         expiryTimeInMinutes: Math.floor(Date.now() / 1000) + minutes * 60 // s
       },
       include: {
-        stream: true,
+        user: true,
         report: true,
-        user: true
+        stream: true
       }
     })
     await ctx.audit.create({

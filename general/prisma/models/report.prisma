@@ -5,7 +5,8 @@ model report {
     userId              String
     user                user          @relation(fields: [userId], references: [id])
     thumbnailUrl        String?
-    recordUrl           String?
+    // @deprecated
+    // recordUrl           String?
     expiryTimeInMinutes Int?
     createdDate         DateTime      @default(now())
     updatedDate         DateTime?

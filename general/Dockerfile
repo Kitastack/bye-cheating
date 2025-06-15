@@ -19,6 +19,4 @@ RUN npm run build
 # Remove source code and move dist
 RUN rm -rf src
 
-COPY dist ./dist
-
 CMD ["sh", "start.sh"]

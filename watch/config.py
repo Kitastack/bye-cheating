@@ -16,9 +16,20 @@ class Settings(BaseSettings):
     redis_channel: str = (lambda redis: "default" if redis is None else redis)(
         os.getenv("REDIS_CHANNEL")
     )
+    minio_access_key: str = (
+        lambda access_key: "minioadmin" if access_key is None else access_key
+    )(os.getenv("MINIO_ACCESS_KEY"))
+    minio_secret_key: str = (
+        lambda secret_key: "minioadmin" if secret_key is None else secret_key
+    )(os.getenv("MINIO_SECRET_KEY"))
     minio_hostname: str = (
         lambda minio_host: "0.0.0.0:9000" if minio_host is None else minio_host
     )(os.getenv("MINIO_HOSTNAME"))
+    minio_hostname_public: str = (
+        lambda minio_host_public: (
+            "0.0.0.0:9000" if minio_host_public is None else minio_host_public
+        )
+    )(os.getenv("MINIO_HOSTNAME_PUBLIC"))
     minio_bucket: str = (lambda bucket: "default" if bucket is None else bucket)(
         os.getenv("MINIO_BUCKET")
     )

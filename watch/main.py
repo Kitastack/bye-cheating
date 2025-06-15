@@ -25,7 +25,7 @@ from utils import (
 )
 import redis.asyncio as redis
 import numpy as np
-import threading
+import subprocess
 import tempfile
 import asyncio
 import uvicorn
@@ -73,9 +73,9 @@ async def lifespan(app: FastAPI):
 
 # server initial
 minio_client = Minio(
-    settings.minio_hostname,
-    access_key="minioadmin",
-    secret_key="minioadmin",
+    endpoint=settings.minio_hostname,
+    access_key=settings.minio_access_key,
+    secret_key=settings.minio_secret_key,
     secure=False,
 )
 redis_client = redis.from_url(url=settings.redis_url, decode_responses=True)
@@ -143,13 +143,13 @@ def framesIntoRecordVideoUploadToMinio(
                 f"No frames found in MinIO under the given folder {folder_name}"
             )
 
-        # Read first frame to get size
+        # get first frame to get size
         first_data = minio_client.get_object(bucket_name, frames[0].object_name).read()
         first_array = np.asarray(bytearray(first_data), dtype=np.uint8)
         first_frame = cv2.imdecode(first_array, cv2.IMREAD_COLOR)
         height, width, _ = first_frame.shape
 
-        # Create temp file for video
+        # temp file for video
         with tempfile.NamedTemporaryFile(suffix=video_format) as tmp:
             fourcc = cv2.VideoWriter.fourcc(*fourcc_format)
             out = cv2.VideoWriter(tmp.name, fourcc, fps, (width, height))
@@ -161,15 +161,44 @@ def framesIntoRecordVideoUploadToMinio(
                 if frame is not None:
                     out.write(frame)
             out.release()
+            # make another temp file for faststart-processed video
+            with tempfile.NamedTemporaryFile(suffix=video_format) as faststart_tmp:
+                # create moov atom to start using ffmpeg
+                subprocess.run(
+                    [
+                        "ffmpeg",
+                        "-y",
+                        "-i",
+                        tmp.name,
+                        "-c:v",
+                        "libx264",
+                        "-preset",
+                        "ultrafast",
+                        "-pix_fmt",
+                        "yuv420p",
+                        "-movflags",
+                        "+faststart",
+                        faststart_tmp.name,
+                    ],
+                    check=True,
+                )
 
-            # Upload video from temp file
-            tmp.seek(0)
-            minio_client.fput_object(
-                bucket_name=bucket_name,
-                object_name=output_name,
-                file_path=tmp.name,
-                content_type=video_type,
-            )
+                # Upload faststart video to MinIO
+                minio_client.fput_object(
+                    bucket_name=bucket_name,
+                    object_name=output_name,
+                    file_path=faststart_tmp.name,
+                    content_type=video_type,
+                )
+
+            # # Upload video from temp file
+            # tmp.seek(0)
+            # minio_client.fput_object(
+            #     bucket_name=bucket_name,
+            #     object_name=output_name,
+            #     file_path=tmp.name,
+            #     content_type=video_type,
+            # )
     except:
         raise GeneratorExit
     finally:
@@ -414,6 +443,37 @@ async def liveStream(request: Request, liveId: str):
         )
 
 
+# @app.get("/video/{folder_id}")
+# async def getVideoUrl(folder_id: str):
+#     bucket_name = settings.minio_bucket
+#     object_name = f"{folder_id}/video{video_format}"
+#     try:
+#         minio_client.stat_object(bucket_name, object_name)
+#     except Exception:
+#         return JSONException(
+#             statusCode=Status.HTTP_404_NOT_FOUND,
+#             message="Video not found",
+#         )
+#     try:
+#         url = public_minio_client.presigned_get_object(
+#             bucket_name=bucket_name,
+#             object_name=object_name,
+#             expires=timedelta(days=1),  # 1 day in seconds
+#         )
+#         return JSONResponse(
+#             content={
+#                 "message": "link will be valid within a day",
+#                 "success": True,
+#                 "url": url,
+#             }
+#         )
+#     except Exception as e:
+#         raise JSONException(
+#             statusCode=Status.HTTP_500_INTERNAL_SERVER_ERROR,
+#             message=str(e),
+#         )
+
+
 async def recordLiveStream(id: str):
     data = await getRedisJson(rd=redis_client, key=id)
     if data is None:
@@ -468,12 +528,13 @@ async def recordLiveStream(id: str):
         )
         # todo: update report data
         async with httpx.AsyncClient() as client:
+            # http://localhost:9000/default/c2c451b6-ac65-4a39-9471-6894b9a09c92/video.mp4
             await client.patch(
                 f"{settings.general_service_url}/report",
                 json={
                     "id": data["report"]["id"],
-                    "recordUrl": f"{data["report"]["id"]}/video{video_format}",
-                    "thumbnailUrl": f"{data["report"]["id"]}/0{image_format}",
+                    "recordUrl": f"default/{data["report"]["id"]}/video{video_format}",
+                    "thumbnailUrl": f"{settings.minio_hostname_public}/{data["report"]["id"]}/0{image_format}",
                 },
                 headers={
                     "x-from-internal": "true",  # headers must be strings
@@ -552,13 +613,13 @@ async def ping(request: Request):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
-# if __name__ == "__main__":
-#     print("logs - api starting")
-# Run the FastAPI server in the main thread
-# uvicorn.run(app, host=settings.host, port=settings.port, lifespan="on")
-# print("logs - worker starting")
-# # Start the async worker in a separate thread
-# threading.Thread(target=run_background_worker, daemon=True).start()
+if __name__ == "__main__":
+    print("logs - api starting")
+    # Run the FastAPI server in the main thread
+    uvicorn.run(app, host=settings.host, port=settings.port)
+    # print("logs - worker starting")
+    # # Start the async worker in a separate thread
+    # threading.Thread(target=run_background_worker, daemon=True).start()
 
 # def run_background_worker():
 #     """worker is running on separate thread"""
