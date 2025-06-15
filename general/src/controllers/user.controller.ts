@@ -44,7 +44,6 @@ export const signup = async (
     ) {
       throw new BadRequestError('user already registered')
     }
-
     req.body.password = await generatePassword(req.body.password)
     const createdUser = await database.$transaction(async (ctx) => {
       const userPayload = await ctx.user.create({
@@ -64,7 +63,6 @@ export const signup = async (
           userId: userPayload.id
         }
       })
-
       return userPayload
     })
     const [accessToken, userAccessPayload] = await generateAccessToken(
@@ -337,7 +335,6 @@ export const getUserListForAdmin = async (
     next(error)
   }
 }
-
 export const getNotification = async (
   req: Request,
   res: Response,
@@ -383,6 +380,7 @@ export const createNotification = async (
       const result = await ctx.notification.create({
         data: {
           ...req.body,
+          userId: req.user?.id,
           id
         }
       })

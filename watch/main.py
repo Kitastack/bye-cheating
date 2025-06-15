@@ -1,4 +1,3 @@
-import traceback
 from fastapi.responses import JSONResponse, StreamingResponse, Response
 from asgi_correlation_id import CorrelationIdMiddleware, correlation_id
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,6 +26,7 @@ from utils import (
 import redis.asyncio as redis
 import numpy as np
 import subprocess
+import traceback
 import tempfile
 import asyncio
 import uvicorn
@@ -65,7 +65,7 @@ async def cleanRedis():
 # lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("logs - background worker starting")
+    print("logs - background worker starting now!")
     asyncio.create_task(consumeIncomingRtspLive())
     asyncio.create_task(run_tomorrow(cleanRedis))
     yield  # keeps the app running
@@ -97,6 +97,7 @@ app.add_middleware(CORSMiddleware, allow_origins="*")
 # app
 def isStreamAvailable(vs: VideoStream):
     if vs.read() is None:
+        print(f"logs - stream not available")
         return False
     return True
 
@@ -481,20 +482,23 @@ async def liveStream(request: Request, liveId: str):
 
 
 async def recordLiveStream(id: str):
-    data = await getRedisJson(rd=redis_client, key=id)
-    if data is None:
-        return
-    report_id = data["report"]["id"]
-    rtsp_url = data["stream"]["url"]
-    expiry_ts = data["report"]["expiryTimeInMinutes"]
-    user_data = json.loads(base64.b64decode(data["user"]).decode("utf-8"))
-    user_data_encoded = base64.b64encode(json.dumps(user_data).encode()).decode()
-    request_header = {
-        "x-from-internal": "true",  # headers must be strings
-        "x-auth-user": user_data_encoded,
-    }
+    print(f"logs - recordLiveStream running for {id}")
     try:
+        data = await getRedisJson(rd=redis_client, key=id)
+        if data is None:
+            raise Exception("Live data is not available")
+        user_data = data["user"]
+        report_id = data["report"]["id"]
+        rtsp_url = data["stream"]["url"]
+        expiry_ts = data["report"]["expiryTimeInMinutes"]
+        user_data_encoded = base64.b64encode(json.dumps(user_data).encode()).decode()
+        request_header = {
+            "x-from-internal": "true",  # headers must be strings
+            "x-auth-user": user_data_encoded,
+        }
         vs = VideoStream(src=rtsp_url).start()
+        if not isStreamAvailable(vs):
+            raise Exception("Stream is not available")
         start_time = time.time()
         frame_count = 0
         while expiry_ts is None or time.time() < int(expiry_ts):
@@ -507,7 +511,6 @@ async def recordLiveStream(id: str):
             frame, prediction_frame, prediction = await captureModelTask(vs)
 
             # store frames
-
             object_name = f"{report_id}/{frame_count}{image_format}"
             print(f"logs - sending {object_name}")
             await asyncio.to_thread(
@@ -584,6 +587,7 @@ async def recordLiveStream(id: str):
 async def consumeIncomingRtspLive():
     pubsub = redis_client.pubsub()
     await pubsub.subscribe(settings.redis_channel)
+    print(f"logs - consumeIncomingRtspLive subscribed to {settings.redis_channel}")
     # track tasks
     running = set()
     async for message in pubsub.listen():
