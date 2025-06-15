@@ -489,14 +489,13 @@ async def recordLiveStream(id: str):
     expiry_ts = data["report"]["expiryTimeInMinutes"]
     user_data = json.loads(base64.b64decode(data["user"]).decode("utf-8"))
     user_data_encoded = base64.b64encode(json.dumps(user_data).encode()).decode()
-    vs = VideoStream(src=rtsp_url).start()
-    start_time = time.time()
-
     request_header = {
         "x-from-internal": "true",  # headers must be strings
         "x-auth-user": user_data_encoded,
     }
     try:
+        vs = VideoStream(src=rtsp_url).start()
+        start_time = time.time()
         frame_count = 0
         while expiry_ts is None or time.time() < int(expiry_ts):
             # no need live changing
