@@ -496,11 +496,12 @@ async def recordLiveStream(id: str):
             "x-from-internal": "true",  # headers must be strings
             "x-auth-user": user_data_encoded,
         }
+        items = []
+        frame_count = 0
+        start_time = time.time()
         vs = VideoStream(src=rtsp_url).start()
         if not isStreamAvailable(vs):
             raise Exception("Stream is not available")
-        start_time = time.time()
-        frame_count = 0
         while expiry_ts is None or time.time() < int(expiry_ts):
             # no need live changing
             # data = await getRedisJson(rd=redis_client, key=id)
@@ -516,8 +517,8 @@ async def recordLiveStream(id: str):
             await asyncio.to_thread(
                 uploadFrameToMinio, settings.minio_bucket, object_name, prediction_frame
             )
-            frame_count += 1
             # todo: store items
+            items.append(prediction)
             async with httpx.AsyncClient() as client:
                 await client.patch(
                     f"{settings.general_service_url}/report/items",
@@ -528,6 +529,7 @@ async def recordLiveStream(id: str):
                     headers=request_header,
                 )
             await asyncio.sleep(1 / default_fps)  # ~30 FPS, sent 1 frame every 33ms
+            frame_count += 1
         # todo: make the video
         duration = time.time() - start_time
         actual_fps = frame_count / duration if duration > 0 else 1
@@ -538,14 +540,41 @@ async def recordLiveStream(id: str):
             actual_fps,
         )
         # todo: update report data
+        # set mean, mod, med
+        confidences = [item["confidence"] for item in items]
+        # find mean
+        mean_confidence = sum(confidences) / len(confidences)
+        # find median
+        sorted_conf = sorted(confidences)
+        n = len(sorted_conf)
+        if n % 2 == 1:
+            median_confidence = sorted_conf[n // 2]
+        else:
+            mid1 = sorted_conf[n // 2 - 1]
+            mid2 = sorted_conf[n // 2]
+            median_confidence = (mid1 + mid2) / 2
+        # find modus
+        freq = {}
+        for val in confidences:
+            freq[val] = freq.get(val, 0) + 1
+        max_freq = max(freq.values())
+        modes = [val for val, count in freq.items() if count == max_freq]
+        if len(modes) == 1:
+            mode_confidence = modes[0]
+        else:
+            mode_confidence = None
+        # update
         async with httpx.AsyncClient() as client:
             # url example http://localhost:9000/default/c2c451b6-ac65-4a39-9471-6894b9a09c92/video.mp4
             await client.patch(
                 f"{settings.general_service_url}/report",
                 json={
                     "id": report_id,
-                    "recordUrl": f"{settings.minio_hostname_public}default/{report_id}/video{video_format}",
+                    "recordUrl": f"{settings.minio_hostname_public}/default/{report_id}/video{video_format}",
                     "thumbnailUrl": f"{settings.minio_hostname_public}/{report_id}/0{image_format}",
+                    "meanResult": mean_confidence,
+                    "medianResult": median_confidence,
+                    "modeResult": mode_confidence,
                 },
                 headers=request_header,
             )

@@ -39,6 +39,7 @@ model notification {
     caption     String?
     entityId    String?
     entityName  String?
+    status      String?
     userId      String
     user        user      @relation(fields: [userId], references: [id])
     createdDate DateTime? @default(now())

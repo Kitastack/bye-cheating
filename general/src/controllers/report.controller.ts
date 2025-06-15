@@ -218,7 +218,10 @@ export const updateReport = async (
         title: Joi.string().optional(),
         description: Joi.string().optional(),
         thumbnailUrl: Joi.string().optional(),
-        recordUrl: Joi.string().optional()
+        recordUrl: Joi.string().optional(),
+        meanResult: Joi.string().optional(),
+        medianResult: Joi.string().optional(),
+        modeResult: Joi.string().optional()
       }).required(),
       req.body
     )
