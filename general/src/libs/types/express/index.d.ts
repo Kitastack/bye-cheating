@@ -11,6 +11,7 @@ export declare global {
       ipAddress?: string
       page?: number
       limit?: number
+      isInternal: boolean
     }
   }
   namespace NodeJS {

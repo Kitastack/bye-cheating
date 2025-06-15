@@ -446,41 +446,6 @@ async def liveStream(request: Request, liveId: str):
         )
 
 
-# @app.get("/video/{folder_id}")
-# async def getVideoUrl(folder_id: str):
-#     bucket_name = settings.minio_bucket
-#     object_name = f"{folder_id}/video{video_format}"
-#     try:
-#         minio_client.stat_object(bucket_name, object_name)
-#     except Exception:
-#         return JSONException(
-#             statusCode=Status.HTTP_404_NOT_FOUND,
-#             message="Video not found",
-#         )
-#     try:
-#         url = public_minio_client.presigned_get_object(
-#             bucket_name=bucket_name,
-#             object_name=object_name,
-#             expires=timedelta(days=1),  # 1 day in seconds
-#         )
-#         return JSONResponse(
-#             content={
-#                 "message": "link will be valid within a day",
-#                 "success": True,
-#                 "url": url,
-#             }
-#         )
-#     except Exception as e:
-#         raise JSONException(
-#             statusCode=Status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             message=str(e),
-#         )
-
-# user_data = base64.b64encode(json.dumps(data["user"]).encode("utf-8")).decode(
-#     "utf-8"
-# )
-
-
 async def recordLiveStream(id: str):
     print(f"logs - recordLiveStream running for {id}")
     try:
@@ -503,14 +468,8 @@ async def recordLiveStream(id: str):
         if not isStreamAvailable(vs):
             raise Exception("Stream is not available")
         while expiry_ts is None or time.time() < int(expiry_ts):
-            # no need live changing
-            # data = await getRedisJson(rd=redis_client, key=id)
-            # if data is None:
-            #     break
-
-            # predic
+            # predict
             frame, prediction_frame, prediction = await captureModelTask(vs)
-
             # store frames
             object_name = f"{report_id}/{frame_count}{image_format}"
             print(f"logs - sending {object_name}")
@@ -540,29 +499,27 @@ async def recordLiveStream(id: str):
             actual_fps,
         )
         # todo: update report data
-        # set mean, mod, med
-        confidences = [item["confidence"] for item in items]
-        # find mean
-        mean_confidence = sum(confidences) / len(confidences)
-        # find median
-        sorted_conf = sorted(confidences)
-        n = len(sorted_conf)
-        if n % 2 == 1:
-            median_confidence = sorted_conf[n // 2]
-        else:
-            mid1 = sorted_conf[n // 2 - 1]
-            mid2 = sorted_conf[n // 2]
-            median_confidence = (mid1 + mid2) / 2
-        # find modus
-        freq = {}
-        for val in confidences:
-            freq[val] = freq.get(val, 0) + 1
-        max_freq = max(freq.values())
-        modes = [val for val, count in freq.items() if count == max_freq]
-        if len(modes) == 1:
-            mode_confidence = modes[0]
-        else:
-            mode_confidence = None
+        # set mean, mod per track_id
+        # add classes
+        class_mapping = {}
+        for item in items:
+            for frame in item:
+                track_id = frame["track_id"]
+                confidence = frame["class"]
+                if track_id not in class_mapping:
+                    class_mapping[track_id] = []
+                class_mapping[track_id].append(confidence)
+        # find mean and mode per track_id
+        calculation_result = {}
+        for track_id, conf_list in class_mapping.items():
+            mean_value = sum(conf_list) / len(conf_list)
+            freq = {}
+            for val in conf_list:
+                freq[val] = freq.get(val, 0) + 1
+            max_freq = max(freq.values())
+            mode_values = [val for val, count in freq.items() if count == max_freq]
+            mode_value = mode_values[0] if len(mode_values) == 1 else mode_values
+            calculation_result[track_id] = {"mean": mean_value, "mode": mode_value}
         # update
         async with httpx.AsyncClient() as client:
             # url example http://localhost:9000/default/c2c451b6-ac65-4a39-9471-6894b9a09c92/video.mp4
@@ -572,9 +529,7 @@ async def recordLiveStream(id: str):
                     "id": report_id,
                     "recordUrl": f"{settings.minio_hostname_public}/default/{report_id}/video{video_format}",
                     "thumbnailUrl": f"{settings.minio_hostname_public}/{report_id}/0{image_format}",
-                    "meanResult": mean_confidence,
-                    "medianResult": median_confidence,
-                    "modeResult": mode_confidence,
+                    "calculatedClass": json.dumps(calculation_result).encode(),
                 },
                 headers=request_header,
             )

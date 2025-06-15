@@ -3,7 +3,7 @@ import {
   InternalServerError,
   UnauthorizedError
 } from './error.lib'
-import jwt, { verify } from 'jsonwebtoken'
+import { verify } from 'jsonwebtoken'
 import { sign } from 'jsonwebtoken'
 import { randomUUID } from 'crypto'
 import { user } from '@xprisma/client'

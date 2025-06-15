@@ -7,9 +7,7 @@ model report {
     thumbnailUrl        String?
     recordUrl           String?
     expiryTimeInMinutes Int?
-    meanResult          Float?
-    medianResult        Float?
-    modeResult          Float?
+    calculatedClass     Json?
     createdDate         DateTime      @default(now())
     updatedDate         DateTime?
     reportItems         reportItems[]
