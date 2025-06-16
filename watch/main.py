@@ -364,6 +364,10 @@ async def captureTask(
             if data is None:
                 break
 
+            expiry = data.get("expiryTimeInMinutes")
+            if expiry is not None and int(time.time()) > int(expiry):
+                break
+
             if is_prediction_enabled:
                 frame, encoded_frame, prediction = await captureModelTask(vs)
             else:
