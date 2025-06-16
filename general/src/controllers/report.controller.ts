@@ -224,6 +224,7 @@ export const updateReport = async (
       req.body
     )
     if (!req.isInternal) {
+      console.log('calculatedClass', req.body.calculatedClass)
       // todo: prevent outsider to update this field
       delete req.body.calculatedClass
     }

@@ -1,11 +1,12 @@
 from fastapi.responses import JSONResponse, StreamingResponse, Response
 from asgi_correlation_id import CorrelationIdMiddleware, correlation_id
 from fastapi.middleware.cors import CORSMiddleware
+from statistics import mean, mode, multimode
 from PIL import Image, ImageDraw, ImageFont
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta
 from imutils.video import VideoStream
 from typing import Optional, Any
-from datetime import datetime, timedelta
 from ultralytics import YOLO
 from config import settings
 from minio import Minio
@@ -477,7 +478,7 @@ async def recordLiveStream(id: str):
                 uploadFrameToMinio, settings.minio_bucket, object_name, prediction_frame
             )
             # todo: store items
-            items.append(prediction)
+            items.append(json.loads(prediction))
             async with httpx.AsyncClient() as client:
                 await client.patch(
                     f"{settings.general_service_url}/report/items",
@@ -505,21 +506,26 @@ async def recordLiveStream(id: str):
         for item in items:
             for frame in item:
                 track_id = frame["track_id"]
-                confidence = frame["class"]
+                cls = frame["class"]
                 if track_id not in class_mapping:
                     class_mapping[track_id] = []
-                class_mapping[track_id].append(confidence)
+                class_mapping[track_id].append(cls)
         # find mean and mode per track_id
         calculation_result = {}
         for track_id, conf_list in class_mapping.items():
             mean_value = sum(conf_list) / len(conf_list)
-            freq = {}
-            for val in conf_list:
-                freq[val] = freq.get(val, 0) + 1
-            max_freq = max(freq.values())
-            mode_values = [val for val, count in freq.items() if count == max_freq]
-            mode_value = mode_values[0] if len(mode_values) == 1 else mode_values
-            calculation_result[track_id] = {"mean": mean_value, "mode": mode_value}
+            mode_value = multimode(conf_list)
+            mean_index = int(round(mean_value))
+            mode_index = mode_value[0] if isinstance(mode_value, list) else mode_value
+
+            # stays index at 4 max
+            mean_index = max(0, min(mean_index, len(class_names) - 1))
+            mode_index = max(0, min(mode_index, len(class_names) - 1))
+
+            calculation_result[track_id] = {
+                "mean": class_names[mean_index].name,
+                "mode": class_names[mode_index].name,
+            }
         # update
         async with httpx.AsyncClient() as client:
             # url example http://localhost:9000/default/c2c451b6-ac65-4a39-9471-6894b9a09c92/video.mp4
@@ -529,7 +535,7 @@ async def recordLiveStream(id: str):
                     "id": report_id,
                     "recordUrl": f"{settings.minio_hostname_public}/default/{report_id}/video{video_format}",
                     "thumbnailUrl": f"{settings.minio_hostname_public}/{report_id}/0{image_format}",
-                    "calculatedClass": json.dumps(calculation_result).encode(),
+                    "calculatedClass": json.dumps(calculation_result),
                 },
                 headers=request_header,
             )
