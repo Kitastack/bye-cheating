@@ -110,6 +110,14 @@ export const generateRefreshToken = async (
   }
 }
 
+export const isRefreshTokenExist = (refreshToken: string) => {
+  try {
+    return verify(refreshToken, publicKey, { algorithms: ['RS256'] })
+  } catch (error) {
+    return null
+  }
+}
+
 export const authenticateToken =
   (roles?: role[]) => (req: Request, res: Response, next: NextFunction) => {
     const isFromInternal = req.headers['x-from-internal'] == 'true'

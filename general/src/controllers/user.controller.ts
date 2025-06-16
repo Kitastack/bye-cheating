@@ -7,7 +7,11 @@ import { StatusCodes } from 'http-status-codes'
 import { BadRequestError } from '@libs/error.lib'
 import { Request, Response, NextFunction } from 'express'
 import { generatePassword, validatePassword } from '@libs/hash.lib'
-import { generateAccessToken, generateRefreshToken } from '@libs/jwt.lib'
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  isRefreshTokenExist
+} from '@libs/jwt.lib'
 /**
  * [POST] User register.
  */
@@ -335,6 +339,9 @@ export const getUserListForAdmin = async (
     next(error)
   }
 }
+/**
+ * [GET] get users notification.
+ */
 export const getNotification = async (
   req: Request,
   res: Response,
@@ -356,6 +363,9 @@ export const getNotification = async (
     next(error)
   }
 }
+/**
+ * [POST] create users notification.
+ */
 export const createNotification = async (
   req: Request,
   res: Response,
@@ -394,7 +404,9 @@ export const createNotification = async (
     next(error)
   }
 }
-
+/**
+ * [GET] get users audit.
+ */
 export const getAudit = async (
   req: Request,
   res: Response,
@@ -433,6 +445,53 @@ export const getAudit = async (
     res.status(StatusCodes.OK).json({
       success: true,
       result
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+/**
+ * [POST] Users access token.
+ */
+export const createAccessToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await isValidSchema(
+      Joi.object({
+        token: Joi.string().required()
+      }).required(),
+      req.body
+    )
+    const foundRefreshTokenPayload = isRefreshTokenExist(req.body.token)
+    if (!(foundRefreshTokenPayload as any)?.id) {
+      throw new BadRequestError('session invalid')
+    }
+    // todo: prevent bypass using access token
+    const foundAuthenticationData = await database.authentication.findFirst({
+      where: {
+        id: (foundRefreshTokenPayload as any).id
+      },
+      include: {
+        user: true
+      }
+    })
+    if (!foundAuthenticationData) {
+      throw new BadRequestError('please sign-in again')
+    }
+
+    const [accessToken, userAccessPayload] = await generateAccessToken({
+      ...foundAuthenticationData?.user,
+      authenticationId: foundAuthenticationData.id
+    } as any)
+
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      result: {
+        token: accessToken
+      }
     })
   } catch (error) {
     next(error)

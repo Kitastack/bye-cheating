@@ -7,7 +7,8 @@ import {
   getUserListForAdmin,
   getNotification,
   getAudit,
-  createNotification
+  createNotification,
+  createAccessToken
 } from '@controllers/user.controller'
 import { authenticateToken } from '@libs/jwt.lib'
 import express from 'express'
@@ -22,5 +23,6 @@ userRouter.patch('/update', authenticateToken(['Admin']), userUpdateForAdmin)
 userRouter.get('/notification', authenticateToken(), getNotification)
 userRouter.post('/notification', authenticateToken(), createNotification)
 userRouter.get('/audit', authenticateToken(), getAudit)
+userRouter.post('/token', createAccessToken)
 
 export { userRouter }
