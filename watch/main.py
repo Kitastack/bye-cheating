@@ -538,7 +538,7 @@ async def recordLiveStream(id: str):
                 json={
                     "id": report_id,
                     "recordUrl": f"{settings.minio_hostname_public}/default/{report_id}/video{video_format}",
-                    "thumbnailUrl": f"{settings.minio_hostname_public}/{report_id}/0{image_format}",
+                    "thumbnailUrl": f"{settings.minio_hostname_public}/default/{report_id}/0{image_format}",
                     "calculatedClass": json.dumps(calculation_result),
                 },
                 headers=request_header,
