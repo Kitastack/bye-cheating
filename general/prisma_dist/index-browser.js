@@ -141,6 +141,7 @@ exports.Prisma.ReportScalarFieldEnum = {
   thumbnailUrl: 'thumbnailUrl',
   recordUrl: 'recordUrl',
   expiryTimeInMinutes: 'expiryTimeInMinutes',
+  calculatedClass: 'calculatedClass',
   createdDate: 'createdDate',
   updatedDate: 'updatedDate'
 };
@@ -157,6 +158,7 @@ exports.Prisma.StreamScalarFieldEnum = {
   id: 'id',
   url: 'url',
   userId: 'userId',
+  inactive: 'inactive',
   createdDate: 'createdDate',
   updatedDate: 'updatedDate'
 };
@@ -208,6 +210,9 @@ exports.Prisma.NotificationScalarFieldEnum = {
   title: 'title',
   description: 'description',
   caption: 'caption',
+  entityId: 'entityId',
+  entityName: 'entityName',
+  status: 'status',
   userId: 'userId',
   createdDate: 'createdDate'
 };
@@ -215,6 +220,11 @@ exports.Prisma.NotificationScalarFieldEnum = {
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -225,6 +235,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 
 

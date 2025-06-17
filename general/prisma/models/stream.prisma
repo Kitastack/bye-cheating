@@ -2,6 +2,7 @@ model stream {
     id          String    @id @default(uuid())
     url         String
     userId      String
+    inactive    Boolean   @default(false)
     user        user      @relation(fields: [userId], references: [id])
     createdDate DateTime  @default(now())
     updatedDate DateTime?

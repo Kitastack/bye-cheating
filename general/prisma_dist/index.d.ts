@@ -3005,6 +3005,7 @@ export namespace Prisma {
     thumbnailUrl: number
     recordUrl: number
     expiryTimeInMinutes: number
+    calculatedClass: number
     createdDate: number
     updatedDate: number
     _all: number
@@ -3051,6 +3052,7 @@ export namespace Prisma {
     thumbnailUrl?: true
     recordUrl?: true
     expiryTimeInMinutes?: true
+    calculatedClass?: true
     createdDate?: true
     updatedDate?: true
     _all?: true
@@ -3150,6 +3152,7 @@ export namespace Prisma {
     thumbnailUrl: string | null
     recordUrl: string | null
     expiryTimeInMinutes: number | null
+    calculatedClass: JsonValue | null
     createdDate: Date
     updatedDate: Date | null
     _count: ReportCountAggregateOutputType | null
@@ -3181,6 +3184,7 @@ export namespace Prisma {
     thumbnailUrl?: boolean
     recordUrl?: boolean
     expiryTimeInMinutes?: boolean
+    calculatedClass?: boolean
     createdDate?: boolean
     updatedDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -3197,6 +3201,7 @@ export namespace Prisma {
     thumbnailUrl?: boolean
     recordUrl?: boolean
     expiryTimeInMinutes?: boolean
+    calculatedClass?: boolean
     createdDate?: boolean
     updatedDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -3210,6 +3215,7 @@ export namespace Prisma {
     thumbnailUrl?: boolean
     recordUrl?: boolean
     expiryTimeInMinutes?: boolean
+    calculatedClass?: boolean
     createdDate?: boolean
     updatedDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -3223,11 +3229,12 @@ export namespace Prisma {
     thumbnailUrl?: boolean
     recordUrl?: boolean
     expiryTimeInMinutes?: boolean
+    calculatedClass?: boolean
     createdDate?: boolean
     updatedDate?: boolean
   }
 
-  export type reportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "userId" | "thumbnailUrl" | "recordUrl" | "expiryTimeInMinutes" | "createdDate" | "updatedDate", ExtArgs["result"]["report"]>
+  export type reportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "userId" | "thumbnailUrl" | "recordUrl" | "expiryTimeInMinutes" | "calculatedClass" | "createdDate" | "updatedDate", ExtArgs["result"]["report"]>
   export type reportInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | userDefaultArgs<ExtArgs>
     reportItems?: boolean | report$reportItemsArgs<ExtArgs>
@@ -3256,6 +3263,7 @@ export namespace Prisma {
       thumbnailUrl: string | null
       recordUrl: string | null
       expiryTimeInMinutes: number | null
+      calculatedClass: Prisma.JsonValue | null
       createdDate: Date
       updatedDate: Date | null
     }, ExtArgs["result"]["report"]>
@@ -3691,6 +3699,7 @@ export namespace Prisma {
     readonly thumbnailUrl: FieldRef<"report", 'String'>
     readonly recordUrl: FieldRef<"report", 'String'>
     readonly expiryTimeInMinutes: FieldRef<"report", 'Int'>
+    readonly calculatedClass: FieldRef<"report", 'Json'>
     readonly createdDate: FieldRef<"report", 'DateTime'>
     readonly updatedDate: FieldRef<"report", 'DateTime'>
   }
@@ -5227,6 +5236,7 @@ export namespace Prisma {
     id: string | null
     url: string | null
     userId: string | null
+    inactive: boolean | null
     createdDate: Date | null
     updatedDate: Date | null
   }
@@ -5235,6 +5245,7 @@ export namespace Prisma {
     id: string | null
     url: string | null
     userId: string | null
+    inactive: boolean | null
     createdDate: Date | null
     updatedDate: Date | null
   }
@@ -5243,6 +5254,7 @@ export namespace Prisma {
     id: number
     url: number
     userId: number
+    inactive: number
     createdDate: number
     updatedDate: number
     _all: number
@@ -5253,6 +5265,7 @@ export namespace Prisma {
     id?: true
     url?: true
     userId?: true
+    inactive?: true
     createdDate?: true
     updatedDate?: true
   }
@@ -5261,6 +5274,7 @@ export namespace Prisma {
     id?: true
     url?: true
     userId?: true
+    inactive?: true
     createdDate?: true
     updatedDate?: true
   }
@@ -5269,6 +5283,7 @@ export namespace Prisma {
     id?: true
     url?: true
     userId?: true
+    inactive?: true
     createdDate?: true
     updatedDate?: true
     _all?: true
@@ -5350,6 +5365,7 @@ export namespace Prisma {
     id: string
     url: string
     userId: string
+    inactive: boolean
     createdDate: Date
     updatedDate: Date | null
     _count: StreamCountAggregateOutputType | null
@@ -5375,6 +5391,7 @@ export namespace Prisma {
     id?: boolean
     url?: boolean
     userId?: boolean
+    inactive?: boolean
     createdDate?: boolean
     updatedDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -5386,6 +5403,7 @@ export namespace Prisma {
     id?: boolean
     url?: boolean
     userId?: boolean
+    inactive?: boolean
     createdDate?: boolean
     updatedDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -5395,6 +5413,7 @@ export namespace Prisma {
     id?: boolean
     url?: boolean
     userId?: boolean
+    inactive?: boolean
     createdDate?: boolean
     updatedDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -5404,11 +5423,12 @@ export namespace Prisma {
     id?: boolean
     url?: boolean
     userId?: boolean
+    inactive?: boolean
     createdDate?: boolean
     updatedDate?: boolean
   }
 
-  export type streamOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "url" | "userId" | "createdDate" | "updatedDate", ExtArgs["result"]["stream"]>
+  export type streamOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "url" | "userId" | "inactive" | "createdDate" | "updatedDate", ExtArgs["result"]["stream"]>
   export type streamInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | userDefaultArgs<ExtArgs>
     live?: boolean | stream$liveArgs<ExtArgs>
@@ -5431,6 +5451,7 @@ export namespace Prisma {
       id: string
       url: string
       userId: string
+      inactive: boolean
       createdDate: Date
       updatedDate: Date | null
     }, ExtArgs["result"]["stream"]>
@@ -5861,6 +5882,7 @@ export namespace Prisma {
     readonly id: FieldRef<"stream", 'String'>
     readonly url: FieldRef<"stream", 'String'>
     readonly userId: FieldRef<"stream", 'String'>
+    readonly inactive: FieldRef<"stream", 'Boolean'>
     readonly createdDate: FieldRef<"stream", 'DateTime'>
     readonly updatedDate: FieldRef<"stream", 'DateTime'>
   }
@@ -10792,6 +10814,9 @@ export namespace Prisma {
     title: string | null
     description: string | null
     caption: string | null
+    entityId: string | null
+    entityName: string | null
+    status: string | null
     userId: string | null
     createdDate: Date | null
   }
@@ -10803,6 +10828,9 @@ export namespace Prisma {
     title: string | null
     description: string | null
     caption: string | null
+    entityId: string | null
+    entityName: string | null
+    status: string | null
     userId: string | null
     createdDate: Date | null
   }
@@ -10814,6 +10842,9 @@ export namespace Prisma {
     title: number
     description: number
     caption: number
+    entityId: number
+    entityName: number
+    status: number
     userId: number
     createdDate: number
     _all: number
@@ -10827,6 +10858,9 @@ export namespace Prisma {
     title?: true
     description?: true
     caption?: true
+    entityId?: true
+    entityName?: true
+    status?: true
     userId?: true
     createdDate?: true
   }
@@ -10838,6 +10872,9 @@ export namespace Prisma {
     title?: true
     description?: true
     caption?: true
+    entityId?: true
+    entityName?: true
+    status?: true
     userId?: true
     createdDate?: true
   }
@@ -10849,6 +10886,9 @@ export namespace Prisma {
     title?: true
     description?: true
     caption?: true
+    entityId?: true
+    entityName?: true
+    status?: true
     userId?: true
     createdDate?: true
     _all?: true
@@ -10931,8 +10971,11 @@ export namespace Prisma {
     link: string | null
     photo: string | null
     title: string
-    description: string
+    description: string | null
     caption: string | null
+    entityId: string | null
+    entityName: string | null
+    status: string | null
     userId: string
     createdDate: Date | null
     _count: NotificationCountAggregateOutputType | null
@@ -10961,6 +11004,9 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     caption?: boolean
+    entityId?: boolean
+    entityName?: boolean
+    status?: boolean
     userId?: boolean
     createdDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -10973,6 +11019,9 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     caption?: boolean
+    entityId?: boolean
+    entityName?: boolean
+    status?: boolean
     userId?: boolean
     createdDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -10985,6 +11034,9 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     caption?: boolean
+    entityId?: boolean
+    entityName?: boolean
+    status?: boolean
     userId?: boolean
     createdDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -10997,11 +11049,14 @@ export namespace Prisma {
     title?: boolean
     description?: boolean
     caption?: boolean
+    entityId?: boolean
+    entityName?: boolean
+    status?: boolean
     userId?: boolean
     createdDate?: boolean
   }
 
-  export type notificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "link" | "photo" | "title" | "description" | "caption" | "userId" | "createdDate", ExtArgs["result"]["notification"]>
+  export type notificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "link" | "photo" | "title" | "description" | "caption" | "entityId" | "entityName" | "status" | "userId" | "createdDate", ExtArgs["result"]["notification"]>
   export type notificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | userDefaultArgs<ExtArgs>
   }
@@ -11022,8 +11077,11 @@ export namespace Prisma {
       link: string | null
       photo: string | null
       title: string
-      description: string
+      description: string | null
       caption: string | null
+      entityId: string | null
+      entityName: string | null
+      status: string | null
       userId: string
       createdDate: Date | null
     }, ExtArgs["result"]["notification"]>
@@ -11456,6 +11514,9 @@ export namespace Prisma {
     readonly title: FieldRef<"notification", 'String'>
     readonly description: FieldRef<"notification", 'String'>
     readonly caption: FieldRef<"notification", 'String'>
+    readonly entityId: FieldRef<"notification", 'String'>
+    readonly entityName: FieldRef<"notification", 'String'>
+    readonly status: FieldRef<"notification", 'String'>
     readonly userId: FieldRef<"notification", 'String'>
     readonly createdDate: FieldRef<"notification", 'DateTime'>
   }
@@ -11910,6 +11971,7 @@ export namespace Prisma {
     thumbnailUrl: 'thumbnailUrl',
     recordUrl: 'recordUrl',
     expiryTimeInMinutes: 'expiryTimeInMinutes',
+    calculatedClass: 'calculatedClass',
     createdDate: 'createdDate',
     updatedDate: 'updatedDate'
   };
@@ -11932,6 +11994,7 @@ export namespace Prisma {
     id: 'id',
     url: 'url',
     userId: 'userId',
+    inactive: 'inactive',
     createdDate: 'createdDate',
     updatedDate: 'updatedDate'
   };
@@ -11998,6 +12061,9 @@ export namespace Prisma {
     title: 'title',
     description: 'description',
     caption: 'caption',
+    entityId: 'entityId',
+    entityName: 'entityName',
+    status: 'status',
     userId: 'userId',
     createdDate: 'createdDate'
   };
@@ -12011,6 +12077,14 @@ export namespace Prisma {
   };
 
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+  export const NullableJsonNullValueInput: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull
+  };
+
+  export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
   export const QueryMode: {
@@ -12027,6 +12101,15 @@ export namespace Prisma {
   };
 
   export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+  export const JsonNullValueFilter: {
+    DbNull: typeof DbNull,
+    JsonNull: typeof JsonNull,
+    AnyNull: typeof AnyNull
+  };
+
+  export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
   /**
@@ -12080,6 +12163,20 @@ export namespace Prisma {
    * Reference to a field of type 'Int[]'
    */
   export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -12199,6 +12296,7 @@ export namespace Prisma {
     thumbnailUrl?: StringNullableFilter<"report"> | string | null
     recordUrl?: StringNullableFilter<"report"> | string | null
     expiryTimeInMinutes?: IntNullableFilter<"report"> | number | null
+    calculatedClass?: JsonNullableFilter<"report">
     createdDate?: DateTimeFilter<"report"> | Date | string
     updatedDate?: DateTimeNullableFilter<"report"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
@@ -12214,6 +12312,7 @@ export namespace Prisma {
     thumbnailUrl?: SortOrderInput | SortOrder
     recordUrl?: SortOrderInput | SortOrder
     expiryTimeInMinutes?: SortOrderInput | SortOrder
+    calculatedClass?: SortOrderInput | SortOrder
     createdDate?: SortOrder
     updatedDate?: SortOrderInput | SortOrder
     user?: userOrderByWithRelationInput
@@ -12232,6 +12331,7 @@ export namespace Prisma {
     thumbnailUrl?: StringNullableFilter<"report"> | string | null
     recordUrl?: StringNullableFilter<"report"> | string | null
     expiryTimeInMinutes?: IntNullableFilter<"report"> | number | null
+    calculatedClass?: JsonNullableFilter<"report">
     createdDate?: DateTimeFilter<"report"> | Date | string
     updatedDate?: DateTimeNullableFilter<"report"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
@@ -12247,6 +12347,7 @@ export namespace Prisma {
     thumbnailUrl?: SortOrderInput | SortOrder
     recordUrl?: SortOrderInput | SortOrder
     expiryTimeInMinutes?: SortOrderInput | SortOrder
+    calculatedClass?: SortOrderInput | SortOrder
     createdDate?: SortOrder
     updatedDate?: SortOrderInput | SortOrder
     _count?: reportCountOrderByAggregateInput
@@ -12267,6 +12368,7 @@ export namespace Prisma {
     thumbnailUrl?: StringNullableWithAggregatesFilter<"report"> | string | null
     recordUrl?: StringNullableWithAggregatesFilter<"report"> | string | null
     expiryTimeInMinutes?: IntNullableWithAggregatesFilter<"report"> | number | null
+    calculatedClass?: JsonNullableWithAggregatesFilter<"report">
     createdDate?: DateTimeWithAggregatesFilter<"report"> | Date | string
     updatedDate?: DateTimeNullableWithAggregatesFilter<"report"> | Date | string | null
   }
@@ -12333,6 +12435,7 @@ export namespace Prisma {
     id?: StringFilter<"stream"> | string
     url?: StringFilter<"stream"> | string
     userId?: StringFilter<"stream"> | string
+    inactive?: BoolFilter<"stream"> | boolean
     createdDate?: DateTimeFilter<"stream"> | Date | string
     updatedDate?: DateTimeNullableFilter<"stream"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
@@ -12343,6 +12446,7 @@ export namespace Prisma {
     id?: SortOrder
     url?: SortOrder
     userId?: SortOrder
+    inactive?: SortOrder
     createdDate?: SortOrder
     updatedDate?: SortOrderInput | SortOrder
     user?: userOrderByWithRelationInput
@@ -12356,6 +12460,7 @@ export namespace Prisma {
     NOT?: streamWhereInput | streamWhereInput[]
     url?: StringFilter<"stream"> | string
     userId?: StringFilter<"stream"> | string
+    inactive?: BoolFilter<"stream"> | boolean
     createdDate?: DateTimeFilter<"stream"> | Date | string
     updatedDate?: DateTimeNullableFilter<"stream"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
@@ -12366,6 +12471,7 @@ export namespace Prisma {
     id?: SortOrder
     url?: SortOrder
     userId?: SortOrder
+    inactive?: SortOrder
     createdDate?: SortOrder
     updatedDate?: SortOrderInput | SortOrder
     _count?: streamCountOrderByAggregateInput
@@ -12380,6 +12486,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"stream"> | string
     url?: StringWithAggregatesFilter<"stream"> | string
     userId?: StringWithAggregatesFilter<"stream"> | string
+    inactive?: BoolWithAggregatesFilter<"stream"> | boolean
     createdDate?: DateTimeWithAggregatesFilter<"stream"> | Date | string
     updatedDate?: DateTimeNullableWithAggregatesFilter<"stream"> | Date | string | null
   }
@@ -12666,8 +12773,11 @@ export namespace Prisma {
     link?: StringNullableFilter<"notification"> | string | null
     photo?: StringNullableFilter<"notification"> | string | null
     title?: StringFilter<"notification"> | string
-    description?: StringFilter<"notification"> | string
+    description?: StringNullableFilter<"notification"> | string | null
     caption?: StringNullableFilter<"notification"> | string | null
+    entityId?: StringNullableFilter<"notification"> | string | null
+    entityName?: StringNullableFilter<"notification"> | string | null
+    status?: StringNullableFilter<"notification"> | string | null
     userId?: StringFilter<"notification"> | string
     createdDate?: DateTimeNullableFilter<"notification"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
@@ -12678,8 +12788,11 @@ export namespace Prisma {
     link?: SortOrderInput | SortOrder
     photo?: SortOrderInput | SortOrder
     title?: SortOrder
-    description?: SortOrder
+    description?: SortOrderInput | SortOrder
     caption?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    entityName?: SortOrderInput | SortOrder
+    status?: SortOrderInput | SortOrder
     userId?: SortOrder
     createdDate?: SortOrderInput | SortOrder
     user?: userOrderByWithRelationInput
@@ -12693,8 +12806,11 @@ export namespace Prisma {
     link?: StringNullableFilter<"notification"> | string | null
     photo?: StringNullableFilter<"notification"> | string | null
     title?: StringFilter<"notification"> | string
-    description?: StringFilter<"notification"> | string
+    description?: StringNullableFilter<"notification"> | string | null
     caption?: StringNullableFilter<"notification"> | string | null
+    entityId?: StringNullableFilter<"notification"> | string | null
+    entityName?: StringNullableFilter<"notification"> | string | null
+    status?: StringNullableFilter<"notification"> | string | null
     userId?: StringFilter<"notification"> | string
     createdDate?: DateTimeNullableFilter<"notification"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
@@ -12705,8 +12821,11 @@ export namespace Prisma {
     link?: SortOrderInput | SortOrder
     photo?: SortOrderInput | SortOrder
     title?: SortOrder
-    description?: SortOrder
+    description?: SortOrderInput | SortOrder
     caption?: SortOrderInput | SortOrder
+    entityId?: SortOrderInput | SortOrder
+    entityName?: SortOrderInput | SortOrder
+    status?: SortOrderInput | SortOrder
     userId?: SortOrder
     createdDate?: SortOrderInput | SortOrder
     _count?: notificationCountOrderByAggregateInput
@@ -12722,8 +12841,11 @@ export namespace Prisma {
     link?: StringNullableWithAggregatesFilter<"notification"> | string | null
     photo?: StringNullableWithAggregatesFilter<"notification"> | string | null
     title?: StringWithAggregatesFilter<"notification"> | string
-    description?: StringWithAggregatesFilter<"notification"> | string
+    description?: StringNullableWithAggregatesFilter<"notification"> | string | null
     caption?: StringNullableWithAggregatesFilter<"notification"> | string | null
+    entityId?: StringNullableWithAggregatesFilter<"notification"> | string | null
+    entityName?: StringNullableWithAggregatesFilter<"notification"> | string | null
+    status?: StringNullableWithAggregatesFilter<"notification"> | string | null
     userId?: StringWithAggregatesFilter<"notification"> | string
     createdDate?: DateTimeNullableWithAggregatesFilter<"notification"> | Date | string | null
   }
@@ -12823,6 +12945,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
     user: userCreateNestedOneWithoutReportInput
@@ -12838,6 +12961,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
     reportItems?: reportItemsUncheckedCreateNestedManyWithoutReportInput
@@ -12851,6 +12975,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: userUpdateOneRequiredWithoutReportNestedInput
@@ -12866,6 +12991,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reportItems?: reportItemsUncheckedUpdateManyWithoutReportNestedInput
@@ -12880,6 +13006,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
   }
@@ -12891,6 +13018,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -12903,6 +13031,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -12965,6 +13094,7 @@ export namespace Prisma {
   export type streamCreateInput = {
     id?: string
     url: string
+    inactive?: boolean
     createdDate?: Date | string
     updatedDate?: Date | string | null
     user: userCreateNestedOneWithoutStreamInput
@@ -12975,6 +13105,7 @@ export namespace Prisma {
     id?: string
     url: string
     userId: string
+    inactive?: boolean
     createdDate?: Date | string
     updatedDate?: Date | string | null
     live?: liveUncheckedCreateNestedManyWithoutStreamInput
@@ -12983,6 +13114,7 @@ export namespace Prisma {
   export type streamUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
+    inactive?: BoolFieldUpdateOperationsInput | boolean
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: userUpdateOneRequiredWithoutStreamNestedInput
@@ -12993,6 +13125,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    inactive?: BoolFieldUpdateOperationsInput | boolean
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     live?: liveUncheckedUpdateManyWithoutStreamNestedInput
@@ -13002,6 +13135,7 @@ export namespace Prisma {
     id?: string
     url: string
     userId: string
+    inactive?: boolean
     createdDate?: Date | string
     updatedDate?: Date | string | null
   }
@@ -13009,6 +13143,7 @@ export namespace Prisma {
   export type streamUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
+    inactive?: BoolFieldUpdateOperationsInput | boolean
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -13017,6 +13152,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    inactive?: BoolFieldUpdateOperationsInput | boolean
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -13328,8 +13464,11 @@ export namespace Prisma {
     link?: string | null
     photo?: string | null
     title: string
-    description: string
+    description?: string | null
     caption?: string | null
+    entityId?: string | null
+    entityName?: string | null
+    status?: string | null
     createdDate?: Date | string | null
     user: userCreateNestedOneWithoutNotificationInput
   }
@@ -13339,8 +13478,11 @@ export namespace Prisma {
     link?: string | null
     photo?: string | null
     title: string
-    description: string
+    description?: string | null
     caption?: string | null
+    entityId?: string | null
+    entityName?: string | null
+    status?: string | null
     userId: string
     createdDate?: Date | string | null
   }
@@ -13350,8 +13492,11 @@ export namespace Prisma {
     link?: NullableStringFieldUpdateOperationsInput | string | null
     photo?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    entityName?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: userUpdateOneRequiredWithoutNotificationNestedInput
   }
@@ -13361,8 +13506,11 @@ export namespace Prisma {
     link?: NullableStringFieldUpdateOperationsInput | string | null
     photo?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    entityName?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -13372,8 +13520,11 @@ export namespace Prisma {
     link?: string | null
     photo?: string | null
     title: string
-    description: string
+    description?: string | null
     caption?: string | null
+    entityId?: string | null
+    entityName?: string | null
+    status?: string | null
     userId: string
     createdDate?: Date | string | null
   }
@@ -13383,8 +13534,11 @@ export namespace Prisma {
     link?: NullableStringFieldUpdateOperationsInput | string | null
     photo?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    entityName?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -13393,8 +13547,11 @@ export namespace Prisma {
     link?: NullableStringFieldUpdateOperationsInput | string | null
     photo?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    entityName?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -13621,6 +13778,29 @@ export namespace Prisma {
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type ReportItemsListRelationFilter = {
     every?: reportItemsWhereInput
@@ -13650,6 +13830,7 @@ export namespace Prisma {
     thumbnailUrl?: SortOrder
     recordUrl?: SortOrder
     expiryTimeInMinutes?: SortOrder
+    calculatedClass?: SortOrder
     createdDate?: SortOrder
     updatedDate?: SortOrder
   }
@@ -13685,6 +13866,32 @@ export namespace Prisma {
   export type reportSumOrderByAggregateInput = {
     expiryTimeInMinutes?: SortOrder
   }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
+  }
 
   export type ReportScalarRelationFilter = {
     is?: reportWhereInput
@@ -13719,6 +13926,7 @@ export namespace Prisma {
     id?: SortOrder
     url?: SortOrder
     userId?: SortOrder
+    inactive?: SortOrder
     createdDate?: SortOrder
     updatedDate?: SortOrder
   }
@@ -13727,6 +13935,7 @@ export namespace Prisma {
     id?: SortOrder
     url?: SortOrder
     userId?: SortOrder
+    inactive?: SortOrder
     createdDate?: SortOrder
     updatedDate?: SortOrder
   }
@@ -13735,6 +13944,7 @@ export namespace Prisma {
     id?: SortOrder
     url?: SortOrder
     userId?: SortOrder
+    inactive?: SortOrder
     createdDate?: SortOrder
     updatedDate?: SortOrder
   }
@@ -13935,6 +14145,9 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     caption?: SortOrder
+    entityId?: SortOrder
+    entityName?: SortOrder
+    status?: SortOrder
     userId?: SortOrder
     createdDate?: SortOrder
   }
@@ -13946,6 +14159,9 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     caption?: SortOrder
+    entityId?: SortOrder
+    entityName?: SortOrder
+    status?: SortOrder
     userId?: SortOrder
     createdDate?: SortOrder
   }
@@ -13957,6 +14173,9 @@ export namespace Prisma {
     title?: SortOrder
     description?: SortOrder
     caption?: SortOrder
+    entityId?: SortOrder
+    entityName?: SortOrder
+    status?: SortOrder
     userId?: SortOrder
     createdDate?: SortOrder
   }
@@ -14679,10 +14898,34 @@ export namespace Prisma {
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type streamCreateWithoutLiveInput = {
     id?: string
     url: string
+    inactive?: boolean
     createdDate?: Date | string
     updatedDate?: Date | string | null
     user: userCreateNestedOneWithoutStreamInput
@@ -14692,6 +14935,7 @@ export namespace Prisma {
     id?: string
     url: string
     userId: string
+    inactive?: boolean
     createdDate?: Date | string
     updatedDate?: Date | string | null
   }
@@ -14747,6 +14991,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
     user: userCreateNestedOneWithoutReportInput
@@ -14761,6 +15006,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
     reportItems?: reportItemsUncheckedCreateNestedManyWithoutReportInput
@@ -14785,6 +15031,7 @@ export namespace Prisma {
   export type streamUpdateWithoutLiveInput = {
     id?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
+    inactive?: BoolFieldUpdateOperationsInput | boolean
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: userUpdateOneRequiredWithoutStreamNestedInput
@@ -14794,6 +15041,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
+    inactive?: BoolFieldUpdateOperationsInput | boolean
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -14861,6 +15109,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: userUpdateOneRequiredWithoutReportNestedInput
@@ -14875,6 +15124,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reportItems?: reportItemsUncheckedUpdateManyWithoutReportNestedInput
@@ -15088,6 +15338,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
     user: userCreateNestedOneWithoutReportInput
@@ -15102,6 +15353,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
     live?: liveUncheckedCreateNestedManyWithoutReportInput
@@ -15130,6 +15382,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: userUpdateOneRequiredWithoutReportNestedInput
@@ -15144,6 +15397,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     live?: liveUncheckedUpdateManyWithoutReportNestedInput
@@ -15286,6 +15540,7 @@ export namespace Prisma {
   export type streamCreateWithoutUserInput = {
     id?: string
     url: string
+    inactive?: boolean
     createdDate?: Date | string
     updatedDate?: Date | string | null
     live?: liveCreateNestedManyWithoutStreamInput
@@ -15294,6 +15549,7 @@ export namespace Prisma {
   export type streamUncheckedCreateWithoutUserInput = {
     id?: string
     url: string
+    inactive?: boolean
     createdDate?: Date | string
     updatedDate?: Date | string | null
     live?: liveUncheckedCreateNestedManyWithoutStreamInput
@@ -15350,6 +15606,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
     reportItems?: reportItemsCreateNestedManyWithoutReportInput
@@ -15363,6 +15620,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
     reportItems?: reportItemsUncheckedCreateNestedManyWithoutReportInput
@@ -15412,8 +15670,11 @@ export namespace Prisma {
     link?: string | null
     photo?: string | null
     title: string
-    description: string
+    description?: string | null
     caption?: string | null
+    entityId?: string | null
+    entityName?: string | null
+    status?: string | null
     createdDate?: Date | string | null
   }
 
@@ -15422,8 +15683,11 @@ export namespace Prisma {
     link?: string | null
     photo?: string | null
     title: string
-    description: string
+    description?: string | null
     caption?: string | null
+    entityId?: string | null
+    entityName?: string | null
+    status?: string | null
     createdDate?: Date | string | null
   }
 
@@ -15486,6 +15750,7 @@ export namespace Prisma {
     id?: StringFilter<"stream"> | string
     url?: StringFilter<"stream"> | string
     userId?: StringFilter<"stream"> | string
+    inactive?: BoolFilter<"stream"> | boolean
     createdDate?: DateTimeFilter<"stream"> | Date | string
     updatedDate?: DateTimeNullableFilter<"stream"> | Date | string | null
   }
@@ -15533,6 +15798,7 @@ export namespace Prisma {
     thumbnailUrl?: StringNullableFilter<"report"> | string | null
     recordUrl?: StringNullableFilter<"report"> | string | null
     expiryTimeInMinutes?: IntNullableFilter<"report"> | number | null
+    calculatedClass?: JsonNullableFilter<"report">
     createdDate?: DateTimeFilter<"report"> | Date | string
     updatedDate?: DateTimeNullableFilter<"report"> | Date | string | null
   }
@@ -15590,8 +15856,11 @@ export namespace Prisma {
     link?: StringNullableFilter<"notification"> | string | null
     photo?: StringNullableFilter<"notification"> | string | null
     title?: StringFilter<"notification"> | string
-    description?: StringFilter<"notification"> | string
+    description?: StringNullableFilter<"notification"> | string | null
     caption?: StringNullableFilter<"notification"> | string | null
+    entityId?: StringNullableFilter<"notification"> | string | null
+    entityName?: StringNullableFilter<"notification"> | string | null
+    status?: StringNullableFilter<"notification"> | string | null
     userId?: StringFilter<"notification"> | string
     createdDate?: DateTimeNullableFilter<"notification"> | Date | string | null
   }
@@ -16003,6 +16272,7 @@ export namespace Prisma {
   export type streamCreateManyUserInput = {
     id?: string
     url: string
+    inactive?: boolean
     createdDate?: Date | string
     updatedDate?: Date | string | null
   }
@@ -16026,6 +16296,7 @@ export namespace Prisma {
     thumbnailUrl?: string | null
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: Date | string
     updatedDate?: Date | string | null
   }
@@ -16044,8 +16315,11 @@ export namespace Prisma {
     link?: string | null
     photo?: string | null
     title: string
-    description: string
+    description?: string | null
     caption?: string | null
+    entityId?: string | null
+    entityName?: string | null
+    status?: string | null
     createdDate?: Date | string | null
   }
 
@@ -16060,6 +16334,7 @@ export namespace Prisma {
   export type streamUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
+    inactive?: BoolFieldUpdateOperationsInput | boolean
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     live?: liveUpdateManyWithoutStreamNestedInput
@@ -16068,6 +16343,7 @@ export namespace Prisma {
   export type streamUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
+    inactive?: BoolFieldUpdateOperationsInput | boolean
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     live?: liveUncheckedUpdateManyWithoutStreamNestedInput
@@ -16076,6 +16352,7 @@ export namespace Prisma {
   export type streamUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     url?: StringFieldUpdateOperationsInput | string
+    inactive?: BoolFieldUpdateOperationsInput | boolean
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -16123,6 +16400,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reportItems?: reportItemsUpdateManyWithoutReportNestedInput
@@ -16136,6 +16414,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reportItems?: reportItemsUncheckedUpdateManyWithoutReportNestedInput
@@ -16149,6 +16428,7 @@ export namespace Prisma {
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
+    calculatedClass?: NullableJsonNullValueInput | InputJsonValue
     createdDate?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -16185,8 +16465,11 @@ export namespace Prisma {
     link?: NullableStringFieldUpdateOperationsInput | string | null
     photo?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    entityName?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -16195,8 +16478,11 @@ export namespace Prisma {
     link?: NullableStringFieldUpdateOperationsInput | string | null
     photo?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    entityName?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -16205,8 +16491,11 @@ export namespace Prisma {
     link?: NullableStringFieldUpdateOperationsInput | string | null
     photo?: NullableStringFieldUpdateOperationsInput | string | null
     title?: StringFieldUpdateOperationsInput | string
-    description?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     caption?: NullableStringFieldUpdateOperationsInput | string | null
+    entityId?: NullableStringFieldUpdateOperationsInput | string | null
+    entityName?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 

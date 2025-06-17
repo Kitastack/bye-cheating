@@ -31,11 +31,12 @@ export const createStream = async (
           url: {
             contains: req.body.url
           },
+          inactive: false,
           userId: req.user?.id
         }
       })) > 0
     ) {
-      throw new BadRequestError(`you already have this url ${req.body.url}`)
+      throw new BadRequestError(`url already ${req.body.url} added`)
     }
     const createdStream = await database.$transaction(async (ctx) => {
       const stream = await ctx.stream.create({
@@ -64,7 +65,7 @@ export const createStream = async (
   }
 }
 /**
- * [PATCH] Stream data edit for logged user or admin.
+ * [PATCH] Stream data edit for logged user.
  */
 export const updateStream = async (
   req: Request,
@@ -83,7 +84,8 @@ export const updateStream = async (
       !(
         (await database.stream.count({
           where: {
-            id: req.body.id
+            id: req.body.id,
+            userId: req.user?.id
           }
         })) > 0
       )
@@ -96,7 +98,8 @@ export const updateStream = async (
     const updatedStream = await database.$transaction(async (ctx) => {
       const stream = await ctx.stream.update({
         where: {
-          id: req.body.id
+          id: req.body.id,
+          userId: req.user?.id // prevent
         },
         data: {
           ...req.body,
@@ -107,8 +110,8 @@ export const updateStream = async (
         data: {
           entityId: stream.id,
           entityName: 'stream',
-          fieldName: JSON.stringify(Object.keys(req.body)),
-          fieldValue: JSON.stringify(req.body),
+          fieldName: JSON.stringify(Object.keys(stream)),
+          fieldValue: JSON.stringify(stream),
           userId: req.user!.id
         }
       })
@@ -117,6 +120,58 @@ export const updateStream = async (
     res.status(StatusCodes.OK).json({
       success: true,
       result: updatedStream
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+/**
+ * [DELETE] Stream data inactive/delet for logged user.
+ */
+export const deleteStream = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const streamId = req.params.id
+    if (
+      !(
+        (await database.stream.count({
+          where: {
+            id: streamId,
+            userId: req.user?.id
+          }
+        })) > 0
+      )
+    ) {
+      throw new BadRequestError(`stream with id ${streamId} not found`)
+    }
+    const updatedStream = await database.$transaction(async (ctx) => {
+      const stream = await ctx.stream.update({
+        where: {
+          id: req.body.id,
+          userId: req.user?.id // prevent
+        },
+        data: {
+          inactive: true,
+          updatedDate: new Date()
+        }
+      })
+      await ctx.audit.create({
+        data: {
+          entityId: stream.id,
+          entityName: 'stream',
+          fieldName: JSON.stringify(Object.keys(stream)),
+          fieldValue: JSON.stringify(stream),
+          userId: req.user!.id
+        }
+      })
+      return stream
+    })
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'stream deleted successfully'
     })
   } catch (error) {
     next(error)
@@ -135,7 +190,8 @@ export const getStream = async (
       Joi.object({
         id: Joi.string().uuid().optional(),
         userId: Joi.string().uuid().optional(),
-        url: urlValidation.optional()
+        url: urlValidation.optional(),
+        isInactive: Joi.boolean().optional().default(false)
       }).prefs({ convert: true }),
       req.populatedQuery
     )
@@ -157,7 +213,14 @@ export const getStream = async (
         OR: orQuery?.length > 0 ? orQuery : undefined,
         userId: req.user?.roles?.includes(ROLE.Admin)
           ? ((req.populatedQuery?.userId as string) ?? undefined)
-          : req.user?.id
+          : req.user?.id,
+        inactive: req.user?.roles?.includes(ROLE.Admin)
+          ? req.populatedQuery?.isInactive != undefined
+            ? req.populatedQuery?.isInactive == 'true'
+              ? true
+              : false
+            : undefined
+          : false
       },
       skip: req.page,
       take: req.limit
