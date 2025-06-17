@@ -191,7 +191,8 @@ export const getStream = async (
         id: Joi.string().uuid().optional(),
         userId: Joi.string().uuid().optional(),
         url: urlValidation.optional(),
-        isInactive: Joi.boolean().optional().default(false)
+        isInactive: Joi.boolean().optional().default(false),
+        isShowMine: Joi.boolean().optional().default(false)
       }).prefs({ convert: true }),
       req.populatedQuery
     )
@@ -211,9 +212,11 @@ export const getStream = async (
     const foundStreams = await database.stream.findMany({
       where: {
         OR: orQuery?.length > 0 ? orQuery : undefined,
-        userId: req.user?.roles?.includes(ROLE.Admin)
-          ? ((req.populatedQuery?.userId as string) ?? undefined)
-          : req.user?.id,
+        userId:
+          req.user?.roles?.includes(ROLE.Admin) &&
+          req.populatedQuery?.isShowMine == 'false'
+            ? ((req.populatedQuery?.userId as string) ?? undefined)
+            : req.user?.id,
         inactive: req.user?.roles?.includes(ROLE.Admin)
           ? req.populatedQuery?.isInactive != undefined
             ? req.populatedQuery?.isInactive == 'true'

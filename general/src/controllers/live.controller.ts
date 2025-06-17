@@ -181,6 +181,7 @@ export const getLive = async (
   try {
     await isValidSchema(
       Joi.object({
+        isShowMine: Joi.boolean().optional().default(false),
         id: Joi.string().uuid().optional(),
         userId: Joi.string().uuid().optional(),
         streamId: Joi.string().uuid().optional(),
@@ -220,9 +221,11 @@ export const getLive = async (
     const foundLive = await database.live.findMany({
       where: {
         OR: orQuery?.length > 0 ? orQuery : undefined,
-        userId: req.user?.roles?.includes(ROLE.Admin)
-          ? ((req.populatedQuery?.userId as string) ?? undefined)
-          : req.user?.id
+        userId:
+          req.user?.roles?.includes(ROLE.Admin) &&
+          req.populatedQuery?.isShowMine == 'false'
+            ? ((req.populatedQuery?.userId as string) ?? undefined)
+            : req.user?.id
       },
       skip: req.page,
       take: req.limit

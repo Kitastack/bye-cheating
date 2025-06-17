@@ -21,7 +21,8 @@ export const getReport = async (
         userId: Joi.string().uuid().optional(),
         title: Joi.string().optional(),
         recordUrl: Joi.string().optional(),
-        withItems: Joi.boolean().optional().default(false)
+        withItems: Joi.boolean().optional().default(false),
+        isShowMine: Joi.boolean().optional().default(false)
       }).prefs({ convert: true }),
       req.populatedQuery
     )
@@ -48,9 +49,11 @@ export const getReport = async (
     const foundReport = await database.report.findMany({
       where: {
         OR: orQuery?.length > 0 ? orQuery : undefined,
-        userId: req.user?.roles?.includes(ROLE.Admin)
-          ? ((req.populatedQuery?.userId as string) ?? undefined)
-          : req.user?.id
+        userId:
+          req.user?.roles?.includes(ROLE.Admin) &&
+          req.populatedQuery?.isShowMine == 'false'
+            ? ((req.populatedQuery?.userId as string) ?? undefined)
+            : req.user?.id
       },
       include: {
         reportItems: req.populatedQuery?.withItems == 'true' ? true : undefined
