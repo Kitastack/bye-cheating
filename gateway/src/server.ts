@@ -1,6 +1,7 @@
 import './config'
 import './config.logging'
 import http from 'http'
+import cors from 'cors'
 import express, { NextFunction, Request, Response } from 'express'
 import { checkAuthentication } from '@libs/jwt.lib'
 import { createProxyMiddleware } from 'http-proxy-middleware'
@@ -58,6 +59,11 @@ Application.use(
         proxyServer.on('proxyReq', customProxyForwarder)
       }
     ]
+  })
+)
+Application.use(
+  cors({
+    origin: '*'
   })
 )
 // todo: error handler
