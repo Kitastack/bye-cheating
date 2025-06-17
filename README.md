@@ -5,14 +5,14 @@ Integrated API system for cheating detection using CCTV, rtsp protocol and YOLOv
 ## Preview
 
 ![API image result](media/thumbnail.jpeg)
-![API record result](media/thumbnail.jpeg)
+![API record result](media/record.mp4)
 
 > Here is our demo
 
 - [API Demo](https://youtu.be/b1nFwKaM9lg)
 - [Demo](https://youtu.be/Jt4vekrCvrE)
 
-## Prasyarat
+## Requirements
 
 ### Hardware
 
@@ -24,16 +24,14 @@ Integrated API system for cheating detection using CCTV, rtsp protocol and YOLOv
 
 ### Packages
 
-- `node 18` or latest
+- `node 20` or latest
 - `python 3.12`
 - `ffmpeg`, could be downloaded at [official website](https://www.ffmpeg.org/download.html)
 - `ultralytics`, more detail docs [official website](https://docs.ultralytics.com/models/yolov7/)
 - `fastapi`, more detail docs [official website](https://fastapi.tiangolo.com/)
-- `nginx`, more detail docs [official website](https://www.docker.com/)
+- `minio`, more detail docs [official website](https://min.io/)
 - `redis`, more detail docs [official website](https://redis.io/)
 - `docker & docker compose`, more detail docs [official website](https://www.docker.com/)
-- `react.js`, more detail docs [official website](https://react.dev/)
-- `vite`, more detail docs [official website](https://vitejs.dev/)
 
 ## Installation
 
