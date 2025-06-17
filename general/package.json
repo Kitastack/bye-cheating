@@ -4,7 +4,8 @@
   "author": "dxxta",
   "license": "ISC",
   "prisma": {
-    "schema": "./prisma"
+    "schema": "./prisma",
+    "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {
     "dev": "NODE_ENV=development nodemon",
