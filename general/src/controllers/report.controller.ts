@@ -7,7 +7,7 @@ import { BadRequestError } from '@libs/error.lib'
 import { Request, Response, NextFunction } from 'express'
 import { randomUUID } from 'crypto'
 /**
- * [GET] Report data for logged user.
+ * [GET] Report data for logged user or admin.
  */
 export const getReport = async (
   req: Request,
@@ -224,7 +224,6 @@ export const updateReport = async (
       req.body
     )
     if (!req.isInternal) {
-      console.log('calculatedClass', req.body.calculatedClass)
       // todo: prevent outsider to update this field
       delete req.body.calculatedClass
     }

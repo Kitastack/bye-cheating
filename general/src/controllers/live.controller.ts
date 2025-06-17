@@ -142,7 +142,8 @@ export const updateLive = async (
       req.body.updatedDate = new Date()
       const live = await ctx.live.update({
         where: {
-          id: req.body.id
+          id: req.body.id,
+          userId: req.user?.id
         },
         data: expiryTimeInMinutes
           ? {
@@ -155,8 +156,8 @@ export const updateLive = async (
         data: {
           entityId: live.id,
           entityName: 'live',
-          fieldName: Object.keys(req.body).toString(),
-          fieldValue: JSON.stringify(req.body)
+          fieldName: Object.keys(live).toString(),
+          fieldValue: JSON.stringify(live)
         }
       })
       return live

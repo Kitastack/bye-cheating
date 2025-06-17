@@ -340,7 +340,7 @@ export const getUserListForAdmin = async (
   }
 }
 /**
- * [GET] get users notification.
+ * [GET] get logged user notification.
  */
 export const getNotification = async (
   req: Request,
@@ -364,7 +364,7 @@ export const getNotification = async (
   }
 }
 /**
- * [POST] create users notification.
+ * [POST] create notification for logged user.
  */
 export const createNotification = async (
   req: Request,
@@ -405,7 +405,7 @@ export const createNotification = async (
   }
 }
 /**
- * [GET] get users audit.
+ * [GET] get logged user or admin audit.
  */
 export const getAudit = async (
   req: Request,
@@ -437,7 +437,9 @@ export const getAudit = async (
               ]
             }
           : {}),
-        userId: req.user?.id
+        userId: req.user?.roles?.includes(ROLE.Admin)
+          ? ((req.populatedQuery?.userId as string) ?? undefined)
+          : req.user?.id
       },
       skip: req.page,
       take: req.limit
@@ -451,7 +453,7 @@ export const getAudit = async (
   }
 }
 /**
- * [POST] Users access token.
+ * [POST] refesh user access token.
  */
 export const createAccessToken = async (
   req: Request,
