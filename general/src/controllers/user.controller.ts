@@ -440,7 +440,8 @@ export const getAudit = async (
           : {}),
         userId:
           req.user?.roles?.includes(ROLE.Admin) &&
-          req.populatedQuery?.isShowMine == 'false'
+          (req.populatedQuery?.isShowMine == 'false' ||
+            req.populatedQuery?.isShowMine == undefined)
             ? ((req.populatedQuery?.userId as string) ?? undefined)
             : req.user?.id
       },

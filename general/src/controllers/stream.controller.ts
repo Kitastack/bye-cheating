@@ -147,10 +147,10 @@ export const deleteStream = async (
     ) {
       throw new BadRequestError(`stream with id ${streamId} not found`)
     }
-    const updatedStream = await database.$transaction(async (ctx) => {
+    await database.$transaction(async (ctx) => {
       const stream = await ctx.stream.update({
         where: {
-          id: req.body.id,
+          id: streamId,
           userId: req.user?.id // prevent
         },
         data: {
@@ -214,7 +214,8 @@ export const getStream = async (
         OR: orQuery?.length > 0 ? orQuery : undefined,
         userId:
           req.user?.roles?.includes(ROLE.Admin) &&
-          req.populatedQuery?.isShowMine == 'false'
+          (req.populatedQuery?.isShowMine == 'false' ||
+            req.populatedQuery?.isShowMine == undefined)
             ? ((req.populatedQuery?.userId as string) ?? undefined)
             : req.user?.id,
         inactive: req.user?.roles?.includes(ROLE.Admin)
