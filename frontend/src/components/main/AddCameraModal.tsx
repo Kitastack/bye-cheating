@@ -5,28 +5,21 @@ import { useState } from "react";
 interface AddCameraModalProps {
   opened: boolean;
   onClose: () => void;
-  onSubmit: (name: string, url: string) => void;
+  onSubmit: (url: string) => void;
 }
 interface AddCameraModalContentProps {
-  onSubmit: (name: string, url: string) => void;
+  onSubmit: (url: string) => void;
 }
 export function AddCameraModalContent(props: AddCameraModalContentProps) {
-  const [name, setName] = useState("");
   const [url, setUrl] = useState("");
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        props.onSubmit(name, url);
+        props.onSubmit( url);
       }}
     >
       <Stack>
-        <TextInput
-          name="Nama Kamera"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Tambahkan nama kamera"
-        />
         <TextInput
           name="URL Kamera"
           value={url}
@@ -43,10 +36,9 @@ export function AddCameraModal(props: AddCameraModalProps) {
   return (
     <Modal title="Tambah Kamera" opened={props.opened} onClose={props.onClose}>
       <AddCameraModalContent
-        onSubmit={(name,url) => {
-          props.onSubmit(name, url);
+        onSubmit={(url) => {
+          props.onSubmit(url);
           modals.closeAll();
-          
         }}
       />
     </Modal>

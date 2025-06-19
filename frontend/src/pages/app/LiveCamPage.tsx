@@ -12,14 +12,14 @@ import { imageStreamContext } from "@/components/context/ImageStreamContext";
 function MainView() {
   // const stream = useStreamSocket();
   const [showTable, setShowTable] = useState(false);
-  const { mlUrl, rawUrl } = useContext(
+  const { mlUrl, rawUrl, camName } = useContext(
     imageStreamContext
   ) as import("@/components/context/ImageStreamContext").IImageStreamContext;
   return (
     <>
       <Flex justify={"space-between"} w={"100%"}>
         <span className="flex flex-col">
-          <h1 className="text-xl font-bold">Nama Camera</h1>
+          <h1 className="text-xl font-bold">{camName ?? "Default"}</h1>
           <h3>Tanggal: 19 Februari 2024</h3>
         </span>
         <Card p={"xs"}>
@@ -49,6 +49,7 @@ function MainView() {
       </Flex>
       {showTable ? (
         <Table.ScrollContainer
+        minWidth={800}
           bd={"1px solid myColor.5"}
           className="w-full aspect-video"
         >

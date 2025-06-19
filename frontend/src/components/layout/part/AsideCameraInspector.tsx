@@ -2,55 +2,86 @@ import {
   Accordion,
   Divider,
   Flex,
-  Button,
   Card,
   Group,
   ActionIcon,
   Text,
-  Center,
-  Menu,
+  Stack,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
-import { IconPlus, IconDotsVertical } from "@tabler/icons-react";
+import {
+  IconPlayerPlay,
+  IconPlus,
+  IconRefresh,
+} from "@tabler/icons-react";
 import { AddCameraModalContent } from "../../main/AddCameraModal";
 import { useContext, useEffect, useState } from "react";
 import { useCameraManagement } from "@/hooks/useCameraManagement";
-import { IImageStreamContext, imageStreamContext, useImageStream } from "@/components/context/ImageStreamContext";
+import { IImageStreamContext, imageStreamContext } from "@/components/context/ImageStreamContext";
 
-interface CameraListItem {
-  name: string;
+function CameraItem({
+  url,
+  streamId,
+  onClick,
+  actionButtons,
+}: {
+  streamId: string;
   url: string;
-}
-
-function CameraItem({ name, url }: { name: string; url: string }) {
+  onClick: (url: string) => void;
+  actionButtons?: React.ReactNode;
+}) {
   return (
-    <Card padding={"xs"} radius={"sm"} withBorder>
+    <Card
+      padding={"xs"}
+      radius={"sm"}
+      withBorder
+      onClick={() => {
+        onClick(url);
+      }}
+      className="w-full cursor-pointer hover:bg-gray-100 transition-colors"
+    >
       <Group justify="space-between">
-        <Text fw={400} size="sm">
-          {name}
-        </Text>
-        <ActionIcon variant="subtle">
-          <IconDotsVertical />
-        </ActionIcon>
+        <Stack gap={0}>
+          <div className="text-gray-500 text-[8px]">{streamId}</div>
+          <Text fw={400} size="sm">
+            {url}
+          </Text>
+        </Stack>
+        {actionButtons}
       </Group>
     </Card>
   );
 }
 
 export function AsideCameraInspector() {
-  const { cameras, addCamera, removeCamera,syncCameras } = useCameraManagement();
-  const {setStreamUrl} = useContext(
-    imageStreamContext
-  ) as IImageStreamContext;
-  const [aInit, setAInit] = useState(true)
-  useEffect(()=> {
-    if(aInit) {
-      syncCameras()
-      setAInit(false)
+  const { cameras, addCamera, fetchCameras } = useCameraManagement();
+  const [aInit, setAInit] = useState(true);
+  const {setStreamUrl} = useContext(imageStreamContext) as IImageStreamContext;
+
+  useEffect(() => {
+    if (aInit) {
+      fetchCameras();
+      setAInit(false);
     }
-  },[])
+  }, []);
+
+  function handleAddCamera() {
+    modals.open({
+      title: "Tambah Kamera",
+      children: (
+        <AddCameraModalContent
+          onSubmit={(url) => {
+            addCamera(url);
+            fetchCameras();
+            modals.closeAll();
+          }}
+        />
+      ),
+    });
+  }
+
   return (
-    <div className="flex flex-col p-2 gap-2 w-full">
+    <div className="flex flex-col p-2 gap-2 w-full h-full">
       <Accordion variant="contained">
         <Accordion.Item value="metadata">
           <Accordion.Control>Metadata</Accordion.Control>
@@ -60,62 +91,53 @@ export function AsideCameraInspector() {
         </Accordion.Item>
       </Accordion>
       <Divider />
-
-      <Text fw={600}>Daftar Kamera</Text>
-      <Flex direction={"column"} gap={"md"}>
-        <Button
-          variant="outline"
-          style={{ borderStyle: "dashed", cursor: "pointer" }}
+      <Flex justify={"space-between"} align={"center"}>
+        <Text fw={600}>Daftar Kamera</Text>
+        <ActionIcon
+          variant="subtle"
           onClick={() => {
-            modals.open({
-              title: "Tambah Kamera",
-              children: (
-                <AddCameraModalContent
-                  onSubmit={(name, url) => {
-                    addCamera(name, url);
-                    modals.closeAll();
-                  }}
-                />
-              ),
-            });
+            fetchCameras();
           }}
-          radius={"sm"}
         >
-          <Flex align={"center"} justify={"center"}>
-            <IconPlus size={18} />
-            <Text size="sm">Add Camera</Text>
-          </Flex>
-        </Button>
+          <IconRefresh />
+        </ActionIcon>
+        <ActionIcon variant="filled" onClick={handleAddCamera}>
+          <IconPlus />
+        </ActionIcon>
+      </Flex>
+      <Flex
+        direction={"column"}
+        justify={"start"}
+        align={"center"}
+        gap={"md"}
+        className="flex-grow"
+      >
         {cameras.length > 0 ? (
           cameras.map((val, i) => (
-            <Card key={i} padding={"xs"} radius={"sm"} withBorder onClick={() => {
-              setStreamUrl(val.title,val.streamId,val.streamId)
-            }}>
-              <Group justify="space-between">
-                <Text fw={400} size="sm">
-                  {val.title}
-                </Text>
-                <Menu>
-                  <Menu.Target>
-                  <ActionIcon variant="subtle">
-                    <IconDotsVertical />
-                  </ActionIcon>
-                  </Menu.Target>
-                  <Menu.Dropdown>
-                    <Menu.Item
-                      onClick={() => {
-                        removeCamera(val.id);
-                      }}
-                    >
-                      Delete Camera
-                    </Menu.Item>
-                  </Menu.Dropdown>
-                </Menu>
-              </Group>
-            </Card>
+            <CameraItem
+              onClick={(url) => {
+                console.log("Selected URL:", url);
+              }}
+              url={val.url}
+              key={i}
+              streamId={val.id}
+              actionButtons={
+                <ActionIcon
+                  variant="subtle"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setStreamUrl(val.url, val.id);
+                  }}
+                >
+                  <IconPlayerPlay />
+                </ActionIcon>
+              }
+            />
           ))
         ) : (
-          <Center>kamera kosong</Center>
+          <div className="w-full h-full flex items-center justify-center">
+            kamera kosong
+          </div>
         )}
       </Flex>
     </div>
