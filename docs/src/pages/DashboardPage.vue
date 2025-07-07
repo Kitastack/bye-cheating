@@ -41,7 +41,9 @@ const utils = getCurrentInstance()?.proxy?.$utils
 const { userSigninData, userFullData, userAuditData, isConnectedToServer } = storeToRefs(userStore)
 
 const stateStreamData = ref<streamDataType[] | null>(null)
-const stateLiveData = ref<liveDataType[] | null>(null)
+const stateLiveStreamUrl = ref<string | null>(null)
+const stateLiveData = ref<liveDataType | null>(null)
+const stateLiveUrl = ref<string | null>(null)
 const stateSignin = reactive<{
   email: string | null
   password: string | null
@@ -201,22 +203,36 @@ async function onSubmitStream() {
 async function onSubmitLive() {
   try {
     loading.start()
-    // console.log(stream)
-    // if (!(await formStream.value.$validate())) {
-    //   throw new Error('Please fill url field')
-    // }
-    // await useApi('/stream').api.post('', {
-    //   url: stateStream.url,
-    // })
-    // await onGetStream()
-    // stateStream.url = null
-    // formStream.value.$reset()
+    if (!stateLiveStreamUrl.value) {
+      throw new Error('Please select a stream')
+    }
+    const stream = (await useApi('/stream').api.get('/'))?.data?.result?.find(
+      (item: any) => item?.url == stateLiveStreamUrl.value,
+    )
+    if (!stream) {
+      throw new Error('Stream not found')
+    }
+    // todo: check if live already available with the same stream id
+    stateLiveData.value = (
+      await useApi('/live').api.post('/', {
+        streamId: stream.id,
+        expiryTimeInMinutes: 1,
+      })
+    )?.data?.result
+    if (!stateLiveData.value) {
+      throw new Error('Live not found')
+    }
+    onPlayStream(stateLiveData.value)
   } catch (error: any) {
     loading.error()
     message.error(`${error?.data?.message ?? error?.message ?? error}`)
   } finally {
     loading.finish()
   }
+}
+async function onPlayStream(liveData: liveDataType) {
+  await useApi('/watch').api.get(`/live/${liveData.id}/extend-more-minutes`)
+  stateLiveUrl.value = `${import.meta.env.VITE_API}/watch/live/${liveData.id}`
 }
 
 onMounted(() => {
@@ -453,7 +469,7 @@ onMounted(() => {
                 <NInput
                   type="text"
                   v-model:value="stateStream.url"
-                  placeholder="rtsp://0.0.0.0:8554/live"
+                  placeholder="rtsp://0.0.0.0:8554/live or rtsp://host.docker.internal:8554/live"
                   :loading="loading.isLoading.value"
                   :disabled="loading.isLoading.value"
                 />
@@ -511,7 +527,9 @@ onMounted(() => {
         <NDivider><NText>Live Story</NText></NDivider>
         <NCard title="Streaming">
           <template #header-extra>
-            <NText>Status: {{ isConnectedToServer ? 'Connected' : 'Disconnected' }}</NText>
+            <NText
+              >Status: {{ isConnectedToServer ? 'Connected' : 'Disconnected' }} to Server</NText
+            >
           </template>
           <NBlockquote>
             <NText
@@ -531,6 +549,7 @@ onMounted(() => {
                   <NSelect
                     filterable
                     placeholder="Please select a stream"
+                    v-model:value="stateLiveStreamUrl"
                     :options="
                       stateStreamData?.map((item) => ({
                         label: item.url,
@@ -548,17 +567,24 @@ onMounted(() => {
                 </NInputGroup>
               </NFormItem>
 
-              <NImage
-                src=""
-                preview-disabled
-                :height="250"
-                :style="{
-                  width: '100%',
-                  background: 'black',
-                  borderRadius: ' 15px',
-                }"
-              >
-              </NImage>
+              <NFlex justify="center">
+                <NImage
+                  preview-disabled
+                  :src="stateLiveUrl ?? stateLiveStreamUrl ?? ''"
+                  :height="350"
+                  :img-props="{
+                    style: {
+                      margin: 'auto',
+                    },
+                  }"
+                  :style="{
+                    width: '100%',
+                    background: 'black',
+                    borderRadius: ' 15px',
+                  }"
+                >
+                </NImage>
+              </NFlex>
             </NSpace>
           </NForm>
         </NCard>

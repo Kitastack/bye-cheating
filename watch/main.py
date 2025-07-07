@@ -356,6 +356,17 @@ async def captureTask(
         rtsp_url = data["stream"]["url"]
         vs = VideoStream(src=rtsp_url).start()
 
+        if vs is None or vs.frame is None:
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: "
+                + image_type.encode("utf-8")
+                + b"\r\n\r\n"
+                + createTextImage(f"connection refused from {rtsp_url}")
+                + b"\r\n"
+            )
+            return
+
         while data.get("expiryTimeInMinutes") is None or time.time() < int(
             data.get("expiryTimeInMinutes")
         ):
@@ -376,14 +387,27 @@ async def captureTask(
             if frame is None or encoded_frame is None:
                 break
 
-            yield (
-                b"--frame\r\n"
-                b"Content-Type: "
-                + image_type.encode("utf-8")
-                + b"\r\n\r\n"
-                + encoded_frame
-                + b"\r\n"
-            )
+            if is_prediction_enabled and prediction:
+                yield (
+                    b"--frame\r\n"
+                    + b"Content-Type: "
+                    + image_type.encode("utf-8")
+                    + b"\r\n"
+                    + b"X-Prediction: "
+                    + prediction.encode("utf-8")
+                    + b"\r\n\r\n"
+                    + encoded_frame
+                    + b"\r\n"
+                )
+            else:
+                yield (
+                    b"--frame\r\n"
+                    b"Content-Type: "
+                    + image_type.encode("utf-8")
+                    + b"\r\n\r\n"
+                    + encoded_frame
+                    + b"\r\n"
+                )
 
         if int(time.time()) > int(data.get("expiryTimeInMinutes", 0)):
             yield (
@@ -396,8 +420,17 @@ async def captureTask(
                 )
                 + b"\r\n"
             )
-    except Exception as e:
+    except (Exception, ConnectionRefusedError) as e:
+        print("RTSP stream error:", e)
         traceback.print_exc()
+        yield (
+            b"--frame\r\n"
+            b"Content-Type: "
+            + image_type.encode("utf-8")
+            + b"\r\n\r\n"
+            + createTextImage(f"something is wrong {e}")
+            + b"\r\n"
+        )
         raise GeneratorExit
     finally:
         if vs is not None:
@@ -428,7 +461,7 @@ async def liveStream(
 @app.get("/live/{liveId}/extend-more-minutes")
 async def liveStream(request: Request, liveId: str):
     try:
-        if redis_client.exists(liveId) == False:
+        if (await redis_client.exists(liveId)) == False:
             raise Exception(f"your live with id {liveId} does not exist")
 
         liveData = await getRedisJson(rd=redis_client, key=liveId)

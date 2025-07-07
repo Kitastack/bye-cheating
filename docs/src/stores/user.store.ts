@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { useApi } from '@/composables/api'
 import { deleteCookie, getCookie, setCookie } from '@/composables/webstorage'
-import { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
@@ -63,12 +63,14 @@ export const useUserStore = defineStore('useUserStore', () => {
   }
   async function pingServerAction() {
     try {
-      await userApi.get('/ping')
+      await axios.get(`${import.meta.env.VITE_API}/ping`)
       isConnectedToServer.value = true
     } catch (error) {
+      console.log(error)
       if ((error as AxiosError)?.code == 'ERR_NETWORK') {
         isConnectedToServer.value = false
       }
+      throw error
     }
   }
   function signoutUserAction() {

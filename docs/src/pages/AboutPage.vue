@@ -22,21 +22,6 @@ import { VPdfViewer } from '@vue-pdf-viewer/viewer'
           <NCard>
             <NSpace :size="[25, 25]">
               <NAvatar
-                src="https://media.licdn.com/dms/image/v2/D5603AQHDhAMbz7Jcig/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1721964602907?e=1755734400&v=beta&t=pybjEL3cDmDLi9VlV2SERZ9-tjh4e-AfeY9OgkgpJ3I"
-                :size="150"
-                round
-              ></NAvatar>
-              <section>
-                <NText strong as="h1">Mochammad Dinta Alif Syaifuddin</NText>
-                <NText>Research author | Software Developer</NText>
-              </section>
-            </NSpace>
-          </NCard>
-        </NGridItem>
-        <NGridItem span="2 l:1">
-          <NCard>
-            <NSpace :size="[25, 25]">
-              <NAvatar
                 src="https://media.licdn.com/dms/image/v2/D5603AQFBryTypX5dXA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1716430202272?e=1755734400&v=beta&t=4XNxx9AHzYox-NbUxsgD8B3Rao_9NOiCca4WPkujJng"
                 :size="150"
                 round
@@ -74,6 +59,21 @@ import { VPdfViewer } from '@vue-pdf-viewer/viewer'
               <section>
                 <NText strong as="h1">Ramaditia Dwiyansaputra</NText>
                 <NText>AI Expert | Assistant Professor & Lecturer at University of Mataram</NText>
+              </section>
+            </NSpace>
+          </NCard>
+        </NGridItem>
+        <NGridItem span="2 l:1">
+          <NCard>
+            <NSpace :size="[25, 25]">
+              <NAvatar
+                src="https://media.licdn.com/dms/image/v2/D5603AQHDhAMbz7Jcig/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1721964602907?e=1755734400&v=beta&t=pybjEL3cDmDLi9VlV2SERZ9-tjh4e-AfeY9OgkgpJ3I"
+                :size="150"
+                round
+              ></NAvatar>
+              <section>
+                <NText strong as="h1">Mochammad Dinta Alif Syaifuddin</NText>
+                <NText>Research author | Software Developer</NText>
               </section>
             </NSpace>
           </NCard>

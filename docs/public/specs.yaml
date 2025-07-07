@@ -27214,8 +27214,14 @@ paths:
 
         The response will return multipart/x-mixed-replace; boundary=frame as
         jpeg streaming
+            
+        ### Custom Headers
+              
+        - `X-Prediction`: Only included if prediction is enabled. It contains a JSON string representing the predicted classes for each frame.
       security:
         - noauthAuth: []
+      header:
+        - X-Prediction: JSON string of classess predict (only if prediction enabled)
       responses:
         '200':
           description: Stream of JPEG frames using multipart/x-mixed-replace (MJPEG)
@@ -27224,6 +27230,11 @@ paths:
               schema:
                 type: string
                 format: binary
+          headers:
+            X-Prediction:
+              description: JSON string of predicted classes (only if prediction is enabled).
+              schema:
+                type: string
   /watch/live/a1639423-d665-4e64-9ce6-579ed51c1e82/extend-more-minutes:
     get:
       tags:

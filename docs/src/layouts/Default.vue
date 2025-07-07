@@ -93,7 +93,7 @@ watch(
 )
 
 onMounted(() => {
-  userStore.pingServerAction().finally(() => {
+  userStore.pingServerAction().catch(() => {
     message.loading(
       () =>
         h(NFlex, { align: 'center' }, [
