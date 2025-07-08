@@ -22,6 +22,7 @@ import {
   NImage,
   NSelect,
   NInputGroup,
+  useThemeVars,
 } from 'naive-ui'
 import { required, email, minLength, helpers } from '@vuelidate/validators'
 import { getCurrentInstance, onMounted, reactive, ref } from 'vue'
@@ -37,13 +38,27 @@ const mode = import.meta.env.MODE
 const message = useMessage()
 const userStore = useUserStore()
 const loading = useCustomLoading()
+const theme = useThemeVars()
 const utils = getCurrentInstance()?.proxy?.$utils
 const { userSigninData, userFullData, userAuditData, isConnectedToServer } = storeToRefs(userStore)
 
+const imageLiveRef = ref<HTMLImageElement | null>(null)
 const stateStreamData = ref<streamDataType[] | null>(null)
 const stateLiveStreamUrl = ref<string | null>(null)
 const stateLiveData = ref<liveDataType | null>(null)
+const stateLiveIsPlaying = ref<boolean>(true)
+const stateLiveIsPrediction = ref<boolean>(false)
 const stateLiveUrl = ref<string | null>(null)
+const stateLiveResponse = ref<EventSource | null>(null)
+const stateLiveDataResponse = ref<
+  | {
+      success: boolean
+      result: string
+      message?: string
+      prediction?: any
+    }[]
+  | null
+>(null)
 const stateSignin = reactive<{
   email: string | null
   password: string | null
@@ -206,19 +221,34 @@ async function onSubmitLive() {
     if (!stateLiveStreamUrl.value) {
       throw new Error('Please select a stream')
     }
-    const stream = (await useApi('/stream').api.get('/'))?.data?.result?.find(
-      (item: any) => item?.url == stateLiveStreamUrl.value,
-    )
+    const stream =
+      (
+        await useApi('/stream').api.get('/', {
+          params: {
+            url: stateLiveStreamUrl.value,
+          },
+        })
+      )?.data?.result?.[0] ?? null
     if (!stream) {
       throw new Error('Stream not found')
     }
     // todo: check if live already available with the same stream id
-    stateLiveData.value = (
-      await useApi('/live').api.post('/', {
-        streamId: stream.id,
-        expiryTimeInMinutes: 1,
-      })
-    )?.data?.result
+    stateLiveData.value =
+      (
+        await useApi('/live').api.get('/', {
+          params: {
+            streamId: stream.id,
+          },
+        })
+      )?.data?.result?.[0] ?? null
+    if (!stateLiveData.value) {
+      stateLiveData.value = (
+        await useApi('/live').api.post('/', {
+          streamId: stream.id,
+          expiryTimeInMinutes: 1,
+        })
+      )?.data?.result
+    }
     if (!stateLiveData.value) {
       throw new Error('Live not found')
     }
@@ -230,11 +260,35 @@ async function onSubmitLive() {
     loading.finish()
   }
 }
-async function onPlayStream(liveData: liveDataType) {
+async function onPlayStream(
+  liveData: liveDataType,
+  isPrediction: boolean = stateLiveIsPrediction.value,
+) {
+  // todo: extend time first
   await useApi('/watch').api.get(`/live/${liveData.id}/extend-more-minutes`)
-  stateLiveUrl.value = `${import.meta.env.VITE_API}/watch/live/${liveData.id}`
-}
+  // live
+  if (stateLiveResponse.value?.CONNECTING != undefined) {
+    stateLiveResponse.value.close()
+  }
+  stateLiveResponse.value = new EventSource(
+    `${import.meta.env.VITE_API}/watch/live/${liveData.id}?json=true&prediction=${isPrediction}`,
+  )
+  stateLiveDataResponse.value = []
+  stateLiveResponse.value.onmessage = (event) => {
+    const data = JSON.parse(event.data)
+    if (data.success === false) {
+      message.error(data.message)
+      stateLiveIsPlaying.value = false
+    }
+    stateLiveUrl.value = data?.result ?? null
+    stateLiveDataResponse.value?.push(data)
+  }
 
+  stateLiveResponse.value.onerror = (err) => {
+    console.error('SSE connection error', err)
+    stateLiveResponse.value?.close()
+  }
+}
 onMounted(() => {
   userStore.loadSigninAction().then(() => {
     if (userSigninData.value?.email) {
@@ -252,10 +306,8 @@ onMounted(() => {
   <NSpace vertical size="large">
     <NBlockquote>
       <NText
-        >Byecheating API is an integrated system cheating detection through RTSP protocol. It
-        enables live streaming analysis, frame-level predictions, and storage of activity reports.
-        This API is part of a system built to track, monitor, and record suspicious behavior during
-        remote sessions.<br /><br />On this page, you can walkthrough the features<br
+        >This API is part of a system built to track, monitor, and record suspicious behavior during
+        remote sessions through RTSP protocol. On this page, you can walkthrough the features<br
       /></NText>
     </NBlockquote>
     <NDivider><NText>Authentication Story</NText></NDivider>
@@ -567,7 +619,45 @@ onMounted(() => {
                 </NInputGroup>
               </NFormItem>
 
-              <NFlex justify="center">
+              <div
+                class="stream-container"
+                :style="{
+                  backgroundColor: theme.placeholderColorDisabled,
+                }"
+              >
+                <div class="stream-video">
+                  <img
+                    :src="stateLiveUrl"
+                    v-if="stateLiveUrl && stateLiveIsPlaying"
+                    class="stream-frame"
+                  />
+                  <div v-else class="stream-placeholder">⏸ Stream Paused</div>
+                </div>
+
+                <div v-if="stateLiveData?.id" class="stream-controls">
+                  <button
+                    @click="
+                      () => {
+                        stateLiveIsPlaying = !stateLiveIsPlaying
+                      }
+                    "
+                  >
+                    {{ stateLiveIsPlaying ? '⏸' : '▶️' }}
+                  </button>
+                  <button
+                    @click="
+                      () => {
+                        stateLiveIsPrediction = !stateLiveIsPrediction
+                        onPlayStream(stateLiveData!)
+                      }
+                    "
+                  >
+                    {{ stateLiveIsPrediction ? '🧠 Prediction On' : '❌ Prediction Off' }}
+                  </button>
+                  <button @click="onPlayStream(stateLiveData)">🔁</button>
+                </div>
+              </div>
+              <!-- <NFlex justify="center">
                 <NImage
                   preview-disabled
                   :src="stateLiveUrl ?? stateLiveStreamUrl ?? ''"
@@ -584,7 +674,7 @@ onMounted(() => {
                   }"
                 >
                 </NImage>
-              </NFlex>
+              </NFlex> -->
             </NSpace>
           </NForm>
         </NCard>
@@ -594,3 +684,60 @@ onMounted(() => {
     <NDivider><NText>Report Story</NText></NDivider> -->
   </NSpace>
 </template>
+<style scoped>
+.stream-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stream-video {
+  width: 100%;
+  max-width: 960px;
+  min-height: 540px;
+  position: relative; /* 👈 required to contain absolutely positioned controls */
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stream-frame {
+  width: 100%;
+  object-fit: contain;
+  border: 2px solid #444;
+}
+
+.stream-placeholder {
+  color: white;
+  font-size: 2rem;
+}
+
+/* 🧩 OVERLAYED CONTROLS */
+.stream-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 30, 30, 0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  gap: 0.75rem;
+  z-index: 10;
+}
+
+.stream-controls button {
+  background: #1e1e1e;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.stream-controls button:hover {
+  background: #333;
+}
+</style>

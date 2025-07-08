@@ -19,7 +19,7 @@ export const useApi = (path: string = '') => {
   })
   const signoutAction = () => {
     setTimeout(() => {
-      // userStore.signoutUserAction()
+      userStore.signoutUserAction()
     }, 1000)
   }
   const onErrorResponse = (retry: AxiosInstance) => async (error: any) => {
