@@ -29,6 +29,7 @@ import numpy as np
 import subprocess
 import traceback
 import tempfile
+import textwrap
 import asyncio
 import uvicorn
 import base64
@@ -38,6 +39,7 @@ import math
 import json
 import cv2
 import io
+import os
 
 
 async def run_tomorrow(task_fn, *args, **kwargs):
@@ -82,17 +84,27 @@ minio_client = Minio(
 )
 redis_client = redis.from_url(url=settings.redis_url, decode_responses=True)
 model = YOLO(settings.path_model)
-image_type = "image/jpeg"
+image_format_type = "jpeg"
+image_type = f"image/{image_format_type}"
 video_type = "video/mp4"
 fourcc_format = "mp4v"
-image_format = ".jpeg"
+image_format = f".{image_format_type}"
 video_format = ".mp4"
 default_fps = 30
 app = FastAPI(lifespan=lifespan)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FONT_PATH = os.path.join(BASE_DIR, "font", "PlusJakartaSans-Regular.ttf")
 
 # middlewares
 app.add_middleware(CorrelationIdMiddleware)  # add extra corrlation id for every request
 app.add_middleware(CORSMiddleware, allow_origins="*")
+
+
+@app.exception_handler(JSONException)
+async def json_exception_handler(request: Request, exc: JSONException):
+    return JSONResponse(
+        status_code=exc.statusCode, content={"success": False, "message": exc.message}
+    )
 
 
 # app
@@ -223,13 +235,13 @@ def resizeImage(frame, width: int = None, height: int = None):
 
 
 def createTextImage(
-    text,
+    text="put your text here",
     width=1920,
     height=1080,
     bg_color="black",
     text_color="white",
-    font_path=None,
-    font_size=250,
+    font_path=FONT_PATH,
+    font_size=50,
 ):
     img = Image.new("RGB", (width, height), color=bg_color)
     draw = ImageDraw.Draw(img)
@@ -339,32 +351,58 @@ async def captureFrameTask(vs: VideoStream):
 
 
 async def captureTask(
-    id: str, width: int | None, height: int | None, is_prediction_enabled: bool = False
+    id: str,
+    width: int | None,
+    height: int | None,
+    is_prediction_enabled: bool = False,
+    is_returned_as_json: bool = False,
 ):
     data = await getRedisJson(rd=redis_client, key=id)
     if data is None:
-        yield (
-            b"--frame\r\n"
-            b"Content-Type: "
-            + image_type.encode("utf-8")
-            + b"\r\n\r\n"
-            + createTextImage("your live session is invalid")
-            + b"\r\n"
-        )
+        message_str = "your live session is invalid"
+        text_image = createTextImage(message_str)
+        if is_returned_as_json == True:
+            image_base64 = base64.b64encode(text_image).decode("utf-8")
+            obj = {
+                "message": message_str,
+                "success": False,
+                "result": f"data:image/jpeg;base64,{image_base64}",
+            }
+            yield json.dumps(obj) + "\n"
+        else:
+            yield (
+                b"--frame\r\n"
+                + b"Content-Type: "
+                + image_type.encode("utf-8")
+                + b"\r\n\r\n"
+                + createTextImage(message_str)
+                + b"\r\n"
+            )
         return
     try:
-        rtsp_url = data["stream"]["url"]
+        rtsp_url = "rtsp://localhost:8554/live"  # data["stream"]["url"]
         vs = VideoStream(src=rtsp_url).start()
 
         if vs is None or vs.frame is None:
-            yield (
-                b"--frame\r\n"
-                b"Content-Type: "
-                + image_type.encode("utf-8")
-                + b"\r\n\r\n"
-                + createTextImage(f"connection refused from {rtsp_url}")
-                + b"\r\n"
-            )
+            message_str = f"connection refused from {rtsp_url}"
+            text_image = createTextImage(message_str)
+            if is_returned_as_json == True:
+                image_base64 = base64.b64encode(text_image).decode("utf-8")
+                obj = {
+                    "message": message_str,
+                    "success": False,
+                    "result": f"data:image/jpeg;base64,{image_base64}",
+                }
+                yield json.dumps(obj) + "\n"
+            else:
+                yield (
+                    b"--frame\r\n"
+                    + b"Content-Type: "
+                    + image_type.encode("utf-8")
+                    + b"\r\n\r\n"
+                    + createTextImage(message_str)
+                    + b"\r\n"
+                )
             return
 
         while data.get("expiryTimeInMinutes") is None or time.time() < int(
@@ -379,7 +417,7 @@ async def captureTask(
             if expiry is not None and int(time.time()) > int(expiry):
                 break
 
-            if is_prediction_enabled:
+            if is_prediction_enabled == True:
                 frame, encoded_frame, prediction = await captureModelTask(vs)
             else:
                 frame, encoded_frame = await captureFrameTask(vs)
@@ -387,18 +425,20 @@ async def captureTask(
             if frame is None or encoded_frame is None:
                 break
 
-            if is_prediction_enabled and prediction:
-                yield (
-                    b"--frame\r\n"
-                    + b"Content-Type: "
-                    + image_type.encode("utf-8")
-                    + b"\r\n"
-                    + b"X-Prediction: "
-                    + prediction.encode("utf-8")
-                    + b"\r\n\r\n"
-                    + encoded_frame
-                    + b"\r\n"
-                )
+            if is_returned_as_json == True:
+                image_base64 = base64.b64encode(encoded_frame).decode("utf-8")
+                if is_prediction_enabled == True:
+                    obj = {
+                        "success": True,
+                        "prediction": prediction,
+                        "result": f"data:image/jpeg;base64,{image_base64}",
+                    }
+                else:
+                    obj = {
+                        "success": True,
+                        "result": f"data:image/jpeg;base64,{image_base64}",
+                    }
+                yield json.dumps(obj) + "\n"
             else:
                 yield (
                     b"--frame\r\n"
@@ -409,28 +449,49 @@ async def captureTask(
                     + b"\r\n"
                 )
 
-        if int(time.time()) > int(data.get("expiryTimeInMinutes", 0)):
+        message_str = (
+            "your live session has reached time limit. Reload to extend the limit"
+        )
+        text_image = createTextImage(message_str)
+        if is_returned_as_json == True:
+            image_base64 = base64.b64encode(text_image).decode("utf-8")
+            obj = {
+                "message": message_str,
+                "success": False,
+                "result": f"data:image/jpeg;base64,{image_base64}",
+            }
+            yield json.dumps(obj) + "\n"
+        else:
             yield (
                 b"--frame\r\n"
-                b"Content-Type: "
+                + b"Content-Type: "
                 + image_type.encode("utf-8")
                 + b"\r\n\r\n"
-                + createTextImage(
-                    "your live session has reached time limit. Reload to extend the limit"
-                )
+                + createTextImage(message_str)
                 + b"\r\n"
             )
     except (Exception, ConnectionRefusedError) as e:
+        message_str = "something is wrong. Try again later"
         print("RTSP stream error:", e)
         traceback.print_exc()
-        yield (
-            b"--frame\r\n"
-            b"Content-Type: "
-            + image_type.encode("utf-8")
-            + b"\r\n\r\n"
-            + createTextImage(f"something is wrong {e}")
-            + b"\r\n"
-        )
+        text_image = createTextImage(message_str)
+        if is_returned_as_json == True:
+            image_base64 = base64.b64encode(text_image).decode("utf-8")
+            obj = {
+                "message": message_str,
+                "success": False,
+                "result": f"data:image/jpeg;base64,{image_base64}",
+            }
+            yield json.dumps(obj) + "\n"
+        else:
+            yield (
+                b"--frame\r\n"
+                + b"Content-Type: "
+                + image_type.encode("utf-8")
+                + b"\r\n\r\n"
+                + createTextImage(message_str)
+                + b"\r\n"
+            )
         raise GeneratorExit
     finally:
         if vs is not None:
@@ -445,14 +506,30 @@ async def liveStream(
     width: int = None,
     height: int = None,
     prediction: bool = False,
+    json: bool = False,
 ):
     liveData = await getRedisJson(rd=redis_client, key=liveId)
     if liveData is not None and liveData.get("expiryTimeInMinutes") is None:
         liveData["expiryTimeInMinutes"] = int(time.time()) + 1 * 60
         await setRedisJson(rd=redis_client, key=liveId, value=liveData)
+
+    if json == True:
+        return StreamingResponse(
+            captureTask(
+                id=liveId,
+                is_prediction_enabled=prediction,
+                width=width,
+                height=height,
+                is_returned_as_json=json,
+            ),
+            media_type="text/event-stream",
+        )
     return StreamingResponse(
         captureTask(
-            id=liveId, is_prediction_enabled=prediction, width=width, height=height
+            id=liveId,
+            is_prediction_enabled=prediction,
+            width=width,
+            height=height,
         ),
         media_type="multipart/x-mixed-replace; boundary=frame",
     )
