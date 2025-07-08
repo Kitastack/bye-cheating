@@ -351,6 +351,7 @@ async def captureFrameTask(vs: VideoStream):
 
 
 async def captureTask(
+    request: Request,
     id: str,
     width: int | None,
     height: int | None,
@@ -408,6 +409,9 @@ async def captureTask(
         while data.get("expiryTimeInMinutes") is None or time.time() < int(
             data.get("expiryTimeInMinutes")
         ):
+            if await request.is_disconnected():
+                print("🔌 Client disconnected")
+                break
             # Run processing in parallel
             data = await getRedisJson(rd=redis_client, key=id)
             if data is None:
@@ -516,6 +520,7 @@ async def liveStream(
     if json == True:
         return StreamingResponse(
             captureTask(
+                request=request,
                 id=liveId,
                 is_prediction_enabled=prediction,
                 width=width,
@@ -526,6 +531,7 @@ async def liveStream(
         )
     return StreamingResponse(
         captureTask(
+            request=request,
             id=liveId,
             is_prediction_enabled=prediction,
             width=width,
