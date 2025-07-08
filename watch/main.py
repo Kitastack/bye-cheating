@@ -368,7 +368,7 @@ async def captureTask(
                 "success": False,
                 "result": f"data:image/jpeg;base64,{image_base64}",
             }
-            yield json.dumps(obj) + "\n"
+            yield f"data: {json.dumps(obj)}\n\n"
         else:
             yield (
                 b"--frame\r\n"
@@ -380,7 +380,7 @@ async def captureTask(
             )
         return
     try:
-        rtsp_url = "rtsp://localhost:8554/live"  # data["stream"]["url"]
+        rtsp_url = data["stream"]["url"]
         vs = VideoStream(src=rtsp_url).start()
 
         if vs is None or vs.frame is None:
@@ -393,7 +393,7 @@ async def captureTask(
                     "success": False,
                     "result": f"data:image/jpeg;base64,{image_base64}",
                 }
-                yield json.dumps(obj) + "\n"
+                yield f"data: {json.dumps(obj)}\n\n"
             else:
                 yield (
                     b"--frame\r\n"
@@ -438,7 +438,7 @@ async def captureTask(
                         "success": True,
                         "result": f"data:image/jpeg;base64,{image_base64}",
                     }
-                yield json.dumps(obj) + "\n"
+                yield f"data: {json.dumps(obj)}\n\n"
             else:
                 yield (
                     b"--frame\r\n"
@@ -460,7 +460,7 @@ async def captureTask(
                 "success": False,
                 "result": f"data:image/jpeg;base64,{image_base64}",
             }
-            yield json.dumps(obj) + "\n"
+            yield f"data: {json.dumps(obj)}\n\n"
         else:
             yield (
                 b"--frame\r\n"
@@ -482,7 +482,7 @@ async def captureTask(
                 "success": False,
                 "result": f"data:image/jpeg;base64,{image_base64}",
             }
-            yield json.dumps(obj) + "\n"
+            yield f"data: {json.dumps(obj)}\n\n"
         else:
             yield (
                 b"--frame\r\n"
