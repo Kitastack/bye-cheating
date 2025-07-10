@@ -6,6 +6,8 @@ export interface PluginInstance {
   appWindow: Window & typeof globalThis
   renderIcon: (icon: Component) => () => VNode
   safeJsonParse: (value: any) => any
+  secondsToClock: (seconds: number) => string
+  clockToSeconds: (clock: string) => number
   getQueryParam: (value: string) => string | null
   sleep: (ms: number) => Promise<void>
   onRedirectToNewWindow: (url: string) => void
@@ -31,6 +33,21 @@ export const utils: PluginInstance = {
     } catch {
       return value
     }
+  },
+  secondsToClock(seconds: number) {
+    const hrs = Math.floor(seconds / 3600)
+    const mins = Math.floor((seconds % 3600) / 60)
+    const secs = seconds % 60
+
+    return [
+      hrs.toString().padStart(2, '0'),
+      mins.toString().padStart(2, '0'),
+      secs.toString().padStart(2, '0'),
+    ].join(':')
+  },
+  clockToSeconds(clock: string): number {
+    const [hours, minutes, seconds] = clock.split(':').map(Number)
+    return hours * 3600 + minutes * 60 + seconds
   },
   getQueryParam(name: string) {
     const params = new URLSearchParams(window.location.search)

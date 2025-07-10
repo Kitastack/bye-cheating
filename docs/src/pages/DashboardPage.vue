@@ -23,16 +23,30 @@ import {
   NSelect,
   NInputGroup,
   useThemeVars,
+  NProgress,
+  NSpin,
+  NThing,
+  NScrollbar,
+  type ScrollbarProps,
+  NButtonGroup,
+  NPopconfirm,
 } from 'naive-ui'
+import {
+  IconMaximize,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconRefresh,
+  IconVideo,
+} from '@tabler/icons-vue'
 import { required, email, minLength, helpers } from '@vuelidate/validators'
-import { getCurrentInstance, onMounted, reactive, ref } from 'vue'
+import { getCurrentInstance, nextTick, onMounted, reactive, ref } from 'vue'
 import { useCustomLoading } from '@/composables/loading'
 import { useUserStore } from '@/stores/user.store'
-import { IconRefresh } from '@tabler/icons-vue'
+import { useThemeStore } from '@/stores/theme.store'
 import { useVuelidate } from '@vuelidate/core'
 import { storeToRefs } from 'pinia'
-import moment from 'moment'
 import { useApi } from '@/composables/api'
+import moment from 'moment'
 
 const mode = import.meta.env.MODE
 const message = useMessage()
@@ -40,16 +54,20 @@ const userStore = useUserStore()
 const loading = useCustomLoading()
 const theme = useThemeVars()
 const utils = getCurrentInstance()?.proxy?.$utils
+const themeStore = useThemeStore()
+const { isDarkTheme } = storeToRefs(themeStore)
 const { userSigninData, userFullData, userAuditData, isConnectedToServer } = storeToRefs(userStore)
 
-const imageLiveRef = ref<HTMLImageElement | null>(null)
+const imageLiveContainerRef = ref<HTMLDivElement | null>(null)
+const logsLiveContainerRef = ref<any | null>(null)
 const stateStreamData = ref<streamDataType[] | null>(null)
 const stateLiveStreamUrl = ref<string | null>(null)
 const stateLiveData = ref<liveDataType | null>(null)
-const stateLiveIsPlaying = ref<boolean>(true)
+const stateLiveIsPlaying = ref<boolean>(false)
 const stateLiveIsPrediction = ref<boolean>(false)
 const stateLiveUrl = ref<string | null>(null)
 const stateLiveResponse = ref<EventSource | null>(null)
+const stateLiveFullscreenToggle = ref<boolean>(false)
 const stateLiveDataResponse = ref<
   | {
       success: boolean
@@ -232,30 +250,32 @@ async function onSubmitLive() {
     if (!stream) {
       throw new Error('Stream not found')
     }
-    // todo: check if live already available with the same stream id
-    stateLiveData.value =
-      (
-        await useApi('/live').api.get('/', {
-          params: {
-            streamId: stream.id,
-          },
-        })
-      )?.data?.result?.[0] ?? null
-    if (!stateLiveData.value) {
-      stateLiveData.value = (
-        await useApi('/live').api.post('/', {
-          streamId: stream.id,
-          expiryTimeInMinutes: 1,
-        })
-      )?.data?.result
-    }
+    // @deprecated need to tracking their session
+    // // todo: check if live already available with the same stream id
+    // stateLiveData.value =
+    //   (
+    //     await useApi('/live').api.get('/', {
+    //       params: {
+    //         streamId: stream.id,
+    //       },
+    //     })
+    //   )?.data?.result?.[0] ?? null
+    // if (!stateLiveData.value) {
+    stateLiveData.value = (
+      await useApi('/live').api.post('/', {
+        streamId: stream.id,
+        expiryTimeInMinutes: 1,
+      })
+    )?.data?.result
+    // }
     if (!stateLiveData.value) {
       throw new Error('Live not found')
     }
-    onPlayStream(stateLiveData.value)
+    await onPlayStream(stateLiveData.value)
   } catch (error: any) {
     loading.error()
     message.error(`${error?.data?.message ?? error?.message ?? error}`)
+    throw error
   } finally {
     loading.finish()
   }
@@ -264,6 +284,7 @@ async function onPlayStream(
   liveData: liveDataType,
   isPrediction: boolean = stateLiveIsPrediction.value,
 ) {
+  loading.start()
   // todo: extend time first
   await useApi('/watch').api.get(`/live/${liveData.id}/extend-more-minutes`)
   // live
@@ -273,20 +294,52 @@ async function onPlayStream(
   stateLiveResponse.value = new EventSource(
     `${import.meta.env.VITE_API}/watch/live/${liveData.id}?json=true&prediction=${isPrediction}`,
   )
+  stateLiveIsPlaying.value = true
   stateLiveDataResponse.value = []
   stateLiveResponse.value.onmessage = (event) => {
     const data = JSON.parse(event.data)
     if (data.success === false) {
       message.error(data.message)
       stateLiveIsPlaying.value = false
+      stateLiveUrl.value = data?.result ?? null
     }
-    stateLiveUrl.value = data?.result ?? null
+    if (data?.prediction) {
+      data.prediction = JSON.parse(data.prediction)
+    }
+    if (stateLiveIsPlaying.value) {
+      stateLiveUrl.value = data?.result ?? null
+    }
+    if (logsLiveContainerRef.value?.$el) {
+      nextTick(() => {
+        const el = (
+          logsLiveContainerRef.value?.$el as HTMLElement
+        )?.nextElementSibling?.querySelector('.n-scrollbar-container')
+        if (el) {
+          el.scrollTop = el.scrollHeight
+        }
+      })
+    }
     stateLiveDataResponse.value?.push(data)
+    loading.finish()
   }
-
   stateLiveResponse.value.onerror = (err) => {
     console.error('SSE connection error', err)
     stateLiveResponse.value?.close()
+    stateLiveIsPlaying.value = false
+    stateLiveIsPrediction.value = false
+    loading.finish()
+  }
+  stateLiveResponse.value.onopen = () => {
+    stateLiveIsPlaying.value = true
+  }
+}
+function toggleFullscreen(el: HTMLElement) {
+  if (!document.fullscreenElement) {
+    el.requestFullscreen?.()
+    stateLiveFullscreenToggle.value = true
+  } else {
+    document.exitFullscreen?.()
+    stateLiveFullscreenToggle.value = false
   }
 }
 onMounted(() => {
@@ -299,6 +352,18 @@ onMounted(() => {
         stateUserEdit.name = userFullData.value.name
       }
     })
+  })
+  document.addEventListener('fullscreenchange', () => {
+    const isFullscreen = document.fullscreenElement !== null
+    if (!isFullscreen && imageLiveContainerRef) {
+      // Wait a bit to ensure layout is stable before scrolling
+      nextTick(() => {
+        const el = imageLiveContainerRef.value as HTMLElement
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        }
+      })
+    }
   })
 })
 </script>
@@ -447,6 +512,8 @@ onMounted(() => {
         >
       </NGridItem>
     </NGrid>
+    <!-- <NGrid cols="1 l:2" responsive="screen" x-gap="20" y-gap="10"> -->
+    <!-- <NGridItem> -->
     <section v-if="userFullData?.id">
       <NSpace vertical size="large">
         <NDivider><NText>User Story</NText></NDivider>
@@ -618,126 +685,101 @@ onMounted(() => {
                   >
                 </NInputGroup>
               </NFormItem>
-
+              <NText>[Live ID]: {{ stateLiveData?.id ?? '-' }}</NText>
               <div
-                class="stream-container"
+                ref="imageLiveContainerRef"
                 :style="{
+                  position: 'relative',
                   backgroundColor: theme.placeholderColorDisabled,
+                  borderRadius: '15px',
+                  overflow: 'hidden',
                 }"
               >
-                <div class="stream-video">
-                  <img
-                    :src="stateLiveUrl"
-                    v-if="stateLiveUrl && stateLiveIsPlaying"
-                    class="stream-frame"
-                  />
-                  <div v-else class="stream-placeholder">⏸ Stream Paused</div>
-                </div>
-
-                <div v-if="stateLiveData?.id" class="stream-controls">
-                  <button
-                    @click="
-                      () => {
-                        stateLiveIsPlaying = !stateLiveIsPlaying
-                      }
-                    "
-                  >
-                    {{ stateLiveIsPlaying ? '⏸' : '▶️' }}
-                  </button>
-                  <button
-                    @click="
-                      () => {
-                        stateLiveIsPrediction = !stateLiveIsPrediction
-                        onPlayStream(stateLiveData!)
-                      }
-                    "
-                  >
-                    {{ stateLiveIsPrediction ? '🧠 Prediction On' : '❌ Prediction Off' }}
-                  </button>
-                  <button @click="onPlayStream(stateLiveData)">🔁</button>
-                </div>
-              </div>
-              <!-- <NFlex justify="center">
-                <NImage
-                  preview-disabled
-                  :src="stateLiveUrl ?? stateLiveStreamUrl ?? ''"
-                  :height="350"
-                  :img-props="{
-                    style: {
-                      margin: 'auto',
-                    },
-                  }"
+                <div
                   :style="{
                     width: '100%',
-                    background: 'black',
-                    borderRadius: ' 15px',
+                    height: stateLiveFullscreenToggle ? '100vh' : 'auto',
+                    minHeight: '500px',
+                    position: 'relative',
+                    background: isDarkTheme ? theme.bodyColor : theme.actionColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }"
                 >
-                </NImage>
-              </NFlex> -->
+                  <img
+                    v-if="stateLiveUrl && stateLiveIsPlaying"
+                    :src="stateLiveUrl"
+                    :style="{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                    }"
+                  />
+                  <div v-else><IconVideo /></div>
+                </div>
+
+                <NFlex
+                  gap="large"
+                  justify="space-between"
+                  :style="{
+                    width: '100%',
+                    position: 'absolute',
+                    boxSizing: 'border-box',
+                    padding: '0.5rem',
+                    left: 0,
+                    bottom: 0,
+                    background: `rgba(30, 30, 30, 0.2)`,
+                    zIndex: 10,
+                  }"
+                >
+                  <NFlex>
+                    <NButton
+                      type="primary"
+                      @click="
+                        () => {
+                          stateLiveIsPlaying = !stateLiveIsPlaying
+                        }
+                      "
+                    >
+                      <IconPlayerPlay v-if="stateLiveIsPlaying" />
+                      <IconPlayerPause v-else />
+                    </NButton>
+                    <NButton
+                      type="primary"
+                      @click="
+                        () => {
+                          if (stateLiveData) {
+                            onPlayStream(stateLiveData)
+                          }
+                        }
+                      "
+                      ><IconRefresh
+                    /></NButton>
+                    <NButton
+                      type="primary"
+                      @click="
+                        () => {
+                          stateLiveIsPrediction = !stateLiveIsPrediction
+                          onPlayStream(stateLiveData!)
+                        }
+                      "
+                    >
+                      {{ stateLiveIsPrediction ? 'Prediction: [On]' : 'Prediction: [Off]' }}
+                    </NButton>
+                  </NFlex>
+                  <NButton
+                    type="primary"
+                    @click="toggleFullscreen(imageLiveContainerRef as HTMLElement)"
+                  >
+                    <IconMaximize />
+                  </NButton>
+                </NFlex>
+              </div>
             </NSpace>
           </NForm>
         </NCard>
       </NSpace>
     </section>
-    <!-- <NDivider><NText>Stream Story</NText></NDivider>
-    <NDivider><NText>Report Story</NText></NDivider> -->
   </NSpace>
 </template>
-<style scoped>
-.stream-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.stream-video {
-  width: 100%;
-  max-width: 960px;
-  min-height: 540px;
-  position: relative; /* 👈 required to contain absolutely positioned controls */
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.stream-frame {
-  width: 100%;
-  object-fit: contain;
-  border: 2px solid #444;
-}
-
-.stream-placeholder {
-  color: white;
-  font-size: 2rem;
-}
-
-/* 🧩 OVERLAYED CONTROLS */
-.stream-controls {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(30, 30, 30, 0.7);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  display: flex;
-  gap: 0.75rem;
-  z-index: 10;
-}
-
-.stream-controls button {
-  background: #1e1e1e;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.95rem;
-}
-
-.stream-controls button:hover {
-  background: #333;
-}
-</style>

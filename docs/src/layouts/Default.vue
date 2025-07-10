@@ -158,12 +158,7 @@ onMounted(() => {
               :render-icon="utils?.renderIcon(IconCode)"
               >API Docs</NButton
             >
-            <NButton
-              @click="() => router.push('/about')"
-              :render-icon="utils?.renderIcon(IconQuestionMark)"
-              icon-placement="right"
-              >About</NButton
-            >
+            <NButton @click="() => router.push('/about')" icon-placement="right">About</NButton>
             <NButton
               :render-icon="utils?.renderIcon(IconLink)"
               @click="

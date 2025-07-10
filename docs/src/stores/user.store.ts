@@ -66,7 +66,6 @@ export const useUserStore = defineStore('useUserStore', () => {
       await axios.get(`${import.meta.env.VITE_API}/ping`)
       isConnectedToServer.value = true
     } catch (error) {
-      console.log(error)
       if ((error as AxiosError)?.code == 'ERR_NETWORK') {
         isConnectedToServer.value = false
       }
