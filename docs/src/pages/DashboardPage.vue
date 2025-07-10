@@ -686,96 +686,151 @@ onMounted(() => {
                 </NInputGroup>
               </NFormItem>
               <NText>[Live ID]: {{ stateLiveData?.id ?? '-' }}</NText>
-              <div
-                ref="imageLiveContainerRef"
-                :style="{
-                  position: 'relative',
-                  backgroundColor: theme.placeholderColorDisabled,
-                  borderRadius: '15px',
-                  overflow: 'hidden',
-                }"
-              >
+              <NSpin :show="loading.isLoading.value">
+                <template #description> Loading... </template>
                 <div
+                  ref="imageLiveContainerRef"
                   :style="{
-                    width: '100%',
-                    height: stateLiveFullscreenToggle ? '100vh' : 'auto',
-                    minHeight: '500px',
                     position: 'relative',
-                    background: isDarkTheme ? theme.bodyColor : theme.actionColor,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    backgroundColor: theme.placeholderColorDisabled,
+                    borderRadius: '15px',
+                    overflow: 'hidden',
                   }"
                 >
-                  <img
-                    v-if="stateLiveUrl && stateLiveIsPlaying"
-                    :src="stateLiveUrl"
+                  <div
                     :style="{
                       width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
+                      height: stateLiveFullscreenToggle ? '100vh' : 'auto',
+                      minHeight: '500px',
+                      position: 'relative',
+                      background: isDarkTheme ? theme.bodyColor : theme.actionColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }"
-                  />
-                  <div v-else><IconVideo /></div>
-                </div>
+                  >
+                    <img
+                      v-if="stateLiveUrl"
+                      :src="stateLiveUrl"
+                      :style="{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                      }"
+                    />
+                    <div v-else><IconVideo /></div>
+                  </div>
 
-                <NFlex
-                  gap="large"
-                  justify="space-between"
-                  :style="{
-                    width: '100%',
-                    position: 'absolute',
-                    boxSizing: 'border-box',
-                    padding: '0.5rem',
-                    left: 0,
-                    bottom: 0,
-                    background: `rgba(30, 30, 30, 0.2)`,
-                    zIndex: 10,
-                  }"
-                >
-                  <NFlex>
-                    <NButton
-                      type="primary"
-                      @click="
-                        () => {
-                          stateLiveIsPlaying = !stateLiveIsPlaying
-                        }
-                      "
-                    >
-                      <IconPlayerPlay v-if="stateLiveIsPlaying" />
-                      <IconPlayerPause v-else />
-                    </NButton>
-                    <NButton
-                      type="primary"
-                      @click="
-                        () => {
-                          if (stateLiveData) {
-                            onPlayStream(stateLiveData)
+                  <NFlex
+                    gap="large"
+                    justify="space-between"
+                    :style="{
+                      width: '100%',
+                      position: 'absolute',
+                      boxSizing: 'border-box',
+                      padding: '0.5rem',
+                      left: 0,
+                      bottom: 0,
+                      background: `rgba(30, 30, 30, 0.2)`,
+                      zIndex: 10,
+                    }"
+                  >
+                    <NFlex>
+                      <NButton
+                        type="primary"
+                        @click="
+                          () => {
+                            if (stateLiveData && stateLiveIsPlaying) {
+                              stateLiveIsPlaying = !stateLiveIsPlaying
+                            } else if (stateLiveData && !stateLiveIsPlaying) {
+                              onPlayStream(stateLiveData)
+                            } else {
+                              onSubmitLive()
+                            }
                           }
-                        }
-                      "
-                      ><IconRefresh
-                    /></NButton>
+                        "
+                      >
+                        <IconPlayerPause v-if="stateLiveIsPlaying" />
+                        <IconPlayerPlay v-else />
+                      </NButton>
+                      <NButton
+                        :disabled="!stateLiveIsPlaying && !stateLiveData"
+                        type="primary"
+                        @click="
+                          () => {
+                            if (stateLiveData) {
+                              onPlayStream(stateLiveData)
+                            } else {
+                              onSubmitLive()
+                            }
+                          }
+                        "
+                        ><IconRefresh
+                      /></NButton>
+                      <NButton
+                        :disabled="!stateLiveIsPlaying"
+                        type="primary"
+                        @click="
+                          () => {
+                            if (stateLiveData) {
+                              onPlayStream(stateLiveData, !stateLiveIsPrediction)
+                            }
+                          }
+                        "
+                      >
+                        {{ stateLiveIsPrediction ? 'Prediction: [On]' : 'Prediction: [Off]' }}
+                      </NButton>
+                    </NFlex>
                     <NButton
                       type="primary"
-                      @click="
-                        () => {
-                          stateLiveIsPrediction = !stateLiveIsPrediction
-                          onPlayStream(stateLiveData!)
-                        }
-                      "
+                      @click="toggleFullscreen(imageLiveContainerRef as HTMLElement)"
                     >
-                      {{ stateLiveIsPrediction ? 'Prediction: [On]' : 'Prediction: [Off]' }}
+                      <IconMaximize />
                     </NButton>
                   </NFlex>
-                  <NButton
-                    type="primary"
-                    @click="toggleFullscreen(imageLiveContainerRef as HTMLElement)"
+                </div>
+              </NSpin>
+
+              <NScrollbar
+                v-if="stateLiveDataResponse"
+                ref="logsLiveContainerRef"
+                :style="{
+                  maxHeight: '250px',
+                  borderRadius: '15px',
+                  overflow: 'hidden',
+                  backgroundColor: isDarkTheme ? theme.bodyColor : theme.placeholderColorDisabled,
+                }"
+              >
+                <NList hoverable>
+                  <NListItem
+                    v-for="(
+                      stateLiveDataResponseItem, stateLiveDataResponseIdx
+                    ) in stateLiveDataResponse"
+                    :key="stateLiveDataResponseIdx"
+                    @click="
+                      () => {
+                        stateLiveUrl = stateLiveDataResponseItem.result
+                      }
+                    "
                   >
-                    <IconMaximize />
-                  </NButton>
-                </NFlex>
-              </div>
+                    <NThing :title="`Frame ${utils?.secondsToClock(stateLiveDataResponseIdx + 1)}`">
+                      <template #description>
+                        <NText v-if="!stateLiveDataResponseItem.prediction"
+                          >Non prediction frame</NText
+                        >
+                        <NText v-else>{{
+                          stateLiveDataResponseItem.prediction
+                            ?.map(
+                              (predictionItem: any) =>
+                                `[${predictionItem.track_id}]: ${predictionItem.name}`,
+                            )
+                            ?.join(', ')
+                        }}</NText>
+                      </template>
+                    </NThing>
+                  </NListItem>
+                </NList>
+              </NScrollbar>
             </NSpace>
           </NForm>
         </NCard>
