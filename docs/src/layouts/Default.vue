@@ -173,7 +173,7 @@ onMounted(() => {
       </NCard>
       <NAlert type="warning">
         <NText
-          >This Intended for academic research, so please be certain that you do not disclose any
+          >This intended for academic research, so please be certain that you do not disclose any
           sensitive information here!
         </NText>
       </NAlert>

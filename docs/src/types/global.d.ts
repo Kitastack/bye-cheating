@@ -33,6 +33,7 @@ declare global {
     title: string
     description: string
     userId: string
+    status: string
     thumbnailUrl: string
     recordUrl: string
     expiryTimeInMinutes: number

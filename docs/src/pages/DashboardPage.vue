@@ -32,6 +32,7 @@ import {
   NPopconfirm,
   NCountdown,
   NIcon,
+  NA,
 } from 'naive-ui'
 import {
   IconMaximize,
@@ -44,6 +45,8 @@ import {
   IconPlayerRecordFilled,
   IconPlayerStop,
   IconPhotoX,
+  IconSearch,
+  IconArrowUpRight,
 } from '@tabler/icons-vue'
 import { required, email, minLength, helpers } from '@vuelidate/validators'
 import { getCurrentInstance, nextTick, onMounted, reactive, ref } from 'vue'
@@ -68,6 +71,8 @@ const themeStore = useThemeStore()
 const { isDarkTheme } = storeToRefs(themeStore)
 const { userSigninData, userFullData, userAuditData, isConnectedToServer } = storeToRefs(userStore)
 
+const reportSectionLoadingRef = ref<boolean>(false)
+const streamSectionLoadingRef = ref<boolean>(false)
 const userSectionRef = ref<InstanceType<typeof NSpace> | null>(null)
 const streamSectionRef = ref<InstanceType<typeof NSpace> | null>(null)
 const liveSectionRef = ref<InstanceType<typeof NSpace> | null>(null)
@@ -205,16 +210,15 @@ async function onSubmitEditUser() {
 }
 async function onGetStream() {
   try {
-    loading.start()
+    streamSectionLoadingRef.value = true
     const response = await useApi('/stream').api.get('')
     if (response.data.result) {
       stateStreamData.value = response.data.result
     }
   } catch (error: any) {
-    loading.error()
     message.error(`${error?.data?.message ?? error?.message ?? error}`)
   } finally {
-    loading.finish()
+    streamSectionLoadingRef.value = false
   }
 }
 async function onDeleteStream(stream: streamDataType) {
@@ -298,7 +302,6 @@ async function onSubmitLive(title?: string | null) {
     if (!stateLiveData.value) {
       throw new Error('Live not found')
     }
-    console.log(stateLiveData.value)
     await onPlayStream(stateLiveData.value)
   } catch (error: any) {
     loading.error()
@@ -371,21 +374,24 @@ function onStopStream() {
 }
 async function onFetchLive() {
   // need to concat stream data
-  const liveData = await useApi('/live').api.get('/')
+  const liveData = await useApi('/live').api.get('/', {
+    params: {
+      withStream: true,
+    },
+  })
   logsLiveData.value = liveData.data?.result ?? null
 }
 async function onGetReport() {
   try {
-    loading.start()
+    reportSectionLoadingRef.value = true
     const response = await useApi('/report').api.get('')
     if (response.data.result) {
       stateReportData.value = response.data.result
     }
   } catch (error: any) {
-    loading.error()
     message.error(`${error?.data?.message ?? error?.message ?? error}`)
   } finally {
-    loading.finish()
+    reportSectionLoadingRef.value = false
   }
 }
 function toggleFullscreen(el: HTMLElement) {
@@ -426,9 +432,9 @@ onMounted(() => {
 </script>
 <template>
   <NSpace vertical size="large">
-    <NAlert type="error">
+    <NAlert type="info">
       <NText
-        >This API is part of a system built to track, monitor, and record suspicious behavior during
+        >The API is part of a system built to track, monitor, and record suspicious behavior during
         remote sessions through RTSP protocol. On this page, you can walkthrough the features<br
       /></NText>
     </NAlert>
@@ -477,7 +483,7 @@ onMounted(() => {
                   }
                 "
                 :render-icon="utils?.renderIcon(IconRefresh)"
-                >Refresh data</NButton
+                >Refresh</NButton
               >
             </NFlex>
           </NSpace>
@@ -658,43 +664,50 @@ onMounted(() => {
                 </NSpace>
               </NForm>
             </NCard>
-            <NCard title="Stream Data">
-              <NList v-if="stateStreamData && stateStreamData?.length > 0" hoverable bordered>
-                <NListItem v-for="(item, itemIdx) in stateStreamData" :key="itemIdx">
-                  <NFlex justify="space-between" align="center">
-                    <NText
-                      ><strong>{{ item.url }}</strong></NText
-                    >
-                    <NSpace align="center">
-                      <NText>{{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText>
-                      <NButton
-                        :disabled="loading.isLoading.value"
-                        :loading="loading.isLoading.value"
-                        size="small"
-                        @click="
-                          () => {
-                            utils?.appWindow.navigator.clipboard
-                              .writeText(item.id)
-                              .then(() => message.success('ID copied'))
-                              .catch(() => message.error('Clipboard not supported'))
-                          }
-                        "
-                        >Copy ID</NButton
+            <NSpin :show="streamSectionLoadingRef">
+              <template #description> Loading... </template>
+              <NCard title="Stream Data">
+                <template #header-extra
+                  ><NButton @click="onGetStream"
+                    >Refresh<template #icon><IconRefresh /></template></NButton
+                ></template>
+                <NList v-if="stateStreamData && stateStreamData?.length > 0" hoverable bordered>
+                  <NListItem v-for="(item, itemIdx) in stateStreamData" :key="itemIdx">
+                    <NFlex justify="space-between" align="center">
+                      <NText
+                        ><strong>{{ item.url }}</strong></NText
                       >
-                      <NButton
-                        :disabled="loading.isLoading.value"
-                        :loading="loading.isLoading.value"
-                        size="small"
-                        type="error"
-                        @click="onDeleteStream(item)"
-                        >Delete</NButton
-                      >
-                    </NSpace>
-                  </NFlex>
-                </NListItem>
-              </NList>
-              <NEmpty v-else description="Logs not found" />
-            </NCard>
+                      <NSpace align="center">
+                        <NText>{{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText>
+                        <NButton
+                          :disabled="loading.isLoading.value"
+                          :loading="loading.isLoading.value"
+                          size="small"
+                          @click="
+                            () => {
+                              utils?.appWindow.navigator.clipboard
+                                .writeText(item.id)
+                                .then(() => message.success('ID copied'))
+                                .catch(() => message.error('Clipboard not supported'))
+                            }
+                          "
+                          >Copy ID</NButton
+                        >
+                        <NButton
+                          :disabled="loading.isLoading.value"
+                          :loading="loading.isLoading.value"
+                          size="small"
+                          type="error"
+                          @click="onDeleteStream(item)"
+                          >Delete</NButton
+                        >
+                      </NSpace>
+                    </NFlex>
+                  </NListItem>
+                </NList>
+                <NEmpty v-else description="Logs not found" />
+              </NCard>
+            </NSpin>
           </NSpace>
           <NSpace ref="liveSectionRef" vertical size="large">
             <NDivider><NText>Live Story</NText></NDivider>
@@ -798,6 +811,7 @@ onMounted(() => {
                       >
                         <NFlex>
                           <NButton
+                            circle
                             type="primary"
                             @click="
                               () => {
@@ -815,6 +829,7 @@ onMounted(() => {
                             <IconPlayerPlay v-else />
                           </NButton>
                           <NButton
+                            circle
                             :disabled="!stateLiveIsPlaying"
                             type="primary"
                             @click="
@@ -825,6 +840,7 @@ onMounted(() => {
                             ><IconPlayerStop />
                           </NButton>
                           <NButton
+                            circle
                             :disabled="!stateLiveIsPlaying && !stateLiveData"
                             type="primary"
                             @click="
@@ -854,6 +870,7 @@ onMounted(() => {
                           </NButton>
                         </NFlex>
                         <NButton
+                          circle
                           type="primary"
                           @click="toggleFullscreen(imageLiveContainerRef as HTMLElement)"
                         >
@@ -914,61 +931,68 @@ onMounted(() => {
           </NSpace>
           <NSpace ref="reportSectionRef" vertical size="large" @vue:mounted="onGetReport">
             <NDivider><NText>Report Story</NText></NDivider>
-            <NCard title="Report Data">
-              <NList v-if="stateReportData && stateReportData?.length > 0" hoverable bordered>
-                <NListItem v-for="(item, itemIdx) in stateReportData" :key="itemIdx">
-                  <NThing :title="item.title">
-                    <template #description>
-                      <NText>{{ item.description }}</NText>
-                    </template>
-                    <section>
-                      <NFlex>
-                        <NImage
-                          :src="item.thumbnailUrl"
-                          :width="100"
-                          style="background: black; border-radius: 15px"
-                        >
-                          <template #error>
-                            {{ item.thumbnailUrl ?? '-' }}
-                            <NIcon :size="100" color="lightGrey">
-                              <IconPhotoX />
-                            </NIcon> </template
-                        ></NImage>
-
-                        <NSpace size="large" vertical>
-                          <NText>[Record URL]: {{ item.recordUrl ?? '-' }}</NText>
-                          <NText
-                            >[Created]: {{ moment(item.createdDate).format('DD MMMM YYYY') }} ({{
-                              moment(item.createdDate).fromNow()
-                            }})</NText
+            <NSpin :show="reportSectionLoadingRef">
+              <template #description> Loading... </template>
+              <NCard title="Report Data">
+                <template #header-extra
+                  ><NButton @click="onGetReport"
+                    >Refresh<template #icon><IconRefresh /></template></NButton
+                ></template>
+                <NList v-if="stateReportData && stateReportData?.length > 0" hoverable bordered>
+                  <NListItem v-for="(item, itemIdx) in stateReportData" :key="itemIdx">
+                    <NThing :title="item.title">
+                      <template #header-extra>
+                        <NButton icon-placement="right"
+                          >Detail <template #icon><IconArrowUpRight /></template
+                        ></NButton>
+                      </template>
+                      <template #description>
+                        <NText>{{ item.description }}</NText>
+                      </template>
+                      <section>
+                        <NFlex>
+                          <NImage
+                            :src="item.thumbnailUrl"
+                            :width="150"
+                            style="background: black; border-radius: 15px"
                           >
-                          <!-- <NText
-                          :style="{
-                            color:
-                              item.calculatedClass == null && item.recordUrl != null
-                                ? 'red'
-                                : item.recordUrl
-                                  ? 'green'
-                                  : 'orange',
-                          }"
-                          >[Status]:
-                          {{
-                            item.calculatedClass == null && item.recordUrl != null
-                              ? 'Error'
-                              : item.recordUrl
-                                ? 'Done'
-                                : 'Progress'
-                          }}</NText
-                        > -->
-                          <!-- {{ item }} -->
-                        </NSpace>
-                      </NFlex>
-                    </section>
-                  </NThing>
-                </NListItem>
-              </NList>
-              <NEmpty v-else description="Report not found" />
-            </NCard>
+                            <template #error>
+                              {{ item.thumbnailUrl ?? '-' }}
+                              <NIcon :size="100" color="lightGrey">
+                                <IconPhotoX />
+                              </NIcon> </template
+                          ></NImage>
+
+                          <NSpace size="large" vertical>
+                            <NA v-if="item.recordUrl" :href="item.recordUrl" target="_blank"
+                              >[Record URL]: {{ item.recordUrl }}</NA
+                            >
+                            <NText
+                              >[Created]: {{ moment(item.createdDate).format('DD MMMM YYYY') }} ({{
+                                moment(item.createdDate).fromNow()
+                              }})</NText
+                            >
+                            <NText
+                              :style="{
+                                color:
+                                  item.status == 'error'
+                                    ? 'red'
+                                    : item.status == 'finished'
+                                      ? 'green'
+                                      : 'orange',
+                              }"
+                              >[Status]: {{ item.status }}</NText
+                            >
+                            <!-- {{ item }} -->
+                          </NSpace>
+                        </NFlex>
+                      </section>
+                    </NThing>
+                  </NListItem>
+                </NList>
+                <NEmpty v-else description="Report not found" />
+              </NCard>
+            </NSpin>
           </NSpace>
         </section>
       </NGridItem>

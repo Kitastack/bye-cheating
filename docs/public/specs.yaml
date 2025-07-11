@@ -2112,7 +2112,7 @@ paths:
         - **page** (integer, required): The page number for pagination. In this
         example, it is set to `1`.
             
-        - **isShowMine** (boolean, required): A flag indicating whether to show
+        - **createdBySelfOnly** (boolean, required): A flag indicating whether to show
         only the notifications related to the authenticated user. In this
         example, it is set to `true`.
             
@@ -2177,7 +2177,7 @@ paths:
           schema:
             type: integer
           example: '1'
-        - name: isShowMine
+        - name: createdBySelfOnly
           in: query
           schema:
             type: boolean
@@ -2827,7 +2827,7 @@ paths:
         - `isInactive` (optional): A boolean flag to filter streams that are
         inactive.
             
-        - `isShowMine` (optional): A boolean flag to indicate whether to show
+        - `createdBySelfOnly` (optional): A boolean flag to indicate whether to show
         streams owned by the requesting user.
             
         - `limit` (optional): The maximum number of results to return in the
@@ -4025,7 +4025,7 @@ paths:
         ### Request Parameters
 
 
-        - **isShowMine** (optional for admin): A boolean flag indicating whether
+        - **createdBySelfOnly** (optional for admin): A boolean flag indicating whether
         to show only the user's streams.
             
         - **id** (optional): The unique identifier for the stream.
@@ -4070,8 +4070,6 @@ paths:
                 
             - **updatedDate**: The date when the stream was last updated.
                 
-            - **isPredictionEnabled**: A boolean indicating if prediction is enabled for the stream.
-                
             - **reportId**: The identifier for any associated report.
                 
             - **expiryTimeInMinutes**: The time in minutes until the stream expires.
@@ -4086,8 +4084,7 @@ paths:
         "", "userId": "", "expiryDate": "", "createdDate": "", "updatedDate":
         null } \]}
             
-        3. { "success": true, "result": \[ { "id": "", "isPredictionEnabled":
-        true, "path": "", "streamId": "", "userId": "", "reportId": "",
+        3. { "success": true, "result": \[ { "id": "", "path": "", "streamId": "", "userId": "", "reportId": "",
         "expiryDate": null, "expiryTimeInMinutes": 0, "createdDate": "",
         "updatedDate": null } \]}
       security:
@@ -4220,7 +4217,6 @@ paths:
                     success: true
                     result:
                       - id: a1639423-d665-4e64-9ce6-579ed51c1e82
-                        isPredictionEnabled: false
                         path: /watch/live/a1639423-d665-4e64-9ce6-579ed51c1e82
                         streamId: b5f796dd-935f-431a-95b4-e7a04e5c55e8
                         userId: 78c01dd8-3f15-4bb5-b9fa-ee302625d3ac
@@ -4971,7 +4967,7 @@ paths:
         - `withItems` (optional): A flag indicating whether to include report
         items in the response.
             
-        - `isShowMine` (optional): A flag to show only reports created by the
+        - `createdBySelfOnly` (optional): A flag to show only reports created by the
         requesting user.
             
         - `page` (optional): The page number for pagination.
@@ -26280,8 +26276,6 @@ paths:
             
             - **id** (string): The unique identifier for the report.
                 
-            - **isPredictionEnabled** (boolean): Indicates if prediction features are enabled for the report.
-                
             - **path** (string): The path to the report.
                 
             - **streamId** (string): The ID of the stream associated with the report.
@@ -26362,7 +26356,6 @@ paths:
           "success": true,
           "result": {
             "id": "",
-            "isPredictionEnabled": true,
             "path": "",
             "streamId": "",
             "userId": "",
@@ -26519,7 +26512,6 @@ paths:
                 success: true
                 result:
                   id: a1639423-d665-4e64-9ce6-579ed51c1e82
-                  isPredictionEnabled: false
                   path: /watch/live/a1639423-d665-4e64-9ce6-579ed51c1e82
                   streamId: b5f796dd-935f-431a-95b4-e7a04e5c55e8
                   userId: 78c01dd8-3f15-4bb5-b9fa-ee302625d3ac
