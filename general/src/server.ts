@@ -14,6 +14,26 @@ import { corsHandler } from '@middlewares/header.middleware'
 import { loggingHandler } from '@middlewares/logging.middleware'
 import { pagination } from '@middlewares/pagination.middleware'
 import { errorHandler, notFoundHandler } from '@middlewares/page.middleware'
+import { notification } from '@xprisma/index'
+import { authenticateToken } from './libs/jwt.lib'
+
+type notificationSubscribersType = [Request, Response][]
+var notificationSubscribers: notificationSubscribersType = []
+var publishNotification = (data: notification) => {
+  notificationSubscribers.forEach((notificationSubscriber) => {
+    const [req, res] = notificationSubscriber
+    if (!req.user) return
+    if (req.user.id != data.userId) return
+    delete (data as any)?.user
+    res.write(`data: ${JSON.stringify(data)}\n\n`)
+  })
+}
+declare global {
+  var publishNotification: (data: notification) => void
+  var notificationSubscribers: notificationSubscribersType
+}
+globalThis.notificationSubscribers = notificationSubscribers
+globalThis.publishNotification = publishNotification
 
 export const Application = express()
 logging.log('Logging & configuration')
@@ -43,6 +63,23 @@ Application.get('/ping', (req: Request, res: Response) => {
     success: true
   })
 })
+Application.get(
+  '/subscribe-notification',
+  authenticateToken(),
+  (req: Request, res: Response) => {
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
+    res.flushHeaders() // need flush headers for establishment SSE with client
+    res.write(`: connected\n\n`)
+    notificationSubscribers.push([req, res])
+    req.on('close', () => {
+      notificationSubscribers = notificationSubscribers.filter(
+        (notificationSubscriber) => notificationSubscriber[0] !== req
+      )
+    })
+  }
+)
 Application.use(notFoundHandler)
 Application.use(errorHandler)
 logging.divider()
@@ -52,5 +89,6 @@ HttpServer.listen(PORT, () => {
   logging.log(`Server started on port ${PORT}`)
   logging.divider()
 })
+
 export const ShutdownServer = (callback: any) =>
   HttpServer && HttpServer.close(callback)

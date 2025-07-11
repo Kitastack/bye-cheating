@@ -380,7 +380,7 @@ export const createNotification = async (
         caption: Joi.string().optional(),
         entityId: Joi.string().uuid().optional(),
         entityName: Joi.string().optional(),
-        status: Joi.string().optional(),
+        type: Joi.string().optional(),
         title: Joi.string().required(),
         description: Joi.string().required()
       }).required(),
@@ -395,6 +395,7 @@ export const createNotification = async (
           id
         }
       })
+      publishNotification(result)
       res.status(StatusCodes.CREATED).json({
         success: true,
         result
