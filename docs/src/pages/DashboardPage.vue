@@ -775,7 +775,8 @@ onMounted(() => {
                             @click="
                               () => {
                                 if (stateLiveData) {
-                                  onPlayStream(stateLiveData, !stateLiveIsPrediction)
+                                  stateLiveIsPrediction = !stateLiveIsPrediction
+                                  onPlayStream(stateLiveData, stateLiveIsPrediction)
                                 }
                               }
                             "
