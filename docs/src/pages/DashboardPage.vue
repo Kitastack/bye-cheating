@@ -281,7 +281,7 @@ async function onSubmitLive(title?: string | null) {
       stateLiveData.value = (
         await useApi('/report').api.post('/', {
           title,
-          description: `Record for stream id ${stream.id} at ${moment().format('DD MMMM YYYY_h:mm:ss a')}`,
+          description: `Record for stream id ${stream.id} at ${moment().format('DD MMMM YYYY h:mm:ss a')}`,
           streamId: stream.id,
           expiryTimeInMinutes: 1,
         })
@@ -737,7 +737,7 @@ onMounted(() => {
                           () => {
                             let title = utils?.appWindow.prompt('Record title')
                             if (!title || !(title?.length > 0)) {
-                              title = `Record_${moment().format('DD-MM-YYYY_h:mm:ss a')}`
+                              title = `Record ${moment().format('DD-MM-YYYY h:mm:ss a')}`
                             }
                             onSubmitLive(title)
                           }
