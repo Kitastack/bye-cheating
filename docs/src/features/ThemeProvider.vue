@@ -69,9 +69,9 @@ onBeforeUnmount(() => {
       },
     }"
     :theme="Boolean(isDarkTheme) ? darkThemeNaive : null"
-    :locale="idID"
-    :date-locale="dateIdID"
   >
+    <!-- :locale="idID" -->
+    <!-- :date-locale="dateIdID" -->
     <slot />
   </NConfigProvider>
 </template>

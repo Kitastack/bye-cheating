@@ -47,12 +47,15 @@ import { useVuelidate } from '@vuelidate/core'
 import { storeToRefs } from 'pinia'
 import { useApi } from '@/composables/api'
 import moment from 'moment'
+import { useBreakpoint } from '@/composables/breakpoint'
 
-const mode = import.meta.env.MODE
+const mode_env = import.meta.env.MODE
+const api_env = import.meta.env.VITE_API
 const message = useMessage()
 const userStore = useUserStore()
 const loading = useCustomLoading()
 const theme = useThemeVars()
+const breakpoint = useBreakpoint()
 const utils = getCurrentInstance()?.proxy?.$utils
 const themeStore = useThemeStore()
 const { isDarkTheme } = storeToRefs(themeStore)
@@ -60,6 +63,7 @@ const { userSigninData, userFullData, userAuditData, isConnectedToServer } = sto
 
 const imageLiveContainerRef = ref<HTMLDivElement | null>(null)
 const logsLiveContainerRef = ref<any | null>(null)
+const logsLiveData = ref<liveDataType[] | null>(null)
 const stateStreamData = ref<streamDataType[] | null>(null)
 const stateLiveStreamUrl = ref<string | null>(null)
 const stateLiveData = ref<liveDataType | null>(null)
@@ -285,6 +289,7 @@ async function onPlayStream(
   isPrediction: boolean = stateLiveIsPrediction.value,
 ) {
   loading.start()
+  onFetchLive()
   // todo: extend time first
   await useApi('/watch').api.get(`/live/${liveData.id}/extend-more-minutes`)
   // live
@@ -333,6 +338,10 @@ async function onPlayStream(
     stateLiveIsPlaying.value = true
   }
 }
+async function onFetchLive() {
+  const liveData = await useApi('/live').api.get('/')
+  logsLiveData.value = liveData.data?.result ?? null
+}
 function toggleFullscreen(el: HTMLElement) {
   if (!document.fullscreenElement) {
     el.requestFullscreen?.()
@@ -365,6 +374,7 @@ onMounted(() => {
       })
     }
   })
+  onFetchLive()
 })
 </script>
 <template>
@@ -512,329 +522,402 @@ onMounted(() => {
         >
       </NGridItem>
     </NGrid>
-    <!-- <NGrid cols="1 l:2" responsive="screen" x-gap="20" y-gap="10"> -->
-    <!-- <NGridItem> -->
-    <section v-if="userFullData?.id">
-      <NSpace vertical size="large">
-        <NDivider><NText>User Story</NText></NDivider>
-        <NCard title="Edit user data">
-          <NForm @submit.prevent="onSubmitEditUser">
-            <NSpace vertical space="large">
-              <NFormItem path="name">
-                <template #label>
-                  <strong> Name </strong>
-                </template>
-                <NInput
-                  type="text"
-                  v-model:value="stateUserEdit.name"
-                  placeholder="ex: Dinta Wondervaal"
-                  :loading="loading.isLoading.value"
-                  :disabled="loading.isLoading.value"
-                />
-              </NFormItem>
-              <NFormItem path="email">
-                <template #label>
-                  <strong> Email</strong>
-                </template>
-                <NInput
-                  disabled
-                  type="text"
-                  :value="userFullData?.email"
-                  placeholder="ex: email@website.com"
-                  :loading="loading.isLoading.value"
-                />
-              </NFormItem>
-              <NButton
-                attr-type="submit"
-                type="primary"
-                style="width: 100%"
-                :loading="loading.isLoading.value"
-                :disabled="loading.isLoading.value"
-                >Save</NButton
-              >
-            </NSpace>
-          </NForm>
-        </NCard>
-        <NCard title="User Audit Logs">
-          <NList v-if="userAuditData && userAuditData?.length > 0" hoverable bordered>
-            <NListItem v-for="(item, itemIdx) in userAuditData" :key="itemIdx">
-              <NFlex justify="space-between">
-                <NText
-                  ><strong>{{ item.user?.name }}</strong> made changes at
-                  {{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText
-                >
-                <NText>{{ moment(item.createdDate).format('HH:mm A') }}</NText>
-              </NFlex>
-            </NListItem>
-          </NList>
-          <NEmpty v-else description="Logs not found" />
-        </NCard>
-      </NSpace>
-      <NSpace vertical size="large" @vue:mounted="onGetStream">
-        <NDivider><NText>Stream Story</NText></NDivider>
-        <NCard title="Add stream">
-          <NBlockquote>
-            <NText>Managing rtsp feeds</NText>
-          </NBlockquote>
-          <NForm @submit.prevent="onSubmitStream">
-            <NSpace vertical space="large">
-              <NFormItem
-                path="url"
-                :feedback="formStream.url.$errors.map(($error) => $error.$message).toString()"
-              >
-                <template #label>
-                  <strong> URL </strong>
-                </template>
-                <NInput
-                  type="text"
-                  v-model:value="stateStream.url"
-                  placeholder="rtsp://0.0.0.0:8554/live or rtsp://host.docker.internal:8554/live"
-                  :loading="loading.isLoading.value"
-                  :disabled="loading.isLoading.value"
-                />
-              </NFormItem>
-              <NButton
-                attr-type="submit"
-                type="primary"
-                style="width: 100%"
-                :loading="loading.isLoading.value"
-                :disabled="loading.isLoading.value"
-                >Save</NButton
-              >
-            </NSpace>
-          </NForm>
-        </NCard>
-        <NCard title="Stream Data">
-          <NList v-if="stateStreamData && stateStreamData?.length > 0" hoverable bordered>
-            <NListItem v-for="(item, itemIdx) in stateStreamData" :key="itemIdx">
-              <NFlex justify="space-between" align="center">
-                <NText
-                  ><strong>{{ item.url }}</strong></NText
-                >
-                <NSpace align="center">
-                  <NText>{{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText>
-                  <NButton
-                    :disabled="loading.isLoading.value"
-                    :loading="loading.isLoading.value"
-                    size="small"
-                    @click="
-                      () => {
-                        utils?.appWindow.navigator.clipboard
-                          .writeText(item.id)
-                          .then(() => message.success('ID copied'))
-                          .catch(() => message.error('Clipboard not supported'))
-                      }
-                    "
-                    >Copy ID</NButton
-                  >
-                  <NButton
-                    :disabled="loading.isLoading.value"
-                    :loading="loading.isLoading.value"
-                    size="small"
-                    type="error"
-                    @click="onDeleteStream(item)"
-                    >Delete</NButton
-                  >
-                </NSpace>
-              </NFlex>
-            </NListItem>
-          </NList>
-          <NEmpty v-else description="Logs not found" />
-        </NCard>
-      </NSpace>
-      <NSpace vertical size="large">
-        <NDivider><NText>Live Story</NText></NDivider>
-        <NCard title="Streaming">
-          <template #header-extra>
-            <NText
-              >Status: {{ isConnectedToServer ? 'Connected' : 'Disconnected' }} to Server</NText
-            >
-          </template>
-          <NBlockquote>
-            <NText
-              >[{{ mode }}]
-              {{
-                mode == 'production' ? 'on this stage, dummy video is used' : 'actual video'
-              }}</NText
-            >
-          </NBlockquote>
-          <NForm @submit.prevent="onSubmitLive">
-            <NSpace vertical space="large">
-              <NFormItem path="streamId">
-                <template #label>
-                  <strong> Stream </strong>
-                </template>
-                <NInputGroup>
-                  <NSelect
-                    filterable
-                    placeholder="Please select a stream"
-                    v-model:value="stateLiveStreamUrl"
-                    :options="
-                      stateStreamData?.map((item) => ({
-                        label: item.url,
-                        value: item.url,
-                      })) ?? []
-                    "
-                  />
+    <NGrid cols="12" responsive="screen" x-gap="20" y-gap="10">
+      <NGridItem :span="breakpoint.mdAndDown ? 12 : 9">
+        <section v-if="userFullData?.id">
+          <NSpace vertical size="large">
+            <NDivider><NText>User Story</NText></NDivider>
+            <NCard title="Edit user data">
+              <NForm @submit.prevent="onSubmitEditUser">
+                <NSpace vertical space="large">
+                  <NFormItem path="name">
+                    <template #label>
+                      <strong> Name </strong>
+                    </template>
+                    <NInput
+                      type="text"
+                      v-model:value="stateUserEdit.name"
+                      placeholder="ex: Dinta Wondervaal"
+                      :loading="loading.isLoading.value"
+                      :disabled="loading.isLoading.value"
+                    />
+                  </NFormItem>
+                  <NFormItem path="email">
+                    <template #label>
+                      <strong> Email</strong>
+                    </template>
+                    <NInput
+                      disabled
+                      type="text"
+                      :value="userFullData?.email"
+                      placeholder="ex: email@website.com"
+                      :loading="loading.isLoading.value"
+                    />
+                  </NFormItem>
                   <NButton
                     attr-type="submit"
                     type="primary"
+                    style="width: 100%"
                     :loading="loading.isLoading.value"
                     :disabled="loading.isLoading.value"
-                    >Play Stream</NButton
+                    >Save</NButton
                   >
-                </NInputGroup>
-              </NFormItem>
-              <NText>[Live ID]: {{ stateLiveData?.id ?? '-' }}</NText>
-              <NSpin :show="loading.isLoading.value">
-                <template #description> Loading... </template>
-                <div
-                  ref="imageLiveContainerRef"
-                  :style="{
-                    position: 'relative',
-                    backgroundColor: theme.placeholderColorDisabled,
-                    borderRadius: '15px',
-                    overflow: 'hidden',
-                  }"
-                >
-                  <div
-                    :style="{
-                      width: '100%',
-                      height: stateLiveFullscreenToggle ? '100vh' : 'auto',
-                      minHeight: '500px',
-                      position: 'relative',
-                      background: isDarkTheme ? theme.bodyColor : theme.actionColor,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }"
-                  >
-                    <img
-                      v-if="stateLiveUrl"
-                      :src="stateLiveUrl"
-                      :style="{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                      }"
-                    />
-                    <div v-else><IconVideo /></div>
-                  </div>
-
-                  <NFlex
-                    gap="large"
-                    justify="space-between"
-                    :style="{
-                      width: '100%',
-                      position: 'absolute',
-                      boxSizing: 'border-box',
-                      padding: '0.5rem',
-                      left: 0,
-                      bottom: 0,
-                      background: `rgba(30, 30, 30, 0.2)`,
-                      zIndex: 10,
-                    }"
-                  >
-                    <NFlex>
-                      <NButton
-                        type="primary"
-                        @click="
-                          () => {
-                            if (stateLiveData && stateLiveIsPlaying) {
-                              stateLiveIsPlaying = !stateLiveIsPlaying
-                            } else if (stateLiveData && !stateLiveIsPlaying) {
-                              onPlayStream(stateLiveData)
-                            } else {
-                              onSubmitLive()
-                            }
-                          }
-                        "
-                      >
-                        <IconPlayerPause v-if="stateLiveIsPlaying" />
-                        <IconPlayerPlay v-else />
-                      </NButton>
-                      <NButton
-                        :disabled="!stateLiveIsPlaying && !stateLiveData"
-                        type="primary"
-                        @click="
-                          () => {
-                            if (stateLiveData) {
-                              onPlayStream(stateLiveData)
-                            } else {
-                              onSubmitLive()
-                            }
-                          }
-                        "
-                        ><IconRefresh
-                      /></NButton>
-                      <NButton
-                        :disabled="!stateLiveIsPlaying"
-                        type="primary"
-                        @click="
-                          () => {
-                            if (stateLiveData) {
-                              onPlayStream(stateLiveData, !stateLiveIsPrediction)
-                            }
-                          }
-                        "
-                      >
-                        {{ stateLiveIsPrediction ? 'Prediction: [On]' : 'Prediction: [Off]' }}
-                      </NButton>
-                    </NFlex>
-                    <NButton
-                      type="primary"
-                      @click="toggleFullscreen(imageLiveContainerRef as HTMLElement)"
+                </NSpace>
+              </NForm>
+            </NCard>
+            <NCard title="User Audit Logs">
+              <NList v-if="userAuditData && userAuditData?.length > 0" hoverable bordered>
+                <NListItem v-for="(item, itemIdx) in userAuditData" :key="itemIdx">
+                  <NFlex justify="space-between">
+                    <NText
+                      ><strong>{{ item.user?.name }}</strong> made changes at
+                      {{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText
                     >
-                      <IconMaximize />
-                    </NButton>
+                    <NText>{{ moment(item.createdDate).format('HH:mm A') }}</NText>
                   </NFlex>
-                </div>
-              </NSpin>
+                </NListItem>
+              </NList>
+              <NEmpty v-else description="Logs not found" />
+            </NCard>
+          </NSpace>
+          <NSpace vertical size="large" @vue:mounted="onGetStream">
+            <NDivider><NText>Stream Story</NText></NDivider>
+            <NCard title="Add stream">
+              <NBlockquote>
+                <NText>Managing rtsp feeds</NText>
+              </NBlockquote>
+              <NForm @submit.prevent="onSubmitStream">
+                <NSpace vertical space="large">
+                  <NFormItem
+                    path="url"
+                    :feedback="formStream.url.$errors.map(($error) => $error.$message).toString()"
+                  >
+                    <template #label>
+                      <strong> URL </strong>
+                    </template>
+                    <NInput
+                      type="text"
+                      v-model:value="stateStream.url"
+                      placeholder="rtsp://0.0.0.0:8554/live or rtsp://host.docker.internal:8554/live"
+                      :loading="loading.isLoading.value"
+                      :disabled="loading.isLoading.value"
+                    />
+                  </NFormItem>
+                  <NButton
+                    attr-type="submit"
+                    type="primary"
+                    style="width: 100%"
+                    :loading="loading.isLoading.value"
+                    :disabled="loading.isLoading.value"
+                    >Save</NButton
+                  >
+                </NSpace>
+              </NForm>
+            </NCard>
+            <NCard title="Stream Data">
+              <NList v-if="stateStreamData && stateStreamData?.length > 0" hoverable bordered>
+                <NListItem v-for="(item, itemIdx) in stateStreamData" :key="itemIdx">
+                  <NFlex justify="space-between" align="center">
+                    <NText
+                      ><strong>{{ item.url }}</strong></NText
+                    >
+                    <NSpace align="center">
+                      <NText>{{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText>
+                      <NButton
+                        :disabled="loading.isLoading.value"
+                        :loading="loading.isLoading.value"
+                        size="small"
+                        @click="
+                          () => {
+                            utils?.appWindow.navigator.clipboard
+                              .writeText(item.id)
+                              .then(() => message.success('ID copied'))
+                              .catch(() => message.error('Clipboard not supported'))
+                          }
+                        "
+                        >Copy ID</NButton
+                      >
+                      <NButton
+                        :disabled="loading.isLoading.value"
+                        :loading="loading.isLoading.value"
+                        size="small"
+                        type="error"
+                        @click="onDeleteStream(item)"
+                        >Delete</NButton
+                      >
+                    </NSpace>
+                  </NFlex>
+                </NListItem>
+              </NList>
+              <NEmpty v-else description="Logs not found" />
+            </NCard>
+          </NSpace>
+          <NSpace vertical size="large">
+            <NDivider><NText>Live Story</NText></NDivider>
+            <NCard title="Streaming">
+              <template #header-extra>
+                <NText
+                  >Status: {{ isConnectedToServer ? 'Connected' : 'Disconnected' }} to Server</NText
+                >
+              </template>
+              <NForm @submit.prevent="onSubmitLive">
+                <NSpace vertical space="large">
+                  <NFormItem path="streamId">
+                    <template #label>
+                      <strong> Stream </strong>
+                    </template>
+                    <NInputGroup>
+                      <NSelect
+                        filterable
+                        placeholder="Please select a stream"
+                        v-model:value="stateLiveStreamUrl"
+                        :options="
+                          stateStreamData?.map((item) => ({
+                            label: item.url,
+                            value: item.url,
+                          })) ?? []
+                        "
+                      />
+                      <NButton
+                        attr-type="submit"
+                        type="primary"
+                        :loading="loading.isLoading.value"
+                        :disabled="loading.isLoading.value"
+                        >Play Stream</NButton
+                      >
+                    </NInputGroup>
+                  </NFormItem>
+                  <NText>[Live ID]: {{ stateLiveData?.id ?? '-' }}</NText>
+                  <NSpin :show="loading.isLoading.value">
+                    <template #description> Loading... </template>
+                    <div
+                      ref="imageLiveContainerRef"
+                      :style="{
+                        position: 'relative',
+                        backgroundColor: theme.placeholderColorDisabled,
+                        borderRadius: '15px',
+                        overflow: 'hidden',
+                      }"
+                    >
+                      <div
+                        :style="{
+                          width: '100%',
+                          height: stateLiveFullscreenToggle ? '100vh' : 'auto',
+                          minHeight: '500px',
+                          position: 'relative',
+                          background: isDarkTheme ? theme.bodyColor : theme.actionColor,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }"
+                      >
+                        <img
+                          v-if="stateLiveUrl"
+                          :src="stateLiveUrl"
+                          :style="{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain',
+                          }"
+                        />
+                        <div v-else><IconVideo /></div>
+                      </div>
 
-              <NScrollbar
-                v-if="stateLiveDataResponse"
-                ref="logsLiveContainerRef"
+                      <NFlex
+                        gap="large"
+                        justify="space-between"
+                        :style="{
+                          width: '100%',
+                          position: 'absolute',
+                          boxSizing: 'border-box',
+                          padding: '0.5rem',
+                          left: 0,
+                          bottom: 0,
+                          background: `rgba(30, 30, 30, 0.2)`,
+                          zIndex: 10,
+                        }"
+                      >
+                        <NFlex>
+                          <NButton
+                            type="primary"
+                            @click="
+                              () => {
+                                if (stateLiveData && stateLiveIsPlaying) {
+                                  stateLiveIsPlaying = !stateLiveIsPlaying
+                                } else if (stateLiveData && !stateLiveIsPlaying) {
+                                  onPlayStream(stateLiveData)
+                                } else {
+                                  onSubmitLive()
+                                }
+                              }
+                            "
+                          >
+                            <IconPlayerPause v-if="stateLiveIsPlaying" />
+                            <IconPlayerPlay v-else />
+                          </NButton>
+                          <NButton
+                            :disabled="!stateLiveIsPlaying && !stateLiveData"
+                            type="primary"
+                            @click="
+                              () => {
+                                if (stateLiveData) {
+                                  onPlayStream(stateLiveData)
+                                } else {
+                                  onSubmitLive()
+                                }
+                              }
+                            "
+                            ><IconRefresh
+                          /></NButton>
+                          <NButton
+                            :disabled="!stateLiveIsPlaying"
+                            type="primary"
+                            @click="
+                              () => {
+                                if (stateLiveData) {
+                                  onPlayStream(stateLiveData, !stateLiveIsPrediction)
+                                }
+                              }
+                            "
+                          >
+                            {{ stateLiveIsPrediction ? 'Prediction: [On]' : 'Prediction: [Off]' }}
+                          </NButton>
+                        </NFlex>
+                        <NButton
+                          type="primary"
+                          @click="toggleFullscreen(imageLiveContainerRef as HTMLElement)"
+                        >
+                          <IconMaximize />
+                        </NButton>
+                      </NFlex>
+                    </div>
+                  </NSpin>
+                  <NScrollbar
+                    v-if="stateLiveDataResponse"
+                    ref="logsLiveContainerRef"
+                    :style="{
+                      maxHeight: '250px',
+                      borderRadius: '15px',
+                      overflow: 'hidden',
+                    }"
+                  >
+                    <NList
+                      hoverable
+                      :style="{
+                        backgroundColor: isDarkTheme ? theme.bodyColor : theme.actionColor,
+                      }"
+                    >
+                      <NListItem
+                        v-for="(
+                          stateLiveDataResponseItem, stateLiveDataResponseIdx
+                        ) in stateLiveDataResponse"
+                        :key="stateLiveDataResponseIdx"
+                        @click="
+                          () => {
+                            stateLiveUrl = stateLiveDataResponseItem.result
+                          }
+                        "
+                      >
+                        <NThing
+                          :title="`Frame ${utils?.secondsToClock(stateLiveDataResponseIdx + 1)}`"
+                        >
+                          <template #description>
+                            <NText v-if="!stateLiveDataResponseItem.prediction"
+                              >Non prediction frame</NText
+                            >
+                            <NText v-else>{{
+                              stateLiveDataResponseItem.prediction
+                                ?.map(
+                                  (predictionItem: any) =>
+                                    `[${predictionItem.track_id}]: ${predictionItem.name}`,
+                                )
+                                ?.join(', ')
+                            }}</NText>
+                          </template>
+                        </NThing>
+                      </NListItem>
+                    </NList>
+                  </NScrollbar>
+                </NSpace>
+              </NForm>
+            </NCard>
+          </NSpace>
+        </section>
+      </NGridItem>
+      <NGridItem v-if="!breakpoint.mdAndDown" :span="breakpoint.mdAndDown ? 12 : 3">
+        <NSpace
+          vertical
+          :size="25"
+          :style="{
+            position: 'sticky',
+            top: '0px',
+            paddingTop: '25px',
+          }"
+        >
+          <NCard title="Status Server">
+            <NSpace vertical>
+              <NText>[IP]: {{ api_env }}</NText>
+              <NText>[Mode]: {{ mode_env }}</NText>
+              <NText
                 :style="{
-                  maxHeight: '250px',
-                  borderRadius: '15px',
-                  overflow: 'hidden',
-                  backgroundColor: isDarkTheme ? theme.bodyColor : theme.placeholderColorDisabled,
+                  color: isConnectedToServer ? 'green' : 'red',
+                }"
+                >[Status]: {{ isConnectedToServer ? 'Connected' : 'Disconnected' }}</NText
+              >
+            </NSpace>
+          </NCard>
+          <NCard title="Status Session">
+            <NSpace v-if="userSigninData" vertical>
+              <NText>[User ID]: {{ userSigninData.id }}</NText>
+              <NText
+                >[Created]:
+                {{
+                  userSigninData?.iat ? moment.unix(userSigninData.iat).format('DD MMMM YYYY') : '-'
+                }}</NText
+              >
+              <NText
+                >[Expired]:
+                {{ userSigninData?.exp ? moment.unix(userSigninData.exp).fromNow() : '-' }}</NText
+              >
+            </NSpace>
+            <NEmpty v-else></NEmpty>
+          </NCard>
+          <NCard title="Live log">
+            <NScrollbar
+              v-if="logsLiveData && logsLiveData?.length > 0"
+              :style="{
+                maxHeight: '300px',
+                borderRadius: '15px',
+                overflow: 'hidden',
+              }"
+            >
+              <NList
+                hoverable
+                :style="{
+                  backgroundColor: isDarkTheme ? theme.bodyColor : theme.actionColor,
                 }"
               >
-                <NList hoverable>
-                  <NListItem
-                    v-for="(
-                      stateLiveDataResponseItem, stateLiveDataResponseIdx
-                    ) in stateLiveDataResponse"
-                    :key="stateLiveDataResponseIdx"
-                    @click="
-                      () => {
-                        stateLiveUrl = stateLiveDataResponseItem.result
-                      }
-                    "
-                  >
-                    <NThing :title="`Frame ${utils?.secondsToClock(stateLiveDataResponseIdx + 1)}`">
-                      <template #description>
-                        <NText v-if="!stateLiveDataResponseItem.prediction"
-                          >Non prediction frame</NText
+                <NListItem
+                  v-for="(logsLiveDataItem, logsLiveDataIdx) in logsLiveData"
+                  :key="logsLiveDataIdx"
+                >
+                  <NThing :title="`Live ID ${logsLiveDataItem.id}`">
+                    <template #description>
+                      <NSpace vertical>
+                        <NText>[URL]: {{ logsLiveDataItem.url }}</NText>
+                        <NText
+                          >[Created]: {{ moment(logsLiveDataItem.createdDate).fromNow() }}</NText
                         >
-                        <NText v-else>{{
-                          stateLiveDataResponseItem.prediction
-                            ?.map(
-                              (predictionItem: any) =>
-                                `[${predictionItem.track_id}]: ${predictionItem.name}`,
-                            )
-                            ?.join(', ')
-                        }}</NText>
-                      </template>
-                    </NThing>
-                  </NListItem>
-                </NList>
-              </NScrollbar>
-            </NSpace>
-          </NForm>
-        </NCard>
-      </NSpace>
-    </section>
+                      </NSpace>
+                    </template>
+                  </NThing>
+                </NListItem>
+              </NList>
+            </NScrollbar>
+            <NEmpty v-else></NEmpty>
+          </NCard>
+        </NSpace>
+      </NGridItem>
+    </NGrid>
   </NSpace>
 </template>

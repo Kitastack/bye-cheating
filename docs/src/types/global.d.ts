@@ -15,6 +15,8 @@ declare global {
     createdDate: string
     updatedDate: string
     photo: string
+    iat?: number
+    exp?: number
   }
   type auditDataType = {
     id: string
@@ -37,6 +39,7 @@ declare global {
   }
   type liveDataType = {
     id: string
+    url?: string
     path: string
     streamId: string
     stream?: streamDataType
