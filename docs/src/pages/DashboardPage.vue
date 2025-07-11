@@ -465,10 +465,10 @@ onMounted(() => {
                 :size="100"
               />
               <NSpace vertical size="large">
-                <NText>[Name]: {{ userFullData.name }}</NText>
-                <NText>[Email]: {{ userFullData.email }}</NText>
+                <NText><strong>[Name]:</strong> {{ userFullData.name }}</NText>
+                <NText><strong>[Email]:</strong> {{ userFullData.email }}</NText>
                 <NText
-                  >[Joined Date]:
+                  ><strong>[Joined Date]:</strong>
                   {{ moment(userFullData.createdDate).format('DD MMMM YYYY') }}</NText
                 >
               </NSpace>
@@ -953,6 +953,13 @@ onMounted(() => {
                     </video>
 
                     <NSpace size="large" vertical justify="center">
+                      <NText
+                        ><strong>[Title]:</strong> {{ reportDetailDrawerRef?.title ?? '-' }}</NText
+                      >
+                      <NText
+                        ><strong>[Description]:</strong>
+                        {{ reportDetailDrawerRef?.description ?? '-' }}</NText
+                      >
                       <NText style="text-transform: capitalize"
                         ><strong>[Status]:</strong> {{ reportDetailDrawerRef?.status }}</NText
                       >
@@ -973,10 +980,6 @@ onMounted(() => {
                         <NA :href="reportDetailDrawerRef?.recordUrl" target="_blank">{{
                           reportDetailDrawerRef?.recordUrl
                         }}</NA></NText
-                      >
-                      <NText
-                        ><strong>[Description]:</strong>
-                        {{ reportDetailDrawerRef?.description ?? '-' }}</NText
                       >
                     </NSpace>
                   </NFlex>
@@ -1030,6 +1033,7 @@ onMounted(() => {
                       <NThing :title="item.title">
                         <template #header-extra>
                           <NButton
+                            :disabled="item.status !== 'finished'"
                             @click="
                               () => {
                                 reportDetailDrawerRef = item
@@ -1045,24 +1049,30 @@ onMounted(() => {
                         <section>
                           <NFlex>
                             <NImage
-                              :src="item.thumbnailUrl"
+                              :src="item.thumbnailUrl ?? 'foo'"
                               :width="150"
                               :height="100"
                               style="background: black; border-radius: 15px"
                             >
                               <template #error>
-                                {{ item.thumbnailUrl ?? '-' }}
-                                <NIcon :size="100" color="lightGrey">
+                                <NFlex
+                                  align="center"
+                                  justify="center"
+                                  style="width: 150px; height: 100px"
+                                >
                                   <IconPhotoX />
-                                </NIcon> </template
-                            ></NImage>
+                                </NFlex>
+                                <!-- <NIcon :size="100" color="lightGrey">
+                                </NIcon>  -->
+                              </template></NImage
+                            >
 
                             <NSpace size="large" vertical>
                               <NA v-if="item.recordUrl" :href="item.recordUrl" target="_blank"
-                                >[Record URL]: {{ item.recordUrl }}</NA
+                                ><strong>[Record URL]:</strong> {{ item.recordUrl }}</NA
                               >
                               <NText
-                                >[Created]:
+                                ><strong>[Created]:</strong>
                                 {{ moment(item.createdDate).format('DD MMMM YYYY') }} ({{
                                   moment(item.createdDate).fromNow()
                                 }})</NText
@@ -1076,7 +1086,7 @@ onMounted(() => {
                                         ? 'green'
                                         : 'orange',
                                 }"
-                                >[Status]: {{ item.status }}</NText
+                                ><strong>[Status]:</strong> {{ item.status }}</NText
                               >
                               <!-- {{ item }} -->
                             </NSpace>
@@ -1152,25 +1162,26 @@ onMounted(() => {
           </NCard>
           <NCard title="Status Server">
             <NSpace vertical>
-              <NText>[IP]: {{ api_env }}</NText>
-              <NText>[Mode]: {{ mode_env }}</NText>
+              <NText><strong>[IP]:</strong> {{ api_env }}</NText>
+              <NText><strong>[Mode]:</strong> {{ mode_env }}</NText>
               <NText
                 :style="{
                   color: isConnectedToServer ? 'green' : 'red',
                 }"
-                >[Status]: {{ isConnectedToServer ? 'Connected' : 'Disconnected' }}</NText
+                ><strong>[Status]:</strong>
+                {{ isConnectedToServer ? 'Connected' : 'Disconnected' }}</NText
               >
             </NSpace>
           </NCard>
           <NCard title="Status Session">
             <NSpace v-if="userSigninData" vertical>
-              <NText>[User ID]: {{ userSigninData.id }}</NText>
+              <NText><strong>[User ID]:</strong> {{ userSigninData.id }}</NText>
               <NText
-                >[Created]:
+                ><strong>[Created]:</strong>
                 {{ userSigninData?.iat ? moment.unix(userSigninData.iat).fromNow() : '-' }}</NText
               >
               <NText
-                >[Expired]:
+                ><strong>[Expired]:</strong>
                 {{ userSigninData?.exp ? moment.unix(userSigninData.exp).fromNow() : '-' }}
                 (<NCountdown
                   v-if="userSigninData?.exp"
@@ -1202,12 +1213,15 @@ onMounted(() => {
                   v-for="(logsLiveDataItem, logsLiveDataIdx) in logsLiveData"
                   :key="logsLiveDataIdx"
                 >
-                  <NThing :title="`Live ID ${logsLiveDataItem.id}`">
+                  <NThing :title="logsLiveDataItem.id">
                     <template #description>
                       <NSpace vertical>
-                        <NText>[URL]: {{ logsLiveDataItem.stream?.url ?? '-' }}</NText>
                         <NText
-                          >[Created]: {{ moment(logsLiveDataItem.createdDate).fromNow() }}</NText
+                          ><strong>[URL]:</strong> {{ logsLiveDataItem.stream?.url ?? '-' }}</NText
+                        >
+                        <NText
+                          ><strong>[Created]:</strong>
+                          {{ moment(logsLiveDataItem.createdDate).fromNow() }}</NText
                         >
                       </NSpace>
                     </template>
