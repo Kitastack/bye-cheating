@@ -22,7 +22,8 @@ export const getReport = async (
         title: Joi.string().optional(),
         recordUrl: Joi.string().optional(),
         withItems: Joi.boolean().optional().default(false),
-        isShowMine: Joi.boolean().optional().default(false)
+        withLive: Joi.boolean().optional().default(false),
+        createdBySelfOnly: Joi.boolean().optional().default(false)
       }).prefs({ convert: true }),
       req.populatedQuery
     )
@@ -51,12 +52,13 @@ export const getReport = async (
         OR: orQuery?.length > 0 ? orQuery : undefined,
         userId:
           req.user?.roles?.includes(ROLE.Admin) &&
-          (req.populatedQuery?.isShowMine == 'false' ||
-            req.populatedQuery?.isShowMine == undefined)
+          (req.populatedQuery?.createdBySelfOnly == 'false' ||
+            req.populatedQuery?.createdBySelfOnly == undefined)
             ? ((req.populatedQuery?.userId as string) ?? undefined)
             : req.user?.id
       },
       include: {
+        live: req.populatedQuery?.withLive == 'true' ? true : undefined,
         reportItems: req.populatedQuery?.withItems == 'true' ? true : undefined
       },
       skip: req.page,
@@ -129,6 +131,7 @@ export const createReport = async (
       const reportResponse = await ctx.report.create({
         data: {
           ...req.body,
+          status: 'progress',
           liveId: liveResponse.id,
           userId: req.user?.id,
           expiryTimeInMinutes:
@@ -199,6 +202,14 @@ export const updateReport = async (
     }
     if (!(Object.keys(req.body).length > 1)) {
       throw new BadRequestError('body atleast have something to update with')
+    }
+    if (
+      !req.body?.calculatedClass &&
+      (req.body?.recordUrl || req.body?.thumbnailUrl)
+    ) {
+      req.body.status = 'error'
+    } else if (req.body?.calculatedClass) {
+      req.body.status = 'finished'
     }
     const updatedReport = await database.$transaction(async (ctx) => {
       req.body.updatedDate = new Date()

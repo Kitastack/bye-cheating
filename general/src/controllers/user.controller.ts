@@ -417,7 +417,7 @@ export const getAudit = async (
       Joi.object({
         entityId: Joi.string().uuid().required(),
         entityName: Joi.string().optional()
-        // isShowMine: Joi.boolean().optional().default(false)
+        // createdBySelfOnly: Joi.boolean().optional().default(false)
       }).prefs({ convert: true }),
       req.populatedQuery
     )
@@ -440,8 +440,8 @@ export const getAudit = async (
           : {})
         // userId:
         //   req.user?.roles?.includes(ROLE.Admin) &&
-        //   (req.populatedQuery?.isShowMine == 'false' ||
-        //     req.populatedQuery?.isShowMine == undefined)
+        //   (req.populatedQuery?.createdBySelfOnly == 'false' ||
+        //     req.populatedQuery?.createdBySelfOnly == undefined)
         //     ? ((req.populatedQuery?.userId as string) ?? undefined)
         //     : req.user?.id
       },

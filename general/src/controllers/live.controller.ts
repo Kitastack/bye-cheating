@@ -182,11 +182,13 @@ export const getLive = async (
   try {
     await isValidSchema(
       Joi.object({
-        isShowMine: Joi.boolean().optional().default(false),
+        createdBySelfOnly: Joi.boolean().optional().default(false),
         id: Joi.string().uuid().optional(),
         userId: Joi.string().uuid().optional(),
         streamId: Joi.string().uuid().optional(),
-        path: urlValidation.optional()
+        path: urlValidation.optional(),
+        withStream: Joi.boolean().optional().default(false),
+        withReport: Joi.boolean().optional().default(false)
         // expiryDate: Joi.object({
         //   gt: Joi.date().optional(),
         //   gte: Joi.date().optional(),
@@ -224,10 +226,14 @@ export const getLive = async (
         OR: orQuery?.length > 0 ? orQuery : undefined,
         userId:
           req.user?.roles?.includes(ROLE.Admin) &&
-          (req.populatedQuery?.isShowMine == 'false' ||
-            req.populatedQuery?.isShowMine == undefined)
+          (req.populatedQuery?.createdBySelfOnly == 'false' ||
+            req.populatedQuery?.createdBySelfOnly == undefined)
             ? ((req.populatedQuery?.userId as string) ?? undefined)
             : req.user?.id
+      },
+      include: {
+        stream: req.populatedQuery?.withStream == 'true' ? true : undefined,
+        report: req.populatedQuery?.withReport == 'true' ? true : undefined
       },
       skip: req.page,
       take: req.limit

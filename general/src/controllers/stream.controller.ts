@@ -192,7 +192,8 @@ export const getStream = async (
         userId: Joi.string().uuid().optional(),
         url: urlValidation.optional(),
         isInactive: Joi.boolean().optional().default(false),
-        isShowMine: Joi.boolean().optional().default(false)
+        withLive: Joi.boolean().optional().default(false),
+        createdBySelfOnly: Joi.boolean().optional().default(false)
       }).prefs({ convert: true }),
       req.populatedQuery
     )
@@ -214,8 +215,8 @@ export const getStream = async (
         OR: orQuery?.length > 0 ? orQuery : undefined,
         userId:
           req.user?.roles?.includes(ROLE.Admin) &&
-          (req.populatedQuery?.isShowMine == 'false' ||
-            req.populatedQuery?.isShowMine == undefined)
+          (req.populatedQuery?.createdBySelfOnly == 'false' ||
+            req.populatedQuery?.createdBySelfOnly == undefined)
             ? ((req.populatedQuery?.userId as string) ?? undefined)
             : req.user?.id,
         inactive: req.user?.roles?.includes(ROLE.Admin)
@@ -225,6 +226,9 @@ export const getStream = async (
               : false
             : undefined
           : false
+      },
+      include: {
+        live: req.populatedQuery?.withLive == 'true' ? true : undefined
       },
       skip: req.page,
       take: req.limit
