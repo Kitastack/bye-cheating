@@ -28,6 +28,19 @@ declare global {
     createdDate: string
     user?: userDataType
   }
+  type reportDataType = {
+    id: string
+    title: string
+    description: string
+    userId: string
+    thumbnailUrl: string
+    recordUrl: string
+    expiryTimeInMinutes: number
+    calculatedClass?: string
+    user?: any
+    createdDate: string
+    updatedDate: string
+  }
   type streamDataType = {
     id: string
     url: string

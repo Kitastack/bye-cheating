@@ -31,6 +31,7 @@ import {
   NButtonGroup,
   NPopconfirm,
   NCountdown,
+  NIcon,
 } from 'naive-ui'
 import {
   IconMaximize,
@@ -39,6 +40,10 @@ import {
   IconRefresh,
   IconVideo,
   IconArrowsMoveVertical,
+  IconPlayerRecord,
+  IconPlayerRecordFilled,
+  IconPlayerStop,
+  IconPhotoX,
 } from '@tabler/icons-vue'
 import { required, email, minLength, helpers } from '@vuelidate/validators'
 import { getCurrentInstance, nextTick, onMounted, reactive, ref } from 'vue'
@@ -71,6 +76,7 @@ const imageLiveContainerRef = ref<HTMLDivElement | null>(null)
 const logsLiveContainerRef = ref<any | null>(null)
 const logsLiveData = ref<liveDataType[] | null>(null)
 const stateStreamData = ref<streamDataType[] | null>(null)
+const stateReportData = ref<reportDataType[] | null>(null)
 const stateLiveStreamUrl = ref<string | null>(null)
 const stateLiveData = ref<liveDataType | null>(null)
 const stateLiveIsPlaying = ref<boolean>(false)
@@ -243,7 +249,7 @@ async function onSubmitStream() {
     loading.finish()
   }
 }
-async function onSubmitLive() {
+async function onSubmitLive(title?: string | null) {
   try {
     loading.start()
     if (!stateLiveStreamUrl.value) {
@@ -271,16 +277,28 @@ async function onSubmitLive() {
     //     })
     //   )?.data?.result?.[0] ?? null
     // if (!stateLiveData.value) {
-    stateLiveData.value = (
-      await useApi('/live').api.post('/', {
-        streamId: stream.id,
-        expiryTimeInMinutes: 1,
-      })
-    )?.data?.result
-    // }
+    if (title) {
+      stateLiveData.value = (
+        await useApi('/report').api.post('/', {
+          title,
+          description: `Record for stream id ${stream.id} at ${moment().format('DD MMMM YYYY_h:mm:ss a')}`,
+          streamId: stream.id,
+          expiryTimeInMinutes: 1,
+        })
+      )?.data?.result?.live
+      onGetReport()
+    } else {
+      stateLiveData.value = (
+        await useApi('/live').api.post('/', {
+          streamId: stream.id,
+          expiryTimeInMinutes: 1,
+        })
+      )?.data?.result
+    }
     if (!stateLiveData.value) {
       throw new Error('Live not found')
     }
+    console.log(stateLiveData.value)
     await onPlayStream(stateLiveData.value)
   } catch (error: any) {
     loading.error()
@@ -344,9 +362,31 @@ async function onPlayStream(
     stateLiveIsPlaying.value = true
   }
 }
+function onStopStream() {
+  if (stateLiveResponse.value?.CONNECTING != undefined) {
+    stateLiveResponse.value?.close()
+    stateLiveIsPlaying.value = false
+    stateLiveIsPrediction.value = false
+  }
+}
 async function onFetchLive() {
+  // need to concat stream data
   const liveData = await useApi('/live').api.get('/')
   logsLiveData.value = liveData.data?.result ?? null
+}
+async function onGetReport() {
+  try {
+    loading.start()
+    const response = await useApi('/report').api.get('')
+    if (response.data.result) {
+      stateReportData.value = response.data.result
+    }
+  } catch (error: any) {
+    loading.error()
+    message.error(`${error?.data?.message ?? error?.message ?? error}`)
+  } finally {
+    loading.finish()
+  }
 }
 function toggleFullscreen(el: HTMLElement) {
   if (!document.fullscreenElement) {
@@ -590,9 +630,6 @@ onMounted(() => {
           <NSpace ref="streamSectionRef" vertical size="large" @vue:mounted="onGetStream">
             <NDivider><NText>Stream Story</NText></NDivider>
             <NCard title="Add stream">
-              <NBlockquote>
-                <NText>Managing rtsp feeds</NText>
-              </NBlockquote>
               <NForm @submit.prevent="onSubmitStream">
                 <NSpace vertical space="large">
                   <NFormItem
@@ -663,9 +700,9 @@ onMounted(() => {
             <NDivider><NText>Live Story</NText></NDivider>
             <NCard title="Streaming">
               <template #header-extra>
-                <NText>[{{ isConnectedToServer ? 'Connected' : 'Disconnected' }} to Server]</NText>
+                <NText>[{{ isConnectedToServer ? 'Ready' : 'Not Ready' }}]</NText>
               </template>
-              <NForm @submit.prevent="onSubmitLive">
+              <NForm @submit.prevent="onSubmitLive(null)">
                 <NSpace vertical space="large">
                   <NFormItem path="streamId">
                     <template #label>
@@ -688,8 +725,25 @@ onMounted(() => {
                         type="primary"
                         :loading="loading.isLoading.value"
                         :disabled="loading.isLoading.value"
-                        >Play Stream</NButton
-                      >
+                        icon-placement="right"
+                        >Play <template #icon><IconPlayerPlay /></template
+                      ></NButton>
+                      <NButton
+                        type="warning"
+                        icon-placement="right"
+                        :loading="loading.isLoading.value"
+                        :disabled="loading.isLoading.value"
+                        @click="
+                          () => {
+                            let title = utils?.appWindow.prompt('Record title')
+                            if (!title || !(title?.length > 0)) {
+                              title = `Record_${moment().format('DD-MM-YYYY_h:mm:ss a')}`
+                            }
+                            onSubmitLive(title)
+                          }
+                        "
+                        >Record <template #icon><IconPlayerRecordFilled /></template
+                      ></NButton>
                     </NInputGroup>
                   </NFormItem>
                   <NText>[Live ID]: {{ stateLiveData?.id ?? '-' }}</NText>
@@ -759,6 +813,16 @@ onMounted(() => {
                           >
                             <IconPlayerPause v-if="stateLiveIsPlaying" />
                             <IconPlayerPlay v-else />
+                          </NButton>
+                          <NButton
+                            :disabled="!stateLiveIsPlaying"
+                            type="primary"
+                            @click="
+                              () => {
+                                onStopStream()
+                              }
+                            "
+                            ><IconPlayerStop />
                           </NButton>
                           <NButton
                             :disabled="!stateLiveIsPlaying && !stateLiveData"
@@ -848,41 +912,59 @@ onMounted(() => {
               </NForm>
             </NCard>
           </NSpace>
-          <NSpace ref="reportSectionRef" vertical size="large" @vue:mounted="onGetStream">
+          <NSpace ref="reportSectionRef" vertical size="large" @vue:mounted="onGetReport">
             <NDivider><NText>Report Story</NText></NDivider>
             <NCard title="Report Data">
-              <NList v-if="stateStreamData && stateStreamData?.length > 0" hoverable bordered>
-                <NListItem v-for="(item, itemIdx) in stateStreamData" :key="itemIdx">
-                  <NFlex justify="space-between" align="center">
-                    <NText
-                      ><strong>{{ item.url }}</strong></NText
-                    >
-                    <NSpace align="center">
-                      <NText>{{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText>
-                      <NButton
-                        :disabled="loading.isLoading.value"
-                        :loading="loading.isLoading.value"
-                        size="small"
-                        @click="
-                          () => {
-                            utils?.appWindow.navigator.clipboard
-                              .writeText(item.id)
-                              .then(() => message.success('ID copied'))
-                              .catch(() => message.error('Clipboard not supported'))
-                          }
-                        "
-                        >Copy ID</NButton
-                      >
-                      <NButton
-                        :disabled="loading.isLoading.value"
-                        :loading="loading.isLoading.value"
-                        size="small"
-                        type="error"
-                        @click="onDeleteStream(item)"
-                        >Delete</NButton
-                      >
-                    </NSpace>
-                  </NFlex>
+              <NList v-if="stateReportData && stateReportData?.length > 0" hoverable bordered>
+                <NListItem v-for="(item, itemIdx) in stateReportData" :key="itemIdx">
+                  <NThing :title="item.title">
+                    <template #description>
+                      <NText>{{ item.description }}</NText>
+                    </template>
+                    <section>
+                      <NFlex>
+                        <NImage
+                          :src="item.thumbnailUrl"
+                          :width="100"
+                          style="background: black; border-radius: 15px"
+                        >
+                          <template #error>
+                            {{ item.thumbnailUrl ?? '-' }}
+                            <NIcon :size="100" color="lightGrey">
+                              <IconPhotoX />
+                            </NIcon> </template
+                        ></NImage>
+
+                        <NSpace size="large" vertical>
+                          <NText>[Record URL]: {{ item.recordUrl ?? '-' }}</NText>
+                          <NText
+                            >[Created]: {{ moment(item.createdDate).format('DD MMMM YYYY') }} ({{
+                              moment(item.createdDate).fromNow()
+                            }})</NText
+                          >
+                          <!-- <NText
+                          :style="{
+                            color:
+                              item.calculatedClass == null && item.recordUrl != null
+                                ? 'red'
+                                : item.recordUrl
+                                  ? 'green'
+                                  : 'orange',
+                          }"
+                          >[Status]:
+                          {{
+                            item.calculatedClass == null && item.recordUrl != null
+                              ? 'Error'
+                              : item.recordUrl
+                                ? 'Done'
+                                : 'Progress'
+                          }}</NText
+                        > -->
+                          <!-- {{ item }} -->
+                        </NSpace>
+                      </NFlex>
+                    </section>
+                  </NThing>
                 </NListItem>
               </NList>
               <NEmpty v-else description="Report not found" />
@@ -970,11 +1052,11 @@ onMounted(() => {
               <NText
                 >[Expired]:
                 {{ userSigninData?.exp ? moment.unix(userSigninData.exp).fromNow() : '-' }}
-                [<NCountdown
+                (<NCountdown
                   v-if="userSigninData?.exp"
                   :duration="Number(utils?.timestampToSeconds(userSigninData.exp) ?? 0) * 1000"
                   active
-                />]
+                />)
                 <!-- {{ userSigninData?.exp ? ` (${expCountdownRef} remaining)` : `` }} -->
               </NText>
               <!--  -->
@@ -1003,7 +1085,7 @@ onMounted(() => {
                   <NThing :title="`Live ID ${logsLiveDataItem.id}`">
                     <template #description>
                       <NSpace vertical>
-                        <NText>[URL]: {{ logsLiveDataItem.url }}</NText>
+                        <NText>[URL]: {{ logsLiveDataItem.stream?.url ?? '-' }}</NText>
                         <NText
                           >[Created]: {{ moment(logsLiveDataItem.createdDate).fromNow() }}</NText
                         >
