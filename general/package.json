@@ -16,6 +16,7 @@
     "prisma:create": "npx prisma migrate dev --create-only",
     "prisma:generate": "npx prisma generate",
     "prisma:seed": "npx prisma db seed",
+    "prisma:push": "npx prisma db push",
     "prisma:reset": "npx prisma db push --force-reset"
   },
   "devDependencies": {
