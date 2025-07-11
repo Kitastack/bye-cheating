@@ -2,7 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_API: string
-  readonly MODE: 'development' | 'production'
+  readonly MODE: 'development' | 'production' | 'staging'
 }
 
 interface ImportMeta {

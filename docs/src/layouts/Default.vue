@@ -5,11 +5,8 @@ import {
   IconSunFilled,
   IconDevices,
   IconHome,
-  IconPaperclip,
   IconCode,
-  IconMail,
   IconLink,
-  IconQuestionMark,
 } from '@tabler/icons-vue'
 import {
   NButton,
@@ -24,13 +21,14 @@ import {
   useMessage,
 } from 'naive-ui'
 import { getCurrentInstance, h, onMounted, reactive, watch } from 'vue'
+import { useBreakpoint } from '@/composables/breakpoint'
 import { useThemeStore } from '@/stores/theme.store'
+import { useUserStore } from '@/stores/user.store'
+import Container from '@/shared/ui/Container.vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import Container from '@/shared/ui/Container.vue'
-import { useBreakpoint } from '@/composables/breakpoint'
-import { useUserStore } from '@/stores/user.store'
 
+const mode_env = import.meta.env.MODE
 const router = useRouter()
 const breakpoint = useBreakpoint()
 const themeStore = useThemeStore()
@@ -143,10 +141,12 @@ onMounted(() => {
       </NButtonGroup>
     </NFlex>
     <br />
-    <div
+    <NSpace
+      vertical
       :style="{
         zIndex: 1,
       }"
+      size="large"
     >
       <NCard>
         <NFlex justify="space-between" align="center" :vertical="breakpoint.mdAndDown" size="large">
@@ -171,16 +171,17 @@ onMounted(() => {
           </NSpace>
         </NFlex>
       </NCard>
-      <br />
       <NAlert type="warning">
         <NText
-          >This site is intended for academic research, so please be certain that you do not
-          disclose any sensitive informations on it!
+          >This Intended for academic research, so please be certain that you do not disclose any
+          sensitive information here!
         </NText>
       </NAlert>
-      <br />
+      <NAlert v-if="mode_env == 'production'" type="info">
+        <NText>Production mode, means all data is static for demonstration only </NText>
+      </NAlert>
       <slot />
-    </div>
+    </NSpace>
     <br />
     <br />
   </Container>

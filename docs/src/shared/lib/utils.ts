@@ -8,6 +8,7 @@ export interface PluginInstance {
   safeJsonParse: (value: any) => any
   secondsToClock: (seconds: number) => string
   clockToSeconds: (clock: string) => number
+  timestampToSeconds: (timestamp: number) => number
   getQueryParam: (value: string) => string | null
   sleep: (ms: number) => Promise<void>
   onRedirectToNewWindow: (url: string) => void
@@ -48,6 +49,11 @@ export const utils: PluginInstance = {
   clockToSeconds(clock: string): number {
     const [hours, minutes, seconds] = clock.split(':').map(Number)
     return hours * 3600 + minutes * 60 + seconds
+  },
+  timestampToSeconds(timestamp: number): number {
+    const now = Math.floor(Date.now() / 1000)
+    const secondsRemaining = timestamp - now
+    return secondsRemaining
   },
   getQueryParam(name: string) {
     const params = new URLSearchParams(window.location.search)

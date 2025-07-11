@@ -30,6 +30,7 @@ import {
   type ScrollbarProps,
   NButtonGroup,
   NPopconfirm,
+  NCountdown,
 } from 'naive-ui'
 import {
   IconMaximize,
@@ -37,17 +38,18 @@ import {
   IconPlayerPlay,
   IconRefresh,
   IconVideo,
+  IconArrowsMoveVertical,
 } from '@tabler/icons-vue'
 import { required, email, minLength, helpers } from '@vuelidate/validators'
 import { getCurrentInstance, nextTick, onMounted, reactive, ref } from 'vue'
 import { useCustomLoading } from '@/composables/loading'
-import { useUserStore } from '@/stores/user.store'
-import { useThemeStore } from '@/stores/theme.store'
-import { useVuelidate } from '@vuelidate/core'
-import { storeToRefs } from 'pinia'
-import { useApi } from '@/composables/api'
-import moment from 'moment'
 import { useBreakpoint } from '@/composables/breakpoint'
+import { useThemeStore } from '@/stores/theme.store'
+import { useUserStore } from '@/stores/user.store'
+import { useVuelidate } from '@vuelidate/core'
+import { useApi } from '@/composables/api'
+import { storeToRefs } from 'pinia'
+import moment from 'moment'
 
 const mode_env = import.meta.env.MODE
 const api_env = import.meta.env.VITE_API
@@ -61,6 +63,10 @@ const themeStore = useThemeStore()
 const { isDarkTheme } = storeToRefs(themeStore)
 const { userSigninData, userFullData, userAuditData, isConnectedToServer } = storeToRefs(userStore)
 
+const userSectionRef = ref<InstanceType<typeof NSpace> | null>(null)
+const streamSectionRef = ref<InstanceType<typeof NSpace> | null>(null)
+const liveSectionRef = ref<InstanceType<typeof NSpace> | null>(null)
+const reportSectionRef = ref<InstanceType<typeof NSpace> | null>(null)
 const imageLiveContainerRef = ref<HTMLDivElement | null>(null)
 const logsLiveContainerRef = ref<any | null>(null)
 const logsLiveData = ref<liveDataType[] | null>(null)
@@ -351,6 +357,7 @@ function toggleFullscreen(el: HTMLElement) {
     stateLiveFullscreenToggle.value = false
   }
 }
+
 onMounted(() => {
   userStore.loadSigninAction().then(() => {
     if (userSigninData.value?.email) {
@@ -379,12 +386,12 @@ onMounted(() => {
 </script>
 <template>
   <NSpace vertical size="large">
-    <NBlockquote>
+    <NAlert type="error">
       <NText
         >This API is part of a system built to track, monitor, and record suspicious behavior during
         remote sessions through RTSP protocol. On this page, you can walkthrough the features<br
       /></NText>
-    </NBlockquote>
+    </NAlert>
     <NDivider><NText>Authentication Story</NText></NDivider>
     <NGrid cols="1 l:2" responsive="screen" x-gap="20" y-gap="10">
       <NGridItem>
@@ -522,10 +529,10 @@ onMounted(() => {
         >
       </NGridItem>
     </NGrid>
-    <NGrid cols="12" responsive="screen" x-gap="20" y-gap="10">
+    <NGrid v-if="userFullData?.id" cols="12" responsive="screen" x-gap="20" y-gap="10">
       <NGridItem :span="breakpoint.mdAndDown ? 12 : 9">
-        <section v-if="userFullData?.id">
-          <NSpace vertical size="large">
+        <section>
+          <NSpace ref="userSectionRef" vertical size="large">
             <NDivider><NText>User Story</NText></NDivider>
             <NCard title="Edit user data">
               <NForm @submit.prevent="onSubmitEditUser">
@@ -580,7 +587,7 @@ onMounted(() => {
               <NEmpty v-else description="Logs not found" />
             </NCard>
           </NSpace>
-          <NSpace vertical size="large" @vue:mounted="onGetStream">
+          <NSpace ref="streamSectionRef" vertical size="large" @vue:mounted="onGetStream">
             <NDivider><NText>Stream Story</NText></NDivider>
             <NCard title="Add stream">
               <NBlockquote>
@@ -652,13 +659,11 @@ onMounted(() => {
               <NEmpty v-else description="Logs not found" />
             </NCard>
           </NSpace>
-          <NSpace vertical size="large">
+          <NSpace ref="liveSectionRef" vertical size="large">
             <NDivider><NText>Live Story</NText></NDivider>
             <NCard title="Streaming">
               <template #header-extra>
-                <NText
-                  >Status: {{ isConnectedToServer ? 'Connected' : 'Disconnected' }} to Server</NText
-                >
+                <NText>[{{ isConnectedToServer ? 'Connected' : 'Disconnected' }} to Server]</NText>
               </template>
               <NForm @submit.prevent="onSubmitLive">
                 <NSpace vertical space="large">
@@ -843,6 +848,46 @@ onMounted(() => {
               </NForm>
             </NCard>
           </NSpace>
+          <NSpace ref="reportSectionRef" vertical size="large" @vue:mounted="onGetStream">
+            <NDivider><NText>Report Story</NText></NDivider>
+            <NCard title="Report Data">
+              <NList v-if="stateStreamData && stateStreamData?.length > 0" hoverable bordered>
+                <NListItem v-for="(item, itemIdx) in stateStreamData" :key="itemIdx">
+                  <NFlex justify="space-between" align="center">
+                    <NText
+                      ><strong>{{ item.url }}</strong></NText
+                    >
+                    <NSpace align="center">
+                      <NText>{{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText>
+                      <NButton
+                        :disabled="loading.isLoading.value"
+                        :loading="loading.isLoading.value"
+                        size="small"
+                        @click="
+                          () => {
+                            utils?.appWindow.navigator.clipboard
+                              .writeText(item.id)
+                              .then(() => message.success('ID copied'))
+                              .catch(() => message.error('Clipboard not supported'))
+                          }
+                        "
+                        >Copy ID</NButton
+                      >
+                      <NButton
+                        :disabled="loading.isLoading.value"
+                        :loading="loading.isLoading.value"
+                        size="small"
+                        type="error"
+                        @click="onDeleteStream(item)"
+                        >Delete</NButton
+                      >
+                    </NSpace>
+                  </NFlex>
+                </NListItem>
+              </NList>
+              <NEmpty v-else description="Report not found" />
+            </NCard>
+          </NSpace>
         </section>
       </NGridItem>
       <NGridItem v-if="!breakpoint.mdAndDown" :span="breakpoint.mdAndDown ? 12 : 3">
@@ -855,6 +900,54 @@ onMounted(() => {
             paddingTop: '25px',
           }"
         >
+          <NCard title="Shortcut">
+            <NSpace vertical>
+              <NButton
+                icon-placement="right"
+                @click="
+                  () => {
+                    userSectionRef?.$el?.scrollIntoView({
+                      behavior: 'smooth',
+                    })
+                  }
+                "
+                >User Section <template #icon><IconArrowsMoveVertical /></template
+              ></NButton>
+              <NButton
+                icon-placement="right"
+                @click="
+                  () => {
+                    streamSectionRef?.$el?.scrollIntoView({
+                      behavior: 'smooth',
+                    })
+                  }
+                "
+                >Stream Section <template #icon><IconArrowsMoveVertical /></template
+              ></NButton>
+              <NButton
+                icon-placement="right"
+                @click="
+                  () => {
+                    liveSectionRef?.$el?.scrollIntoView({
+                      behavior: 'smooth',
+                    })
+                  }
+                "
+                >Live Section <template #icon><IconArrowsMoveVertical /></template
+              ></NButton>
+              <NButton
+                icon-placement="right"
+                @click="
+                  () => {
+                    reportSectionRef?.$el?.scrollIntoView({
+                      behavior: 'smooth',
+                    })
+                  }
+                "
+                >Report Section <template #icon><IconArrowsMoveVertical /></template
+              ></NButton>
+            </NSpace>
+          </NCard>
           <NCard title="Status Server">
             <NSpace vertical>
               <NText>[IP]: {{ api_env }}</NText>
@@ -872,14 +965,19 @@ onMounted(() => {
               <NText>[User ID]: {{ userSigninData.id }}</NText>
               <NText
                 >[Created]:
-                {{
-                  userSigninData?.iat ? moment.unix(userSigninData.iat).format('DD MMMM YYYY') : '-'
-                }}</NText
+                {{ userSigninData?.iat ? moment.unix(userSigninData.iat).fromNow() : '-' }}</NText
               >
               <NText
                 >[Expired]:
-                {{ userSigninData?.exp ? moment.unix(userSigninData.exp).fromNow() : '-' }}</NText
-              >
+                {{ userSigninData?.exp ? moment.unix(userSigninData.exp).fromNow() : '-' }}
+                [<NCountdown
+                  v-if="userSigninData?.exp"
+                  :duration="Number(utils?.timestampToSeconds(userSigninData.exp) ?? 0) * 1000"
+                  active
+                />]
+                <!-- {{ userSigninData?.exp ? ` (${expCountdownRef} remaining)` : `` }} -->
+              </NText>
+              <!--  -->
             </NSpace>
             <NEmpty v-else></NEmpty>
           </NCard>

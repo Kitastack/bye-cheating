@@ -24,7 +24,7 @@ export const useApi = (path: string = '') => {
   }
   const onErrorResponse = (retry: AxiosInstance) => async (error: any) => {
     const originalRequest = error.config
-    if (Boolean(error.response?.status === 401) && !axios.isCancel(error)) {
+    if (Boolean(error.response?.status === 401) && !axios.isCancel(error) && userStore.isLoggedIn) {
       signoutAction()
       return Promise.reject(error?.response)
     }
