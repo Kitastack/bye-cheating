@@ -2,7 +2,6 @@
 import {
   NCard,
   NText,
-  NTag,
   NSpace,
   NDivider,
   NGrid,
@@ -16,37 +15,37 @@ import {
   useMessage,
   NAvatar,
   NFlex,
-  NBlockquote,
   NList,
   NListItem,
   NImage,
   NSelect,
   NInputGroup,
   useThemeVars,
-  NProgress,
   NSpin,
   NThing,
   NScrollbar,
-  type ScrollbarProps,
-  NButtonGroup,
-  NPopconfirm,
   NCountdown,
   NIcon,
   NA,
+  NDrawer,
+  NDrawerContent,
+  NDescriptions,
+  NDescriptionsItem,
+  NTable,
+  NH1,
+  NTag,
 } from 'naive-ui'
 import {
   IconMaximize,
   IconPlayerPause,
   IconPlayerPlay,
   IconRefresh,
-  IconVideo,
   IconArrowsMoveVertical,
-  IconPlayerRecord,
   IconPlayerRecordFilled,
   IconPlayerStop,
   IconPhotoX,
-  IconSearch,
   IconArrowUpRight,
+  IconVideoOff,
 } from '@tabler/icons-vue'
 import { required, email, minLength, helpers } from '@vuelidate/validators'
 import { getCurrentInstance, nextTick, onMounted, reactive, ref } from 'vue'
@@ -71,6 +70,7 @@ const themeStore = useThemeStore()
 const { isDarkTheme } = storeToRefs(themeStore)
 const { userSigninData, userFullData, userAuditData, isConnectedToServer } = storeToRefs(userStore)
 
+const reportDetailDrawerRef = ref<reportDataType | null>(null)
 const reportSectionLoadingRef = ref<boolean>(false)
 const streamSectionLoadingRef = ref<boolean>(false)
 const userSectionRef = ref<InstanceType<typeof NSpace> | null>(null)
@@ -334,6 +334,7 @@ async function onPlayStream(
       message.error(data.message)
       stateLiveIsPlaying.value = false
       stateLiveUrl.value = data?.result ?? null
+      onGetReport()
     }
     if (data?.prediction) {
       data.prediction = JSON.parse(data.prediction)
@@ -455,7 +456,7 @@ onMounted(() => {
             }"
           >
             <NEmpty v-if="!userFullData?.id" description="User not logged in" />
-            <NFlex v-else>
+            <NFlex v-else size="large">
               <NAvatar
                 :src="
                   userFullData?.photo ??
@@ -792,7 +793,7 @@ onMounted(() => {
                             objectFit: 'contain',
                           }"
                         />
-                        <div v-else><IconVideo /></div>
+                        <div v-else><IconVideoOff /></div>
                       </div>
 
                       <NFlex
@@ -930,6 +931,85 @@ onMounted(() => {
             </NCard>
           </NSpace>
           <NSpace ref="reportSectionRef" vertical size="large" @vue:mounted="onGetReport">
+            <NDrawer
+              :show="Boolean(reportDetailDrawerRef)"
+              placement="bottom"
+              height="80vh"
+              @update:show="
+                () => {
+                  reportDetailDrawerRef = null
+                }
+              "
+            >
+              <NDrawerContent mask-closable closable>
+                <template #header>
+                  <NText> Summary Report </NText>
+                </template>
+                <NCard>
+                  <NFlex size="large">
+                    <video controls height="200px" style="background: black; border-radius: 15px">
+                      <source :src="reportDetailDrawerRef?.recordUrl" type="video/mp4" />
+                      <a :href="reportDetailDrawerRef?.recordUrl">MP4</a>
+                    </video>
+
+                    <NSpace size="large" vertical justify="center">
+                      <NText style="text-transform: capitalize"
+                        ><strong>[Status]:</strong> {{ reportDetailDrawerRef?.status }}</NText
+                      >
+                      <NText
+                        ><strong>[Created Date]:</strong>
+                        {{
+                          moment(reportDetailDrawerRef?.createdDate).format('DD MMMM YYYY, H:mm A')
+                        }}</NText
+                      >
+                      <NText
+                        ><strong>[Thumbnail URL]: </strong>
+                        <NA :href="reportDetailDrawerRef?.thumbnailUrl" target="_blank">{{
+                          reportDetailDrawerRef?.thumbnailUrl
+                        }}</NA></NText
+                      >
+                      <NText
+                        ><strong>[Record URL]: </strong>
+                        <NA :href="reportDetailDrawerRef?.recordUrl" target="_blank">{{
+                          reportDetailDrawerRef?.recordUrl
+                        }}</NA></NText
+                      >
+                      <NText
+                        ><strong>[Description]:</strong>
+                        {{ reportDetailDrawerRef?.description ?? '-' }}</NText
+                      >
+                    </NSpace>
+                  </NFlex>
+                </NCard>
+                <br />
+                <NSpace vertical>
+                  <NTable :single-line="true" size="small">
+                    <thead>
+                      <tr>
+                        <th>Identifier (ID)</th>
+                        <th>Class (Avg)</th>
+                        <th>Class (Most)</th>
+                      </tr>
+                    </thead>
+                    <tbody v-if="reportDetailDrawerRef?.calculatedClass">
+                      <tr
+                        v-for="(calculatedItem, calculatedItemIdx) in Object.entries(
+                          JSON.parse(reportDetailDrawerRef?.calculatedClass),
+                        ).map(([key, value]) => ({
+                          ...(value as any),
+                          id: key,
+                        }))"
+                        :key="calculatedItemIdx"
+                      >
+                        <td>{{ calculatedItem?.id }}</td>
+                        <td>{{ calculatedItem?.mean }}</td>
+                        <td>{{ calculatedItem?.mode }}</td>
+                      </tr>
+                    </tbody>
+                  </NTable>
+                </NSpace>
+              </NDrawerContent>
+            </NDrawer>
             <NDivider><NText>Report Story</NText></NDivider>
             <NSpin :show="reportSectionLoadingRef">
               <template #description> Loading... </template>
@@ -938,58 +1018,74 @@ onMounted(() => {
                   ><NButton @click="onGetReport"
                     >Refresh<template #icon><IconRefresh /></template></NButton
                 ></template>
-                <NList v-if="stateReportData && stateReportData?.length > 0" hoverable bordered>
-                  <NListItem v-for="(item, itemIdx) in stateReportData" :key="itemIdx">
-                    <NThing :title="item.title">
-                      <template #header-extra>
-                        <NButton icon-placement="right"
-                          >Detail <template #icon><IconArrowUpRight /></template
-                        ></NButton>
-                      </template>
-                      <template #description>
-                        <NText>{{ item.description }}</NText>
-                      </template>
-                      <section>
-                        <NFlex>
-                          <NImage
-                            :src="item.thumbnailUrl"
-                            :width="150"
-                            style="background: black; border-radius: 15px"
-                          >
-                            <template #error>
-                              {{ item.thumbnailUrl ?? '-' }}
-                              <NIcon :size="100" color="lightGrey">
-                                <IconPhotoX />
-                              </NIcon> </template
-                          ></NImage>
+                <NScrollbar
+                  v-if="stateReportData && stateReportData?.length > 0"
+                  trigger="none"
+                  :style="{
+                    maxHeight: '500px',
+                  }"
+                >
+                  <NList hoverable bordered>
+                    <NListItem v-for="(item, itemIdx) in stateReportData" :key="itemIdx">
+                      <NThing :title="item.title">
+                        <template #header-extra>
+                          <NButton
+                            @click="
+                              () => {
+                                reportDetailDrawerRef = item
+                              }
+                            "
+                            icon-placement="right"
+                            >Detail <template #icon><IconArrowUpRight /></template
+                          ></NButton>
+                        </template>
+                        <template #description>
+                          <NText>{{ item.description }}</NText>
+                        </template>
+                        <section>
+                          <NFlex>
+                            <NImage
+                              :src="item.thumbnailUrl"
+                              :width="150"
+                              :height="100"
+                              style="background: black; border-radius: 15px"
+                            >
+                              <template #error>
+                                {{ item.thumbnailUrl ?? '-' }}
+                                <NIcon :size="100" color="lightGrey">
+                                  <IconPhotoX />
+                                </NIcon> </template
+                            ></NImage>
 
-                          <NSpace size="large" vertical>
-                            <NA v-if="item.recordUrl" :href="item.recordUrl" target="_blank"
-                              >[Record URL]: {{ item.recordUrl }}</NA
-                            >
-                            <NText
-                              >[Created]: {{ moment(item.createdDate).format('DD MMMM YYYY') }} ({{
-                                moment(item.createdDate).fromNow()
-                              }})</NText
-                            >
-                            <NText
-                              :style="{
-                                color:
-                                  item.status == 'error'
-                                    ? 'red'
-                                    : item.status == 'finished'
-                                      ? 'green'
-                                      : 'orange',
-                              }"
-                              >[Status]: {{ item.status }}</NText
-                            >
-                            <!-- {{ item }} -->
-                          </NSpace>
-                        </NFlex>
-                      </section>
-                    </NThing>
-                  </NListItem>
-                </NList>
+                            <NSpace size="large" vertical>
+                              <NA v-if="item.recordUrl" :href="item.recordUrl" target="_blank"
+                                >[Record URL]: {{ item.recordUrl }}</NA
+                              >
+                              <NText
+                                >[Created]:
+                                {{ moment(item.createdDate).format('DD MMMM YYYY') }} ({{
+                                  moment(item.createdDate).fromNow()
+                                }})</NText
+                              >
+                              <NText
+                                :style="{
+                                  color:
+                                    item.status == 'error'
+                                      ? 'red'
+                                      : item.status == 'finished'
+                                        ? 'green'
+                                        : 'orange',
+                                }"
+                                >[Status]: {{ item.status }}</NText
+                              >
+                              <!-- {{ item }} -->
+                            </NSpace>
+                          </NFlex>
+                        </section>
+                      </NThing>
+                    </NListItem>
+                  </NList>
+                </NScrollbar>
                 <NEmpty v-else description="Report not found" />
               </NCard>
             </NSpin>

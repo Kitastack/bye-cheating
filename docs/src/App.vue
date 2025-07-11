@@ -7,7 +7,7 @@ import { NLoadingBarProvider, NMessageProvider, NNotificationProvider } from 'na
   <ThemeProvider>
     <NLoadingBarProvider>
       <NNotificationProvider :max="1">
-        <NMessageProvider placement="bottom-right">
+        <NMessageProvider placement="top">
           <Layout />
         </NMessageProvider>
       </NNotificationProvider>

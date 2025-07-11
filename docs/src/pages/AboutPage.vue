@@ -86,12 +86,12 @@ import { VPdfViewer } from '@vue-pdf-viewer/viewer'
         height="500"
       ></NImage>
     </NTabPane>
-    <NTabPane name="Paper" tab="Paper">
+    <!-- <NTabPane name="Paper" tab="Paper">
       <div :style="{ width: '100vw', height: '50vh' }">
         <VPdfViewer
           src="https://raw.githubusercontent.com/dxxta/Cheating-Detection-API/main/media/paper.pdf"
         />
       </div>
-    </NTabPane>
+    </NTabPane> -->
   </NTabs>
 </template>
