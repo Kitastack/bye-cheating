@@ -181,13 +181,15 @@ export const updateReport = async (
         description: Joi.string().optional(),
         thumbnailUrl: Joi.string().optional(),
         recordUrl: Joi.string().optional(),
-        calculatedClass: Joi.string().optional()
+        calculatedClass: Joi.string().optional(),
+        status: Joi.string().optional()
       }).required(),
       req.body
     )
     if (!req.isInternal) {
       // todo: prevent outsider to update this field
       delete req.body.calculatedClass
+      delete req.body.status
     }
     if (
       !(

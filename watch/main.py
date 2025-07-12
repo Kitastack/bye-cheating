@@ -659,6 +659,7 @@ async def recordLiveStream(id: str):
                     "recordUrl": f"{settings.minio_hostname_public}/default/{report_id}/video{video_format}",
                     "thumbnailUrl": f"{settings.minio_hostname_public}/default/{report_id}/0{image_format}",
                     "calculatedClass": json.dumps(calculation_result),
+                    "status": "success",
                 },
                 headers=request_header,
             )
@@ -692,6 +693,11 @@ async def recordLiveStream(id: str):
                 },
                 headers=request_header,
             )
+        await client.patch(
+            f"{settings.general_service_url}/report",
+            json={"id": report_id, "status": "error"},
+            headers=request_header,
+        )
     finally:
         if vs is not None:
             vs.stop()
