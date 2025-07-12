@@ -49,7 +49,7 @@ export const getReport = async (
         }
       })
     }
-    const foundReport = await database.report.findMany({
+    const finalQuery = {
       where: {
         OR: orQuery?.length > 0 ? orQuery : undefined,
         userId:
@@ -58,7 +58,10 @@ export const getReport = async (
             req.populatedQuery?.createdBySelfOnly == undefined)
             ? ((req.populatedQuery?.userId as string) ?? undefined)
             : req.user?.id
-      },
+      }
+    }
+    const foundReport = await database.report.findMany({
+      ...finalQuery,
       include: {
         user: req.populatedQuery?.withUser == 'true' ? true : undefined,
         live: req.populatedQuery?.withLive == 'true' ? true : undefined,
@@ -68,9 +71,10 @@ export const getReport = async (
       skip: req.page,
       take: req.limit
     })
+    const reportCount = await database.report.count(finalQuery)
     res.status(StatusCodes.ACCEPTED).json({
       success: true,
-      result: foundReport
+      result: reportCount
     })
   } catch (error) {
     next(error)

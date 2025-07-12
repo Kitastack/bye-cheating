@@ -212,7 +212,7 @@ export const getStream = async (
         }
       })
     }
-    const foundStreams = await database.stream.findMany({
+    const finalQuery = {
       where: {
         OR: orQuery?.length > 0 ? orQuery : undefined,
         userId:
@@ -228,7 +228,10 @@ export const getStream = async (
               : false
             : undefined
           : false
-      },
+      }
+    }
+    const foundStreams = await database.stream.findMany({
+      ...finalQuery,
       include: {
         live: req.populatedQuery?.withLive == 'true' ? true : undefined,
         user: req.populatedQuery?.withUser == 'true' ? true : undefined
@@ -237,9 +240,11 @@ export const getStream = async (
       skip: req.page,
       take: req.limit
     })
+    const streamCount = await database.stream.count(finalQuery)
     res.status(StatusCodes.ACCEPTED).json({
       success: true,
-      result: foundStreams
+      result: foundStreams,
+      count: streamCount
     })
   } catch (error) {
     next(error)

@@ -223,7 +223,7 @@ export const getLive = async (
         }
       })
     }
-    const foundLive = await database.live.findMany({
+    const finalQuery = {
       where: {
         OR: orQuery?.length > 0 ? orQuery : undefined,
         userId:
@@ -232,7 +232,10 @@ export const getLive = async (
             req.populatedQuery?.createdBySelfOnly == undefined)
             ? ((req.populatedQuery?.userId as string) ?? undefined)
             : req.user?.id
-      },
+      }
+    }
+    const foundLive = await database.live.findMany({
+      ...finalQuery,
       include: {
         user: req.populatedQuery?.withUser == 'true' ? true : undefined,
         stream: req.populatedQuery?.withStream == 'true' ? true : undefined,
@@ -242,9 +245,11 @@ export const getLive = async (
       skip: req.page,
       take: req.limit
     })
+    const liveCount = await database.live.count(finalQuery)
     res.status(StatusCodes.ACCEPTED).json({
       success: true,
-      result: foundLive
+      result: foundLive,
+      count: liveCount
     })
   } catch (error) {
     next(error)

@@ -394,17 +394,22 @@ export const getUserListForAdmin = async (
         }
       })
     }
-    const foundUsers = await database.user.findMany({
+    const finalQuery = {
       where: {
         OR: orQuery?.length > 0 ? orQuery : undefined
-      },
+      }
+    }
+    const foundUsers = await database.user.findMany({
+      ...finalQuery,
       orderBy: (req.populatedQuery?.orderBy as any[]) ?? undefined,
       skip: req.page,
       take: req.limit
     })
+    const userCount = await database.user.count(finalQuery)
     res.status(StatusCodes.OK).json({
       success: true,
-      result: foundUsers
+      result: foundUsers,
+      count: userCount
     })
   } catch (error) {
     next(error)
