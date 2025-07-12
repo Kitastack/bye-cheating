@@ -23,7 +23,8 @@ export const getReport = async (
         recordUrl: Joi.string().optional(),
         withItems: Joi.boolean().optional().default(false),
         withLive: Joi.boolean().optional().default(false),
-        createdBySelfOnly: Joi.boolean().optional().default(false)
+        createdBySelfOnly: Joi.boolean().optional().default(false),
+        orderBy: Joi.array().optional()
       }).prefs({ convert: true }),
       req.populatedQuery
     )
@@ -61,6 +62,7 @@ export const getReport = async (
         live: req.populatedQuery?.withLive == 'true' ? true : undefined,
         reportItems: req.populatedQuery?.withItems == 'true' ? true : undefined
       },
+      orderBy: (req.populatedQuery?.orderBy as any[]) ?? undefined,
       skip: req.page,
       take: req.limit
     })

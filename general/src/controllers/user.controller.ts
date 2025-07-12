@@ -295,7 +295,8 @@ export const getUserListForAdmin = async (
         id: Joi.string().optional(),
         name: Joi.string().optional(),
         email: Joi.string().optional(),
-        userIds: Joi.array().items(Joi.string()).optional()
+        userIds: Joi.array().items(Joi.string()).optional(),
+        orderBy: Joi.array().optional()
       }).prefs({ convert: true }),
       req.populatedQuery
     )
@@ -328,6 +329,7 @@ export const getUserListForAdmin = async (
       where: {
         OR: orQuery?.length > 0 ? orQuery : undefined
       },
+      orderBy: (req.populatedQuery?.orderBy as any[]) ?? undefined,
       skip: req.page,
       take: req.limit
     })

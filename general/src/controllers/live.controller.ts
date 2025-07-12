@@ -188,7 +188,8 @@ export const getLive = async (
         streamId: Joi.string().uuid().optional(),
         path: urlValidation.optional(),
         withStream: Joi.boolean().optional().default(false),
-        withReport: Joi.boolean().optional().default(false)
+        withReport: Joi.boolean().optional().default(false),
+        orderBy: Joi.array().optional()
         // expiryDate: Joi.object({
         //   gt: Joi.date().optional(),
         //   gte: Joi.date().optional(),
@@ -235,6 +236,7 @@ export const getLive = async (
         stream: req.populatedQuery?.withStream == 'true' ? true : undefined,
         report: req.populatedQuery?.withReport == 'true' ? true : undefined
       },
+      orderBy: (req.populatedQuery?.orderBy as any[]) ?? undefined,
       skip: req.page,
       take: req.limit
     })
