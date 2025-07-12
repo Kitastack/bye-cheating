@@ -5,6 +5,22 @@ declare global {
     google: any
     __googleMapsCallback__?: () => void
   }
+  type notificationDataType = {
+    id: string
+    link?: string
+    photo?: string
+    title: string
+    description?: string
+    caption?: string
+    entityId?: string
+    entityName?: string
+    status?: string
+    type?: string
+    userId: string
+    user?: User
+    createdDate: Date
+    isReaded: Boolean
+  }
   type userDataType = {
     id: string
     email: string

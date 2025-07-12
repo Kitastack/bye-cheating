@@ -20,6 +20,7 @@ import {
   NText,
   NAlert,
   useMessage,
+  useNotification,
 } from 'naive-ui'
 import { getCurrentInstance, h, onMounted, reactive, watch } from 'vue'
 import { useBreakpoint } from '@/composables/breakpoint'
@@ -31,11 +32,13 @@ import { storeToRefs } from 'pinia'
 
 const mode_env = import.meta.env.MODE
 const router = useRouter()
+const message = useMessage()
 const breakpoint = useBreakpoint()
 const themeStore = useThemeStore()
+const notification = useNotification()
 const userStore = useUserStore()
-const message = useMessage()
-const { isLoggedIn } = storeToRefs(userStore)
+const { isLoggedIn, currentNotificationLiveData, userSigninData, userFullData } =
+  storeToRefs(userStore)
 const { toggleTheme } = storeToRefs(themeStore)
 const utils = getCurrentInstance()?.proxy?.$utils
 const data: {
@@ -91,6 +94,43 @@ watch(
   },
   { immediate: true },
 )
+watch(
+  () => isLoggedIn.value,
+  () => {
+    userStore.subscribeNotificationAction()
+  },
+)
+watch(
+  () => currentNotificationLiveData.value,
+  () => {
+    if (currentNotificationLiveData.value) {
+      notification.create({
+        title: currentNotificationLiveData.value?.title,
+        content: currentNotificationLiveData.value?.description,
+        type: (currentNotificationLiveData.value?.type as any) ?? 'default',
+        duration: 5000,
+      })
+      // userStore.$patch((state) => {
+      //   if (isNotificationLiveDataExist) {
+      //     state.notificationLiveData = notificationLiveData.value!.map(
+      //       (notificationLiveDataItem) => {
+      //         if (notificationLiveDataItem.id == currentNotification?.id) {
+      //           return {
+      //             ...notificationLiveDataItem,
+      //             isReaded: true,
+      //           }
+      //         }
+      //         return notificationLiveDataItem
+      //       },
+      //     )
+      //   }
+      // })
+    }
+  },
+  {
+    deep: true,
+  },
+)
 
 onMounted(() => {
   userStore.pingServerAction().catch(() => {
@@ -114,6 +154,14 @@ onMounted(() => {
         duration: 0,
       },
     )
+  })
+  userStore.loadSigninAction().then(() => {
+    if (userSigninData.value?.email) {
+      message.success(
+        `${userSigninData.value?.roles?.includes('Admin') ? 'Welcome [admin]' : 'Welcome'} ${userSigninData.value.email}`,
+      )
+    }
+    userStore.loadUserDataAction()
   })
 })
 </script>

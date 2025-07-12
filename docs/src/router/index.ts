@@ -11,6 +11,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/admin',
+      name: 'admin',
+      component: async () => await import('@/pages/AdminPage.vue'),
+      meta: {
+        title: 'Admin',
+      },
+    },
+    {
       path: '/docs',
       name: 'docs',
       component: async () => await import('../pages/DocumentationPage.vue'),

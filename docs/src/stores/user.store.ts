@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-import { useApi } from '@/composables/api'
 import { deleteCookie, getCookie, setCookie } from '@/composables/webstorage'
+import { useApi } from '@/composables/api'
 import axios, { AxiosError } from 'axios'
 import { jwtDecode } from 'jwt-decode'
 import { defineStore } from 'pinia'
@@ -10,6 +10,9 @@ export const useUserStore = defineStore('useUserStore', () => {
   const { api: userApi } = useApi('/user')
   const isLoggedIn = ref<boolean>(false)
   const isConnectedToServer = ref<boolean>(true)
+  const notificationLiveData = ref<notificationDataType[] | null>(null)
+  const currentNotificationLiveData = ref<notificationDataType | null>(null)
+  const notificationResponse = ref<EventSource | null>(null)
   const userSigninData = ref<extendedUserDataType | null>(null)
   const userFullData = ref<userDataType | null>(null)
   const userAuditData = ref<auditDataType[] | null>(null)
@@ -36,15 +39,41 @@ export const useUserStore = defineStore('useUserStore', () => {
   }
   async function loadSigninAction() {
     const credentialsData = getCookie('credentials')
-    if (!credentialsData?.accessToken || !credentialsData?.refreshToken) return
+    if (!credentialsData?.accessToken || !credentialsData?.refreshToken) throw new Error()
     const userData: extendedUserDataType = jwtDecode(credentialsData?.accessToken)
-    if (!userData) return
+    if (!userData) throw new Error()
     setCookie('credentials', {
       accessToken: credentialsData?.accessToken,
       refreshToken: credentialsData?.refreshToken,
     })
     userSigninData.value = userData
     isLoggedIn.value = true
+  }
+  async function subscribeNotificationAction() {
+    const { accessToken } = getCookie('credentials')
+    if (!userSigninData.value || !accessToken) return
+    notificationLiveData.value = []
+    currentNotificationLiveData.value = null
+    notificationResponse.value = new EventSource(
+      `${import.meta.env.VITE_API}/subscribe-notification?token=${accessToken}`,
+    )
+    notificationResponse.value.onmessage = (event) => {
+      const data = JSON.parse(event.data)
+      if (data?.success === false) return
+      const payload = {
+        ...data?.result,
+        isReaded: false,
+      }
+      notificationLiveData.value?.unshift(payload)
+      currentNotificationLiveData.value = payload
+    }
+    notificationResponse.value.onerror = () => {
+      console.log('notification subscriber error')
+      notificationResponse.value?.close()
+    }
+    notificationResponse.value.onopen = () => {
+      console.log('subscribe to notification')
+    }
   }
   async function loadUserDataAction() {
     if (!userSigninData.value) return
@@ -88,6 +117,9 @@ export const useUserStore = defineStore('useUserStore', () => {
     pingServerAction,
     loadUserDataAction,
     isConnectedToServer,
+    notificationLiveData,
+    currentNotificationLiveData,
+    subscribeNotificationAction,
     userPostApi: userApi.post<AxiosResponseResult<any>>,
     userPatchApi: userApi.patch<AxiosResponseResult<any>>,
     userGetApi: userApi.get<AxiosResponseResult<any>>,

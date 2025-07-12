@@ -58,13 +58,15 @@ import { useVuelidate } from '@vuelidate/core'
 import { useApi } from '@/composables/api'
 import { storeToRefs } from 'pinia'
 import moment from 'moment'
+import { useRouter } from 'vue-router'
 
 const mode_env = import.meta.env.MODE
 const api_env = import.meta.env.VITE_API
+const router = useRouter()
+const theme = useThemeVars()
 const message = useMessage()
 const userStore = useUserStore()
 const loading = useCustomLoading()
-const theme = useThemeVars()
 const breakpoint = useBreakpoint()
 const utils = getCurrentInstance()?.proxy?.$utils
 const themeStore = useThemeStore()
@@ -212,7 +214,16 @@ async function onSubmitEditUser() {
 async function onGetStream() {
   try {
     streamSectionLoadingRef.value = true
-    const response = await useApi('/stream').api.get('')
+    const response = await useApi('/stream').api.get('/', {
+      params: {
+        orderBy: [
+          {
+            createdDate: 'desc',
+          },
+        ],
+        createdBySelfOnly: userSigninData.value?.roles?.includes('Admin') ? true : undefined,
+      },
+    })
     if (response.data.result) {
       stateStreamData.value = response.data.result
     }
@@ -286,9 +297,9 @@ async function onSubmitLive(title?: string | null) {
       stateLiveData.value = (
         await useApi('/report').api.post('/', {
           title,
-          description: `Record for stream id ${stream.id} at ${moment().format('DD MMMM YYYY h:mm:ss a')}`,
           streamId: stream.id,
           expiryTimeInMinutes: 1,
+          description: `Record for stream id ${stream.id} ${moment().format('DD MMMM YYYY HH:mm A')}`,
         })
       )?.data?.result?.live
       onGetReport()
@@ -317,7 +328,7 @@ async function onPlayStream(
   isPrediction: boolean = stateLiveIsPrediction.value,
 ) {
   loading.start()
-  onFetchLive()
+  onGetLive()
   // todo: extend time first
   await useApi('/watch').api.get(`/live/${liveData.id}/extend-more-minutes`)
   // live
@@ -374,11 +385,12 @@ function onStopStream() {
     stateLiveIsPrediction.value = false
   }
 }
-async function onFetchLive() {
+async function onGetLive() {
   // need to concat stream data
   const liveData = await useApi('/live').api.get('/', {
     params: {
       withStream: true,
+      createdBySelfOnly: userSigninData.value?.roles?.includes('Admin') ? true : undefined,
     },
   })
   logsLiveData.value = liveData.data?.result ?? null
@@ -386,7 +398,16 @@ async function onFetchLive() {
 async function onGetReport() {
   try {
     reportSectionLoadingRef.value = true
-    const response = await useApi('/report').api.get('')
+    const response = await useApi('/report').api.get('/', {
+      params: {
+        orderBy: [
+          {
+            createdDate: 'desc',
+          },
+        ],
+        createdBySelfOnly: userSigninData.value?.roles?.includes('Admin') ? true : undefined,
+      },
+    })
     if (response.data.result) {
       stateReportData.value = response.data.result
     }
@@ -407,16 +428,6 @@ function toggleFullscreen(el: HTMLElement) {
 }
 
 onMounted(() => {
-  userStore.loadSigninAction().then(() => {
-    if (userSigninData.value?.email) {
-      message.success(`Welcome ${userSigninData.value.email}`)
-    }
-    userStore.loadUserDataAction().then(() => {
-      if (userFullData.value?.name) {
-        stateUserEdit.name = userFullData.value.name
-      }
-    })
-  })
   document.addEventListener('fullscreenchange', () => {
     const isFullscreen = document.fullscreenElement !== null
     if (!isFullscreen && imageLiveContainerRef) {
@@ -429,7 +440,7 @@ onMounted(() => {
       })
     }
   })
-  onFetchLive()
+  onGetLive()
 })
 </script>
 <template>
@@ -494,8 +505,7 @@ onMounted(() => {
                 :disabled="loading.isLoading.value"
                 @click="
                   () => {
-                    loading.start()
-                    userStore.loadUserDataAction().finally(() => loading.finish())
+                    router.push('/admin')
                   }
                 "
                 :render-icon="utils?.renderIcon(IconUserCog)"
@@ -635,17 +645,26 @@ onMounted(() => {
               </NForm>
             </NCard>
             <NCard title="User Audit Logs">
-              <NList v-if="userAuditData && userAuditData?.length > 0" hoverable bordered>
-                <NListItem v-for="(item, itemIdx) in userAuditData" :key="itemIdx">
-                  <NFlex justify="space-between">
-                    <NText
-                      ><strong>{{ item.user?.name }}</strong> made changes at
-                      {{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText
-                    >
-                    <NText>{{ moment(item.createdDate).format('HH:mm A') }}</NText>
-                  </NFlex>
-                </NListItem>
-              </NList>
+              <NScrollbar
+                v-if="userAuditData && userAuditData?.length > 0"
+                trigger="none"
+                :style="{
+                  maxHeight: '250px',
+                }"
+              >
+                <NList hoverable bordered>
+                  <NListItem v-for="(item, itemIdx) in userAuditData" :key="itemIdx">
+                    <NFlex justify="space-between">
+                      <NText
+                        ><strong>{{ item.user?.name }}</strong> made changes at
+                        {{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText
+                      >
+                      <NText>{{ moment(item.createdDate).format('HH:mm A') }}</NText>
+                    </NFlex>
+                  </NListItem>
+                </NList></NScrollbar
+              >
+
               <NEmpty v-else description="Logs not found" />
             </NCard>
           </NSpace>
@@ -687,40 +706,48 @@ onMounted(() => {
                   ><NButton @click="onGetStream"
                     >Refresh<template #icon><IconRefresh /></template></NButton
                 ></template>
-                <NList v-if="stateStreamData && stateStreamData?.length > 0" hoverable bordered>
-                  <NListItem v-for="(item, itemIdx) in stateStreamData" :key="itemIdx">
-                    <NFlex justify="space-between" align="center">
-                      <NText
-                        ><strong>{{ item.url }}</strong></NText
-                      >
-                      <NSpace align="center">
-                        <NText>{{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText>
-                        <NButton
-                          :disabled="loading.isLoading.value"
-                          :loading="loading.isLoading.value"
-                          size="small"
-                          @click="
-                            () => {
-                              utils?.appWindow.navigator.clipboard
-                                .writeText(item.id)
-                                .then(() => message.success('ID copied'))
-                                .catch(() => message.error('Clipboard not supported'))
-                            }
-                          "
-                          >Copy ID</NButton
+                <NScrollbar
+                  v-if="stateStreamData && stateStreamData?.length > 0"
+                  trigger="none"
+                  :style="{
+                    maxHeight: '250px',
+                  }"
+                >
+                  <NList hoverable bordered>
+                    <NListItem v-for="(item, itemIdx) in stateStreamData" :key="itemIdx">
+                      <NFlex justify="space-between" align="center">
+                        <NText
+                          ><strong>{{ item.url }}</strong></NText
                         >
-                        <NButton
-                          :disabled="loading.isLoading.value"
-                          :loading="loading.isLoading.value"
-                          size="small"
-                          type="error"
-                          @click="onDeleteStream(item)"
-                          >Delete</NButton
-                        >
-                      </NSpace>
-                    </NFlex>
-                  </NListItem>
-                </NList>
+                        <NSpace align="center">
+                          <NText>{{ moment(item.createdDate).format('DD MMMM YYYY') }}</NText>
+                          <NButton
+                            :disabled="loading.isLoading.value"
+                            :loading="loading.isLoading.value"
+                            size="small"
+                            @click="
+                              () => {
+                                utils?.appWindow.navigator.clipboard
+                                  .writeText(item.id)
+                                  .then(() => message.success('ID copied'))
+                                  .catch(() => message.error('Clipboard not supported'))
+                              }
+                            "
+                            >Copy ID</NButton
+                          >
+                          <NButton
+                            :disabled="loading.isLoading.value"
+                            :loading="loading.isLoading.value"
+                            size="small"
+                            type="error"
+                            @click="onDeleteStream(item)"
+                            >Delete</NButton
+                          >
+                        </NSpace>
+                      </NFlex>
+                    </NListItem>
+                  </NList>
+                </NScrollbar>
                 <NEmpty v-else description="Logs not found" />
               </NCard>
             </NSpin>
@@ -766,7 +793,7 @@ onMounted(() => {
                           () => {
                             let title = utils?.appWindow.prompt('Record title')
                             if (!title || !(title?.length > 0)) {
-                              title = `Record ${moment().format('DD-MM-YYYY-HH:mm:ss A')}`
+                              title = `Record_${moment().format('DD-MM-YYYY_HH:mm:ss_A')}`
                             }
                             onSubmitLive(title)
                           }
@@ -960,15 +987,14 @@ onMounted(() => {
                 <template #header>
                   <NText> Summary Report </NText>
                 </template>
-                <NCard>
+                <NCard
+                  :style="{
+                    background: theme.primaryColor,
+                  }"
+                >
                   <NSpace size="large" vertical justify="center">
-                    <NText
-                      ><strong>[Title]:</strong> {{ reportDetailDrawerRef?.title ?? '-' }}</NText
-                    >
-                    <NText
-                      ><strong>[Description]:</strong>
-                      {{ reportDetailDrawerRef?.description ?? '-' }}</NText
-                    ></NSpace
+                    <NH1> {{ reportDetailDrawerRef?.title ?? '-' }}</NH1>
+                    <NText> {{ reportDetailDrawerRef?.description ?? '-' }}</NText></NSpace
                   >
                 </NCard>
                 <br />
@@ -977,6 +1003,7 @@ onMounted(() => {
                     <video
                       loop
                       autoplay
+                      :width="breakpoint.mdAndDown ? '100%' : 'auto'"
                       height="300px"
                       style="background: black; border-radius: 15px"
                     >
@@ -1107,40 +1134,24 @@ onMounted(() => {
                   <NList hoverable bordered>
                     <NListItem v-for="(item, itemIdx) in stateReportData" :key="itemIdx">
                       <NThing :title="item.title">
-                        <template #header-extra>
-                          <NButton
-                            :disabled="item.status !== 'finished'"
-                            @click="
-                              () => {
-                                reportDetailDrawerRef = item
-                              }
-                            "
-                            size="small"
-                            icon-placement="right"
-                            >Detail <template #icon><IconArrowUpRight /></template
-                          ></NButton>
-                        </template>
                         <section>
                           <NFlex>
                             <NImage
                               :src="item.thumbnailUrl ?? 'foo'"
                               :width="150"
-                              :height="100"
+                              :height="150"
+                              object-fit="cover"
                               style="background: black; border-radius: 15px"
                             >
                               <template #error>
                                 <NFlex
                                   align="center"
                                   justify="center"
-                                  style="width: 150px; height: 100px"
+                                  style="width: 150px; height: 150px"
                                 >
                                   <IconPhotoX />
-                                </NFlex>
-                                <!-- <NIcon :size="100" color="lightGrey">
-                                </NIcon>  -->
-                              </template></NImage
-                            >
-
+                                </NFlex> </template
+                            ></NImage>
                             <NSpace size="large" vertical>
                               <NA v-if="item.recordUrl" :href="item.recordUrl" target="_blank"
                                 ><strong>[Record URL]:</strong> {{ item.recordUrl }}</NA
@@ -1162,7 +1173,32 @@ onMounted(() => {
                                 }"
                                 ><strong>[Status]:</strong> {{ item.status }}</NText
                               >
-                              <!-- {{ item }} -->
+                              <NSpace>
+                                <NButton
+                                  @click="
+                                    () => {
+                                      utils?.appWindow.navigator.clipboard
+                                        .writeText(item.id)
+                                        .then(() => message.success('ID copied'))
+                                        .catch(() => message.error('Clipboard not supported'))
+                                    }
+                                  "
+                                  size="small"
+                                  icon-placement="right"
+                                  >Copy ID
+                                </NButton>
+                                <NButton
+                                  :disabled="item.status !== 'finished'"
+                                  @click="
+                                    () => {
+                                      reportDetailDrawerRef = item
+                                    }
+                                  "
+                                  type="primary"
+                                  size="small"
+                                  icon-placement="right"
+                                  >Detail <template #icon><IconArrowUpRight /></template></NButton
+                              ></NSpace>
                             </NSpace>
                           </NFlex>
                         </section>
