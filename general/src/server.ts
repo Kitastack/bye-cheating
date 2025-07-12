@@ -28,7 +28,12 @@ var publishNotification = (data: notification) => {
     if (!req.user) return
     if (req.user.id != data.userId) return
     delete (data as any)?.user
-    res.write(`data: ${JSON.stringify(data)}\n\n`)
+    res.write(
+      `data: ${JSON.stringify({
+        success: true,
+        result: data
+      })}\n\n`
+    )
   })
 }
 declare global {
@@ -69,6 +74,11 @@ Application.get('/ping', (req: Request, res: Response) => {
   })
 })
 Application.get('/subscribe-notification', (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+  res.flushHeaders() // need flush headers for establishment SSE with client
+  res.write(`: connected\n\n`)
   try {
     const token = req.query.token as string
     if (!token) throw new Error()
@@ -78,11 +88,6 @@ Application.get('/subscribe-notification', (req: Request, res: Response) => {
       }
       req.user = payload as any
     })
-    res.setHeader('Content-Type', 'text/event-stream')
-    res.setHeader('Cache-Control', 'no-cache')
-    res.setHeader('Connection', 'keep-alive')
-    res.flushHeaders() // need flush headers for establishment SSE with client
-    res.write(`: connected\n\n`)
     notificationSubscribers.push([req, res])
     req.on('close', () => {
       notificationSubscribers = notificationSubscribers.filter(
@@ -90,7 +95,6 @@ Application.get('/subscribe-notification', (req: Request, res: Response) => {
       )
     })
   } catch (error) {
-    res.write(`event: error\n`)
     res.write(
       `data: ${JSON.stringify({ success: false, message: "You're not authenticated!" })}\n\n`
     )
