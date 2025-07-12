@@ -1,8 +1,8 @@
 // roles
-const Admin = "Admin";
-const Sandbox = "Sandbox";
-export const ROLE_TYPE = [Sandbox, Admin] as const;
+const Admin = 'Admin'
+const Developer = 'Developer'
+export const ROLE_TYPE = [Developer, Admin] as const
 export const ROLE = {
-  Sandbox,
-  Admin,
-};
+  Developer,
+  Admin
+}

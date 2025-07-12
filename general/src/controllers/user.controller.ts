@@ -227,6 +227,75 @@ export const userUpdate = async (
   }
 }
 /**
+ * [POST] User register for admin.
+ */
+export const signupUserForAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await isValidSchema(
+      Joi.object({
+        id: Joi.string().uuid().optional(),
+        name: Joi.string().required(),
+        email: Joi.string().email().required(),
+        password: Joi.string().min(8).required(),
+        roles: Joi.array()
+          .items(Joi.string().valid(ROLE.Admin, ROLE.Developer))
+          .optional(),
+        isVerified: Joi.boolean().optional()
+      }).required(),
+      req.body
+    )
+    if (
+      (await database.user.count({
+        where: {
+          OR: [
+            {
+              email: {
+                contains: req.body.email?.trim()
+              }
+            },
+            {
+              id: req.body.id
+            }
+          ]
+        }
+      })) > 0
+    ) {
+      throw new BadRequestError('user already registered')
+    }
+    req.body.password = await generatePassword(req.body.password)
+    const createdUser = await database.$transaction(async (ctx) => {
+      const userPayload = await ctx.user.create({
+        data: {
+          ...req.body,
+          isVerified: req.body.isVerified ?? false,
+          id: req.body.id ?? randomUUID()
+        }
+      })
+      delete req.body.password
+      await ctx.audit.create({
+        data: {
+          entityId: userPayload.id,
+          entityName: 'user',
+          fieldName: JSON.stringify(Object.keys(userPayload)),
+          fieldValue: JSON.stringify(userPayload),
+          userId: req.user?.id
+        }
+      })
+      return userPayload
+    })
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      result: createdUser
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+/**
  * [PATCH] User data edit for admin.
  */
 export const userUpdateForAdmin = async (
@@ -504,6 +573,32 @@ export const createAccessToken = async (
       result: {
         token: accessToken
       }
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+/**
+ * [GET] get user authentication for admin.
+ */
+export const getAuthentication = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await database.authentication.findMany({
+      include: {
+        user: true
+      },
+      skip: req.page,
+      take: req.limit
+    })
+    const count = await database.authentication.count()
+    res.status(StatusCodes.OK).json({
+      success: true,
+      result,
+      count
     })
   } catch (error) {
     next(error)
