@@ -10,7 +10,9 @@ import {
   createNotification,
   createAccessToken,
   getAuthentication,
-  signupUserForAdmin
+  signupUserForAdmin,
+  signOut,
+  setNotificationAsReaded
 } from '@controllers/user.controller'
 import { authenticateToken } from '@libs/jwt.lib'
 import express from 'express'
@@ -36,13 +38,19 @@ userRouter.get(
   authenticateToken(['Admin', 'Developer']),
   getUserListForAdmin
 )
+userRouter.post(
+  '/notification/read',
+  authenticateToken(),
+  setNotificationAsReaded
+)
 userRouter.post('/notification', authenticateToken(), createNotification)
 userRouter.get('/notification', authenticateToken(), getNotification)
 userRouter.get('/', authenticateToken(), getForLoggedUser)
-userRouter.get('/audit', authenticateToken(), getAudit)
 userRouter.patch('/', authenticateToken(), userUpdate)
+userRouter.get('/audit', authenticateToken(), getAudit)
 userRouter.post('/token', createAccessToken)
 userRouter.post('/signin', signin)
 userRouter.post('/signup', signup)
+userRouter.delete('/signout', signOut)
 
 export { userRouter }

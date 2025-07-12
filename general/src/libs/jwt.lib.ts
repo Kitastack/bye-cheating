@@ -19,10 +19,6 @@ export type extendedUserType = {
   ipAddress?: string
 } & user
 
-export type extendedUserTypeRequiredId = {
-  authenticationId: string
-} & user
-
 export const generateAccessToken = async (
   payload: extendedUserType,
   type: string = 'website'

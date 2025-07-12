@@ -50,6 +50,8 @@ model notification {
     status      String?
     type        String?
     userId      String
+    isReaded    Boolean   @default(false)
     user        user      @relation(fields: [userId], references: [id])
     createdDate DateTime? @default(now())
+    updatedDate DateTime?
 }

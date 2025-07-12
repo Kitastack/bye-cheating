@@ -4,10 +4,13 @@ import qs from 'qs'
 
 export declare global {
   type role = (typeof ROLE_TYPE)[number]
+  type extendedUserTypeRequiredId = {
+    authenticationId: string
+  } & user
   namespace Express {
     export interface Request {
       populatedQuery?: qs.ParsedQs
-      user?: user
+      user?: extendedUserTypeRequiredId
       ipAddress?: string
       page?: number
       limit?: number

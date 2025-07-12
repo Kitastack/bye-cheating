@@ -179,6 +179,7 @@ exports.Prisma.AuthenticationScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   ipAddress: 'ipAddress',
+  isSignOut: 'isSignOut',
   description: 'description',
   createdDate: 'createdDate',
   updatedDate: 'updatedDate'
@@ -215,7 +216,9 @@ exports.Prisma.NotificationScalarFieldEnum = {
   status: 'status',
   type: 'type',
   userId: 'userId',
-  createdDate: 'createdDate'
+  isReaded: 'isReaded',
+  createdDate: 'createdDate',
+  updatedDate: 'updatedDate'
 };
 
 exports.Prisma.SortOrder = {

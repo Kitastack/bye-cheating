@@ -21,6 +21,7 @@ model authentication {
     userId      String
     user        user      @relation(fields: [userId], references: [id])
     ipAddress   String?
+    isSignOut   Boolean   @default(false)
     description String?
     createdDate DateTime  @default(now())
     updatedDate DateTime?

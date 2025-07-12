@@ -67,6 +67,21 @@ export const signup = async (
           userId: userPayload.id
         }
       })
+      await ctx.notification
+        .create({
+          data: {
+            title: 'Welcome to Byecheating',
+            status: 'success',
+            userId: userPayload.id,
+            description: 'Your register was successful. Enjoy your session!'
+          }
+        })
+        .then((result) => {
+          setTimeout(() => {
+            // todo: send after a half minute
+            publishNotification(result)
+          }, 30 * 1000)
+        })
       return userPayload
     })
     const [accessToken, userAccessPayload] = await generateAccessToken({
@@ -76,6 +91,7 @@ export const signup = async (
     const [refreshToken, _] = await generateRefreshToken(
       userAccessPayload.authenticationId
     )
+
     res.status(StatusCodes.CREATED).json({
       success: true,
       result: {
@@ -491,6 +507,39 @@ export const createNotification = async (
   }
 }
 /**
+ * [POST] set notification read status for logged user.
+ */
+export const setNotificationAsReaded = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await isValidSchema(
+      Joi.object({
+        id: Joi.string().uuid().required()
+      }).required(),
+      req.body
+    )
+    const id = req.body?.id
+    await database.notification.update({
+      where: {
+        id
+      },
+      data: {
+        isReaded: true,
+        updatedDate: new Date()
+      }
+    })
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      message: 'Notification has readed'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+/**
  * [GET] get logged user or admin audit.
  */
 export const getAudit = async (
@@ -504,7 +553,6 @@ export const getAudit = async (
         entityId: Joi.string().uuid().required(),
         entityName: Joi.string().optional(),
         orderBy: Joi.array().optional()
-        // createdBySelfOnly: Joi.boolean().optional().default(false)
       }).prefs({ convert: true }),
       req.populatedQuery
     )
@@ -525,12 +573,6 @@ export const getAudit = async (
               ]
             }
           : {})
-        // userId:
-        //   req.user?.roles?.includes(ROLE.Admin) &&
-        //   (req.populatedQuery?.createdBySelfOnly == 'false' ||
-        //     req.populatedQuery?.createdBySelfOnly == undefined)
-        //     ? ((req.populatedQuery?.userId as string) ?? undefined)
-        //     : req.user?.id
       },
       include: {
         user: true
@@ -578,13 +620,11 @@ export const createAccessToken = async (
     if (!foundAuthenticationData) {
       throw new UnauthorizedError('please sign-in again')
     }
-
     const [accessToken, userAccessPayload] = await generateAccessToken({
       ...foundAuthenticationData?.user,
       authenticationId: foundAuthenticationData.id,
       ipAddress: req.ipAddress
     } as any)
-
     res.status(StatusCodes.CREATED).json({
       success: true,
       result: {
@@ -606,11 +646,19 @@ export const getAuthentication = async (
   try {
     await isValidSchema(
       Joi.object({
+        createdBySelfOnly: Joi.boolean().optional().default(false),
         orderBy: Joi.array().optional()
       }).prefs({ convert: true }),
       req.populatedQuery
     )
     const result = await database.authentication.findMany({
+      where: {
+        userId:
+          req.user?.roles?.includes(ROLE.Admin) &&
+          !(req.populatedQuery?.createdBySelfOnly == 'true')
+            ? ((req.populatedQuery?.userId as string) ?? undefined)
+            : req.user?.id
+      },
       include: {
         user: true
       },
@@ -623,6 +671,55 @@ export const getAuthentication = async (
       success: true,
       result,
       count
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+/**
+ * [DELETE] set isSignOut authentication for user and admin.
+ */
+export const signOut = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    await isValidSchema(
+      Joi.object({
+        id: Joi.string().uuid().optional()
+      }).prefs({ convert: true }),
+      req.populatedQuery
+    )
+    let selectedId = req.user?.authenticationId
+    if (req.populatedQuery?.id && req.user?.roles?.includes(ROLE.Admin)) {
+      selectedId = req.populatedQuery.id as string
+    }
+    if (
+      !(
+        (await database.authentication.count({
+          where: { id: selectedId }
+        })) > 0
+      )
+    ) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        success: false,
+        message: `Session with id ${selectedId} does not exist`
+      })
+      return
+    }
+    await database.authentication.update({
+      where: {
+        id: selectedId
+      },
+      data: {
+        isSignOut: true,
+        updatedDate: new Date()
+      }
+    })
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Successfully sign-out'
     })
   } catch (error) {
     next(error)
