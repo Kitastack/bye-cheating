@@ -33,6 +33,16 @@ export async function corsHandler(
     req.isInternal = false
   }
 
+  let ip =
+    req.headers['x-forwarded-for']?.toString().split(',')[0] ||
+    req.socket.remoteAddress ||
+    ''
+  if (ip === '::1' || ip === '127.0.0.1') {
+    ip = 'localhost'
+  }
+  const userAgent = req.headers['user-agent'] || ''
+  req.ipAddress = `${ip} | User-Agent: ${userAgent}`
+
   next()
 }
 

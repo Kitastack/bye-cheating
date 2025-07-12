@@ -69,9 +69,10 @@ export const signup = async (
       })
       return userPayload
     })
-    const [accessToken, userAccessPayload] = await generateAccessToken(
-      createdUser as user
-    )
+    const [accessToken, userAccessPayload] = await generateAccessToken({
+      ...createdUser,
+      ipAddress: req.ipAddress
+    } as any)
     const [refreshToken, _] = await generateRefreshToken(
       userAccessPayload.authenticationId
     )
@@ -133,9 +134,10 @@ export const signin = async (
     if (!isPasswordValid) {
       throw new BadRequestError(`password does not match`)
     }
-    const [accessToken, userPayload] = await generateAccessToken(
-      existingUser as user
-    )
+    const [accessToken, userPayload] = await generateAccessToken({
+      ...existingUser,
+      ipAddress: req.ipAddress
+    } as any)
     const [refreshToken, _] = await generateRefreshToken(
       userPayload.authenticationId
     )
@@ -579,7 +581,8 @@ export const createAccessToken = async (
 
     const [accessToken, userAccessPayload] = await generateAccessToken({
       ...foundAuthenticationData?.user,
-      authenticationId: foundAuthenticationData.id
+      authenticationId: foundAuthenticationData.id,
+      ipAddress: req.ipAddress
     } as any)
 
     res.status(StatusCodes.CREATED).json({

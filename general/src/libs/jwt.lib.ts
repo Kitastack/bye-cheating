@@ -16,6 +16,7 @@ const publicKey = readFileSync(join(__dirname, '../keys/public.pem'), 'utf8')
 
 export type extendedUserType = {
   authenticationId?: string
+  ipAddress?: string
 } & user
 
 export type extendedUserTypeRequiredId = {
@@ -23,7 +24,7 @@ export type extendedUserTypeRequiredId = {
 } & user
 
 export const generateAccessToken = async (
-  payload: extendedUserType | user,
+  payload: extendedUserType,
   type: string = 'website'
 ): Promise<[string, extendedUserTypeRequiredId]> => {
   try {
@@ -42,7 +43,8 @@ export const generateAccessToken = async (
         data: {
           description: type,
           id: authenticationId,
-          userId: payload.id
+          userId: payload.id,
+          ipAddress: payload?.ipAddress
         },
         include: {
           user: true
