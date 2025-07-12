@@ -23,6 +23,7 @@ model report {
   userId              String
   user                user          @relation(fields: [userId], references: [id])
   thumbnailUrl        String?
+  status              String
   recordUrl           String?
   expiryTimeInMinutes Int?
   calculatedClass     Json?
@@ -91,6 +92,14 @@ generator client {
   previewFeatures = ["driverAdapters", "typedSql", "postgresqlExtensions"]
 }
 
+// model temporary {
+//     id          String    @id @default(uuid())
+//     key         String
+//     value       String?
+//     description String?
+//     createdDate DateTime? @default(now())
+// }
+
 model logs {
   id          String    @id @default(uuid())
   type        String    @default("traffic")
@@ -121,6 +130,7 @@ model notification {
   entityId    String?
   entityName  String?
   status      String?
+  type        String?
   userId      String
   user        user      @relation(fields: [userId], references: [id])
   createdDate DateTime? @default(now())

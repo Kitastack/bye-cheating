@@ -138,6 +138,7 @@ exports.Prisma.ReportScalarFieldEnum = {
   liveId: 'liveId',
   userId: 'userId',
   thumbnailUrl: 'thumbnailUrl',
+  status: 'status',
   recordUrl: 'recordUrl',
   expiryTimeInMinutes: 'expiryTimeInMinutes',
   calculatedClass: 'calculatedClass',
@@ -212,6 +213,7 @@ exports.Prisma.NotificationScalarFieldEnum = {
   entityId: 'entityId',
   entityName: 'entityName',
   status: 'status',
+  type: 'type',
   userId: 'userId',
   createdDate: 'createdDate'
 };

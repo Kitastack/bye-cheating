@@ -10,7 +10,7 @@ declare global {
     email: string
     name: string
     password: string
-    roles: string
+    roles: ['Admin' | 'User']
     isVerified: boolean
     createdDate: string
     updatedDate: string

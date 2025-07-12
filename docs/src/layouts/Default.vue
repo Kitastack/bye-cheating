@@ -7,6 +7,7 @@ import {
   IconHome,
   IconCode,
   IconLink,
+  IconBell,
 } from '@tabler/icons-vue'
 import {
   NButton,
@@ -34,6 +35,7 @@ const breakpoint = useBreakpoint()
 const themeStore = useThemeStore()
 const userStore = useUserStore()
 const message = useMessage()
+const { isLoggedIn } = storeToRefs(userStore)
 const { toggleTheme } = storeToRefs(themeStore)
 const utils = getCurrentInstance()?.proxy?.$utils
 const data: {
@@ -119,6 +121,9 @@ onMounted(() => {
   <Container>
     <br />
     <NFlex justify="center">
+      <NButton v-if="isLoggedIn" @click="router.push({ path: '/' })" circle
+        ><template #icon><IconBell /> </template
+      ></NButton>
       <NButton @click="router.push({ path: '/' })" circle
         ><template #icon><IconHome /> </template
       ></NButton>

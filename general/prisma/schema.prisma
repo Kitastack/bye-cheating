@@ -10,6 +10,14 @@ generator client {
     previewFeatures = ["driverAdapters", "typedSql", "postgresqlExtensions"]
 }
 
+// model temporary {
+//     id          String    @id @default(uuid())
+//     key         String
+//     value       String?
+//     description String?
+//     createdDate DateTime? @default(now())
+// }
+
 model logs {
     id          String    @id @default(uuid())
     type        String    @default("traffic")

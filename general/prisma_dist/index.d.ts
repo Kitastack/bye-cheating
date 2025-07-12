@@ -2979,6 +2979,7 @@ export namespace Prisma {
     liveId: string | null
     userId: string | null
     thumbnailUrl: string | null
+    status: string | null
     recordUrl: string | null
     expiryTimeInMinutes: number | null
     createdDate: Date | null
@@ -2992,6 +2993,7 @@ export namespace Prisma {
     liveId: string | null
     userId: string | null
     thumbnailUrl: string | null
+    status: string | null
     recordUrl: string | null
     expiryTimeInMinutes: number | null
     createdDate: Date | null
@@ -3005,6 +3007,7 @@ export namespace Prisma {
     liveId: number
     userId: number
     thumbnailUrl: number
+    status: number
     recordUrl: number
     expiryTimeInMinutes: number
     calculatedClass: number
@@ -3029,6 +3032,7 @@ export namespace Prisma {
     liveId?: true
     userId?: true
     thumbnailUrl?: true
+    status?: true
     recordUrl?: true
     expiryTimeInMinutes?: true
     createdDate?: true
@@ -3042,6 +3046,7 @@ export namespace Prisma {
     liveId?: true
     userId?: true
     thumbnailUrl?: true
+    status?: true
     recordUrl?: true
     expiryTimeInMinutes?: true
     createdDate?: true
@@ -3055,6 +3060,7 @@ export namespace Prisma {
     liveId?: true
     userId?: true
     thumbnailUrl?: true
+    status?: true
     recordUrl?: true
     expiryTimeInMinutes?: true
     calculatedClass?: true
@@ -3156,6 +3162,7 @@ export namespace Prisma {
     liveId: string
     userId: string
     thumbnailUrl: string | null
+    status: string
     recordUrl: string | null
     expiryTimeInMinutes: number | null
     calculatedClass: JsonValue | null
@@ -3189,6 +3196,7 @@ export namespace Prisma {
     liveId?: boolean
     userId?: boolean
     thumbnailUrl?: boolean
+    status?: boolean
     recordUrl?: boolean
     expiryTimeInMinutes?: boolean
     calculatedClass?: boolean
@@ -3207,6 +3215,7 @@ export namespace Prisma {
     liveId?: boolean
     userId?: boolean
     thumbnailUrl?: boolean
+    status?: boolean
     recordUrl?: boolean
     expiryTimeInMinutes?: boolean
     calculatedClass?: boolean
@@ -3223,6 +3232,7 @@ export namespace Prisma {
     liveId?: boolean
     userId?: boolean
     thumbnailUrl?: boolean
+    status?: boolean
     recordUrl?: boolean
     expiryTimeInMinutes?: boolean
     calculatedClass?: boolean
@@ -3239,6 +3249,7 @@ export namespace Prisma {
     liveId?: boolean
     userId?: boolean
     thumbnailUrl?: boolean
+    status?: boolean
     recordUrl?: boolean
     expiryTimeInMinutes?: boolean
     calculatedClass?: boolean
@@ -3246,7 +3257,7 @@ export namespace Prisma {
     updatedDate?: boolean
   }
 
-  export type reportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "liveId" | "userId" | "thumbnailUrl" | "recordUrl" | "expiryTimeInMinutes" | "calculatedClass" | "createdDate" | "updatedDate", ExtArgs["result"]["report"]>
+  export type reportOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "description" | "liveId" | "userId" | "thumbnailUrl" | "status" | "recordUrl" | "expiryTimeInMinutes" | "calculatedClass" | "createdDate" | "updatedDate", ExtArgs["result"]["report"]>
   export type reportInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     live?: boolean | liveDefaultArgs<ExtArgs>
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -3276,6 +3287,7 @@ export namespace Prisma {
       liveId: string
       userId: string
       thumbnailUrl: string | null
+      status: string
       recordUrl: string | null
       expiryTimeInMinutes: number | null
       calculatedClass: Prisma.JsonValue | null
@@ -3713,6 +3725,7 @@ export namespace Prisma {
     readonly liveId: FieldRef<"report", 'String'>
     readonly userId: FieldRef<"report", 'String'>
     readonly thumbnailUrl: FieldRef<"report", 'String'>
+    readonly status: FieldRef<"report", 'String'>
     readonly recordUrl: FieldRef<"report", 'String'>
     readonly expiryTimeInMinutes: FieldRef<"report", 'Int'>
     readonly calculatedClass: FieldRef<"report", 'Json'>
@@ -10809,6 +10822,7 @@ export namespace Prisma {
     entityId: string | null
     entityName: string | null
     status: string | null
+    type: string | null
     userId: string | null
     createdDate: Date | null
   }
@@ -10823,6 +10837,7 @@ export namespace Prisma {
     entityId: string | null
     entityName: string | null
     status: string | null
+    type: string | null
     userId: string | null
     createdDate: Date | null
   }
@@ -10837,6 +10852,7 @@ export namespace Prisma {
     entityId: number
     entityName: number
     status: number
+    type: number
     userId: number
     createdDate: number
     _all: number
@@ -10853,6 +10869,7 @@ export namespace Prisma {
     entityId?: true
     entityName?: true
     status?: true
+    type?: true
     userId?: true
     createdDate?: true
   }
@@ -10867,6 +10884,7 @@ export namespace Prisma {
     entityId?: true
     entityName?: true
     status?: true
+    type?: true
     userId?: true
     createdDate?: true
   }
@@ -10881,6 +10899,7 @@ export namespace Prisma {
     entityId?: true
     entityName?: true
     status?: true
+    type?: true
     userId?: true
     createdDate?: true
     _all?: true
@@ -10968,6 +10987,7 @@ export namespace Prisma {
     entityId: string | null
     entityName: string | null
     status: string | null
+    type: string | null
     userId: string
     createdDate: Date | null
     _count: NotificationCountAggregateOutputType | null
@@ -10999,6 +11019,7 @@ export namespace Prisma {
     entityId?: boolean
     entityName?: boolean
     status?: boolean
+    type?: boolean
     userId?: boolean
     createdDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -11014,6 +11035,7 @@ export namespace Prisma {
     entityId?: boolean
     entityName?: boolean
     status?: boolean
+    type?: boolean
     userId?: boolean
     createdDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -11029,6 +11051,7 @@ export namespace Prisma {
     entityId?: boolean
     entityName?: boolean
     status?: boolean
+    type?: boolean
     userId?: boolean
     createdDate?: boolean
     user?: boolean | userDefaultArgs<ExtArgs>
@@ -11044,11 +11067,12 @@ export namespace Prisma {
     entityId?: boolean
     entityName?: boolean
     status?: boolean
+    type?: boolean
     userId?: boolean
     createdDate?: boolean
   }
 
-  export type notificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "link" | "photo" | "title" | "description" | "caption" | "entityId" | "entityName" | "status" | "userId" | "createdDate", ExtArgs["result"]["notification"]>
+  export type notificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "link" | "photo" | "title" | "description" | "caption" | "entityId" | "entityName" | "status" | "type" | "userId" | "createdDate", ExtArgs["result"]["notification"]>
   export type notificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | userDefaultArgs<ExtArgs>
   }
@@ -11074,6 +11098,7 @@ export namespace Prisma {
       entityId: string | null
       entityName: string | null
       status: string | null
+      type: string | null
       userId: string
       createdDate: Date | null
     }, ExtArgs["result"]["notification"]>
@@ -11509,6 +11534,7 @@ export namespace Prisma {
     readonly entityId: FieldRef<"notification", 'String'>
     readonly entityName: FieldRef<"notification", 'String'>
     readonly status: FieldRef<"notification", 'String'>
+    readonly type: FieldRef<"notification", 'String'>
     readonly userId: FieldRef<"notification", 'String'>
     readonly createdDate: FieldRef<"notification", 'DateTime'>
   }
@@ -11960,6 +11986,7 @@ export namespace Prisma {
     liveId: 'liveId',
     userId: 'userId',
     thumbnailUrl: 'thumbnailUrl',
+    status: 'status',
     recordUrl: 'recordUrl',
     expiryTimeInMinutes: 'expiryTimeInMinutes',
     calculatedClass: 'calculatedClass',
@@ -12055,6 +12082,7 @@ export namespace Prisma {
     entityId: 'entityId',
     entityName: 'entityName',
     status: 'status',
+    type: 'type',
     userId: 'userId',
     createdDate: 'createdDate'
   };
@@ -12276,6 +12304,7 @@ export namespace Prisma {
     liveId?: StringFilter<"report"> | string
     userId?: StringFilter<"report"> | string
     thumbnailUrl?: StringNullableFilter<"report"> | string | null
+    status?: StringFilter<"report"> | string
     recordUrl?: StringNullableFilter<"report"> | string | null
     expiryTimeInMinutes?: IntNullableFilter<"report"> | number | null
     calculatedClass?: JsonNullableFilter<"report">
@@ -12293,6 +12322,7 @@ export namespace Prisma {
     liveId?: SortOrder
     userId?: SortOrder
     thumbnailUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
     recordUrl?: SortOrderInput | SortOrder
     expiryTimeInMinutes?: SortOrderInput | SortOrder
     calculatedClass?: SortOrderInput | SortOrder
@@ -12313,6 +12343,7 @@ export namespace Prisma {
     liveId?: StringFilter<"report"> | string
     userId?: StringFilter<"report"> | string
     thumbnailUrl?: StringNullableFilter<"report"> | string | null
+    status?: StringFilter<"report"> | string
     recordUrl?: StringNullableFilter<"report"> | string | null
     expiryTimeInMinutes?: IntNullableFilter<"report"> | number | null
     calculatedClass?: JsonNullableFilter<"report">
@@ -12330,6 +12361,7 @@ export namespace Prisma {
     liveId?: SortOrder
     userId?: SortOrder
     thumbnailUrl?: SortOrderInput | SortOrder
+    status?: SortOrder
     recordUrl?: SortOrderInput | SortOrder
     expiryTimeInMinutes?: SortOrderInput | SortOrder
     calculatedClass?: SortOrderInput | SortOrder
@@ -12352,6 +12384,7 @@ export namespace Prisma {
     liveId?: StringWithAggregatesFilter<"report"> | string
     userId?: StringWithAggregatesFilter<"report"> | string
     thumbnailUrl?: StringNullableWithAggregatesFilter<"report"> | string | null
+    status?: StringWithAggregatesFilter<"report"> | string
     recordUrl?: StringNullableWithAggregatesFilter<"report"> | string | null
     expiryTimeInMinutes?: IntNullableWithAggregatesFilter<"report"> | number | null
     calculatedClass?: JsonNullableWithAggregatesFilter<"report">
@@ -12764,6 +12797,7 @@ export namespace Prisma {
     entityId?: StringNullableFilter<"notification"> | string | null
     entityName?: StringNullableFilter<"notification"> | string | null
     status?: StringNullableFilter<"notification"> | string | null
+    type?: StringNullableFilter<"notification"> | string | null
     userId?: StringFilter<"notification"> | string
     createdDate?: DateTimeNullableFilter<"notification"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
@@ -12779,6 +12813,7 @@ export namespace Prisma {
     entityId?: SortOrderInput | SortOrder
     entityName?: SortOrderInput | SortOrder
     status?: SortOrderInput | SortOrder
+    type?: SortOrderInput | SortOrder
     userId?: SortOrder
     createdDate?: SortOrderInput | SortOrder
     user?: userOrderByWithRelationInput
@@ -12797,6 +12832,7 @@ export namespace Prisma {
     entityId?: StringNullableFilter<"notification"> | string | null
     entityName?: StringNullableFilter<"notification"> | string | null
     status?: StringNullableFilter<"notification"> | string | null
+    type?: StringNullableFilter<"notification"> | string | null
     userId?: StringFilter<"notification"> | string
     createdDate?: DateTimeNullableFilter<"notification"> | Date | string | null
     user?: XOR<UserScalarRelationFilter, userWhereInput>
@@ -12812,6 +12848,7 @@ export namespace Prisma {
     entityId?: SortOrderInput | SortOrder
     entityName?: SortOrderInput | SortOrder
     status?: SortOrderInput | SortOrder
+    type?: SortOrderInput | SortOrder
     userId?: SortOrder
     createdDate?: SortOrderInput | SortOrder
     _count?: notificationCountOrderByAggregateInput
@@ -12832,6 +12869,7 @@ export namespace Prisma {
     entityId?: StringNullableWithAggregatesFilter<"notification"> | string | null
     entityName?: StringNullableWithAggregatesFilter<"notification"> | string | null
     status?: StringNullableWithAggregatesFilter<"notification"> | string | null
+    type?: StringNullableWithAggregatesFilter<"notification"> | string | null
     userId?: StringWithAggregatesFilter<"notification"> | string
     createdDate?: DateTimeNullableWithAggregatesFilter<"notification"> | Date | string | null
   }
@@ -12920,6 +12958,7 @@ export namespace Prisma {
     title?: string | null
     description?: string | null
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -12937,6 +12976,7 @@ export namespace Prisma {
     liveId: string
     userId: string
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -12950,6 +12990,7 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -12967,6 +13008,7 @@ export namespace Prisma {
     liveId?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -12982,6 +13024,7 @@ export namespace Prisma {
     liveId: string
     userId: string
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -12994,6 +13037,7 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -13008,6 +13052,7 @@ export namespace Prisma {
     liveId?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -13448,6 +13493,7 @@ export namespace Prisma {
     entityId?: string | null
     entityName?: string | null
     status?: string | null
+    type?: string | null
     createdDate?: Date | string | null
     user: userCreateNestedOneWithoutNotificationInput
   }
@@ -13462,6 +13508,7 @@ export namespace Prisma {
     entityId?: string | null
     entityName?: string | null
     status?: string | null
+    type?: string | null
     userId: string
     createdDate?: Date | string | null
   }
@@ -13476,6 +13523,7 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     entityName?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     user?: userUpdateOneRequiredWithoutNotificationNestedInput
   }
@@ -13490,6 +13538,7 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     entityName?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -13504,6 +13553,7 @@ export namespace Prisma {
     entityId?: string | null
     entityName?: string | null
     status?: string | null
+    type?: string | null
     userId: string
     createdDate?: Date | string | null
   }
@@ -13518,6 +13568,7 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     entityName?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -13531,6 +13582,7 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     entityName?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -13771,6 +13823,7 @@ export namespace Prisma {
     liveId?: SortOrder
     userId?: SortOrder
     thumbnailUrl?: SortOrder
+    status?: SortOrder
     recordUrl?: SortOrder
     expiryTimeInMinutes?: SortOrder
     calculatedClass?: SortOrder
@@ -13789,6 +13842,7 @@ export namespace Prisma {
     liveId?: SortOrder
     userId?: SortOrder
     thumbnailUrl?: SortOrder
+    status?: SortOrder
     recordUrl?: SortOrder
     expiryTimeInMinutes?: SortOrder
     createdDate?: SortOrder
@@ -13802,6 +13856,7 @@ export namespace Prisma {
     liveId?: SortOrder
     userId?: SortOrder
     thumbnailUrl?: SortOrder
+    status?: SortOrder
     recordUrl?: SortOrder
     expiryTimeInMinutes?: SortOrder
     createdDate?: SortOrder
@@ -14124,6 +14179,7 @@ export namespace Prisma {
     entityId?: SortOrder
     entityName?: SortOrder
     status?: SortOrder
+    type?: SortOrder
     userId?: SortOrder
     createdDate?: SortOrder
   }
@@ -14138,6 +14194,7 @@ export namespace Prisma {
     entityId?: SortOrder
     entityName?: SortOrder
     status?: SortOrder
+    type?: SortOrder
     userId?: SortOrder
     createdDate?: SortOrder
   }
@@ -14152,6 +14209,7 @@ export namespace Prisma {
     entityId?: SortOrder
     entityName?: SortOrder
     status?: SortOrder
+    type?: SortOrder
     userId?: SortOrder
     createdDate?: SortOrder
   }
@@ -14963,6 +15021,7 @@ export namespace Prisma {
     title?: string | null
     description?: string | null
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -14978,6 +15037,7 @@ export namespace Prisma {
     description?: string | null
     userId: string
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -15096,6 +15156,7 @@ export namespace Prisma {
     liveId?: StringFilter<"report"> | string
     userId?: StringFilter<"report"> | string
     thumbnailUrl?: StringNullableFilter<"report"> | string | null
+    status?: StringFilter<"report"> | string
     recordUrl?: StringNullableFilter<"report"> | string | null
     expiryTimeInMinutes?: IntNullableFilter<"report"> | number | null
     calculatedClass?: JsonNullableFilter<"report">
@@ -15303,6 +15364,7 @@ export namespace Prisma {
     title?: string | null
     description?: string | null
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -15319,6 +15381,7 @@ export namespace Prisma {
     liveId: string
     userId: string
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -15347,6 +15410,7 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -15363,6 +15427,7 @@ export namespace Prisma {
     liveId?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -15581,6 +15646,7 @@ export namespace Prisma {
     title?: string | null
     description?: string | null
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -15596,6 +15662,7 @@ export namespace Prisma {
     description?: string | null
     liveId: string
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -15652,6 +15719,7 @@ export namespace Prisma {
     entityId?: string | null
     entityName?: string | null
     status?: string | null
+    type?: string | null
     createdDate?: Date | string | null
   }
 
@@ -15665,6 +15733,7 @@ export namespace Prisma {
     entityId?: string | null
     entityName?: string | null
     status?: string | null
+    type?: string | null
     createdDate?: Date | string | null
   }
 
@@ -15822,6 +15891,7 @@ export namespace Prisma {
     entityId?: StringNullableFilter<"notification"> | string | null
     entityName?: StringNullableFilter<"notification"> | string | null
     status?: StringNullableFilter<"notification"> | string | null
+    type?: StringNullableFilter<"notification"> | string | null
     userId?: StringFilter<"notification"> | string
     createdDate?: DateTimeNullableFilter<"notification"> | Date | string | null
   }
@@ -16112,6 +16182,7 @@ export namespace Prisma {
     description?: string | null
     userId: string
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -16124,6 +16195,7 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -16139,6 +16211,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -16153,6 +16226,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     userId?: StringFieldUpdateOperationsInput | string
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -16254,6 +16328,7 @@ export namespace Prisma {
     description?: string | null
     liveId: string
     thumbnailUrl?: string | null
+    status: string
     recordUrl?: string | null
     expiryTimeInMinutes?: number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -16280,6 +16355,7 @@ export namespace Prisma {
     entityId?: string | null
     entityName?: string | null
     status?: string | null
+    type?: string | null
     createdDate?: Date | string | null
   }
 
@@ -16354,6 +16430,7 @@ export namespace Prisma {
     title?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -16369,6 +16446,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     liveId?: StringFieldUpdateOperationsInput | string
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -16383,6 +16461,7 @@ export namespace Prisma {
     description?: NullableStringFieldUpdateOperationsInput | string | null
     liveId?: StringFieldUpdateOperationsInput | string
     thumbnailUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: StringFieldUpdateOperationsInput | string
     recordUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiryTimeInMinutes?: NullableIntFieldUpdateOperationsInput | number | null
     calculatedClass?: NullableJsonNullValueInput | InputJsonValue
@@ -16427,6 +16506,7 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     entityName?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -16440,6 +16520,7 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     entityName?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -16453,6 +16534,7 @@ export namespace Prisma {
     entityId?: NullableStringFieldUpdateOperationsInput | string | null
     entityName?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
+    type?: NullableStringFieldUpdateOperationsInput | string | null
     createdDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 

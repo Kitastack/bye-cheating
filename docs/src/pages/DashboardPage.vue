@@ -46,6 +46,7 @@ import {
   IconPhotoX,
   IconArrowUpRight,
   IconVideoOff,
+  IconUserCog,
 } from '@tabler/icons-vue'
 import { required, email, minLength, helpers } from '@vuelidate/validators'
 import { getCurrentInstance, nextTick, onMounted, reactive, ref } from 'vue'
@@ -486,6 +487,20 @@ onMounted(() => {
                 :render-icon="utils?.renderIcon(IconRefresh)"
                 >Refresh</NButton
               >
+              <NButton
+                v-if="userFullData.roles?.includes('Admin')"
+                style="width: 100%"
+                :loading="loading.isLoading.value"
+                :disabled="loading.isLoading.value"
+                @click="
+                  () => {
+                    loading.start()
+                    userStore.loadUserDataAction().finally(() => loading.finish())
+                  }
+                "
+                :render-icon="utils?.renderIcon(IconUserCog)"
+                >Admin</NButton
+              >
             </NFlex>
           </NSpace>
         </NCard>
@@ -751,7 +766,7 @@ onMounted(() => {
                           () => {
                             let title = utils?.appWindow.prompt('Record title')
                             if (!title || !(title?.length > 0)) {
-                              title = `Record ${moment().format('DD-MM-YYYY h:mm:ss a')}`
+                              title = `Record ${moment().format('DD-MM-YYYY-HH:mm:ss A')}`
                             }
                             onSubmitLive(title)
                           }
@@ -946,25 +961,73 @@ onMounted(() => {
                   <NText> Summary Report </NText>
                 </template>
                 <NCard>
+                  <NSpace size="large" vertical justify="center">
+                    <NText
+                      ><strong>[Title]:</strong> {{ reportDetailDrawerRef?.title ?? '-' }}</NText
+                    >
+                    <NText
+                      ><strong>[Description]:</strong>
+                      {{ reportDetailDrawerRef?.description ?? '-' }}</NText
+                    ></NSpace
+                  >
+                </NCard>
+                <br />
+                <NCard>
                   <NFlex size="large">
-                    <video controls height="200px" style="background: black; border-radius: 15px">
+                    <video
+                      loop
+                      autoplay
+                      height="300px"
+                      style="background: black; border-radius: 15px"
+                    >
                       <source :src="reportDetailDrawerRef?.recordUrl" type="video/mp4" />
-                      <a :href="reportDetailDrawerRef?.recordUrl">MP4</a>
+                      <!-- <a :href="reportDetailDrawerRef?.recordUrl">MP4</a> -->
                     </video>
-
                     <NSpace size="large" vertical justify="center">
                       <NText
-                        ><strong>[Title]:</strong> {{ reportDetailDrawerRef?.title ?? '-' }}</NText
+                        ><strong>[Total Identifier/ID]: </strong>
+                        {{
+                          reportDetailDrawerRef?.calculatedClass
+                            ? `${Object.keys(JSON.parse(reportDetailDrawerRef?.calculatedClass)).length} Person`
+                            : '-'
+                        }}</NText
                       >
                       <NText
-                        ><strong>[Description]:</strong>
-                        {{ reportDetailDrawerRef?.description ?? '-' }}</NText
+                        ><strong>[Most Detected Classess]: </strong>
+                        {{
+                          reportDetailDrawerRef?.calculatedClass
+                            ? [
+                                ...new Set(
+                                  Object.values(
+                                    JSON.parse(reportDetailDrawerRef?.calculatedClass),
+                                  )?.flatMap(
+                                    (itemClass: any) => itemClass?.mean ?? itemClass?.mode,
+                                  ),
+                                ),
+                              ].join(', ')
+                            : '-'
+                        }}</NText
                       >
                       <NText style="text-transform: capitalize"
-                        ><strong>[Status]:</strong> {{ reportDetailDrawerRef?.status }}</NText
+                        ><strong>[Time Length/Duration]: </strong>
+                        {{
+                          reportDetailDrawerRef?.expiryTimeInMinutes
+                            ? utils?.secondsToClock(
+                                Math.round(
+                                  Math.abs(
+                                    new Date(reportDetailDrawerRef?.createdDate).getTime() -
+                                      Number(reportDetailDrawerRef.expiryTimeInMinutes * 1000),
+                                  ) / 1000,
+                                ),
+                              )
+                            : '-'
+                        }}</NText
+                      >
+                      <NText style="text-transform: capitalize"
+                        ><strong>[Status]: </strong> {{ reportDetailDrawerRef?.status }}</NText
                       >
                       <NText
-                        ><strong>[Created Date]:</strong>
+                        ><strong>[Created Date]: </strong>
                         {{
                           moment(reportDetailDrawerRef?.createdDate).format('DD MMMM YYYY, H:mm A')
                         }}</NText
@@ -981,6 +1044,19 @@ onMounted(() => {
                           reportDetailDrawerRef?.recordUrl
                         }}</NA></NText
                       >
+                      <NA
+                        :disabled="!reportDetailDrawerRef?.recordUrl"
+                        :href="`${reportDetailDrawerRef?.recordUrl}?response-content-disposition=attachment%3B%20filename%3Dvideo.mp4`"
+                        target="_blank"
+                        download
+                      >
+                        <NButton
+                          type="primary"
+                          icon-placement="right"
+                          :disabled="!reportDetailDrawerRef?.recordUrl"
+                          >Download Video <template #icon><IconArrowUpRight /></template
+                        ></NButton>
+                      </NA>
                     </NSpace>
                   </NFlex>
                 </NCard>
@@ -1039,12 +1115,10 @@ onMounted(() => {
                                 reportDetailDrawerRef = item
                               }
                             "
+                            size="small"
                             icon-placement="right"
                             >Detail <template #icon><IconArrowUpRight /></template
                           ></NButton>
-                        </template>
-                        <template #description>
-                          <NText>{{ item.description }}</NText>
                         </template>
                         <section>
                           <NFlex>
