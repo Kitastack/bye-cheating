@@ -189,6 +189,7 @@ export const getLive = async (
         path: urlValidation.optional(),
         withStream: Joi.boolean().optional().default(false),
         withReport: Joi.boolean().optional().default(false),
+        withUser: Joi.boolean().optional().default(false),
         orderBy: Joi.array().optional()
         // expiryDate: Joi.object({
         //   gt: Joi.date().optional(),
@@ -233,6 +234,7 @@ export const getLive = async (
             : req.user?.id
       },
       include: {
+        user: req.populatedQuery?.withUser == 'true' ? true : undefined,
         stream: req.populatedQuery?.withStream == 'true' ? true : undefined,
         report: req.populatedQuery?.withReport == 'true' ? true : undefined
       },

@@ -193,6 +193,7 @@ export const getStream = async (
         url: urlValidation.optional(),
         isInactive: Joi.boolean().optional().default(false),
         withLive: Joi.boolean().optional().default(false),
+        withUser: Joi.boolean().optional().default(false),
         createdBySelfOnly: Joi.boolean().optional().default(false),
         orderBy: Joi.array().optional()
       }).prefs({ convert: true }),
@@ -229,7 +230,8 @@ export const getStream = async (
           : false
       },
       include: {
-        live: req.populatedQuery?.withLive == 'true' ? true : undefined
+        live: req.populatedQuery?.withLive == 'true' ? true : undefined,
+        user: req.populatedQuery?.withUser == 'true' ? true : undefined
       },
       orderBy: (req.populatedQuery?.orderBy as any[]) ?? undefined,
       skip: req.page,
