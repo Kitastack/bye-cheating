@@ -155,13 +155,15 @@ onMounted(() => {
       },
     )
   })
-  userStore.loadSigninAction().then(() => {
-    if (userSigninData.value?.email) {
-      message.success(
-        `${userSigninData.value?.roles?.includes('Admin') ? 'Welcome [admin]' : 'Welcome'} ${userSigninData.value.email}`,
-      )
-    }
-    userStore.loadUserDataAction()
+  // load cached sign-in session
+  userStore.loadSigninAction().finally(() => {
+    userStore.loadUserDataAction().finally(() => {
+      if (userFullData.value?.email) {
+        message.success(
+          `${userFullData.value?.roles?.includes('Admin') ? 'Welcome [admin]' : 'Welcome'} ${userFullData.value.email}`,
+        )
+      }
+    })
   })
 })
 </script>

@@ -5,6 +5,14 @@ declare global {
     google: any
     __googleMapsCallback__?: () => void
   }
+  type authenticationDataType = {
+    id: string
+    ipAddress: string
+    user: userDataType
+    description?: string
+    createdDate: Date
+    updatedDate?: Date
+  }
   type notificationDataType = {
     id: string
     link?: string
@@ -17,7 +25,7 @@ declare global {
     status?: string
     type?: string
     userId: string
-    user?: User
+    user?: userDataType
     createdDate: Date
     isReaded: Boolean
   }
@@ -54,7 +62,7 @@ declare global {
     recordUrl: string
     expiryTimeInMinutes: number
     calculatedClass?: string
-    user?: any
+    user?: userDataType
     createdDate: string
     updatedDate: string
   }
@@ -63,7 +71,7 @@ declare global {
     url: string
     userId: string
     inactive: boolean
-    user?: any
+    user?: userDataType
     createdDate: string
     updatedDate: string
   }
@@ -75,7 +83,7 @@ declare global {
     stream?: streamDataType
     userId: string
     user?: userDataType
-    report?: any
+    report?: reportDataType
     expiryTimeInMinutes: number
     createdDate: string
     updatedDate: string
@@ -93,6 +101,7 @@ declare global {
   type AxiosResponseResult<T> = {
     success: boolean
     result?: T
-    message?: T
+    message?: string
+    count?: number
   }
 }

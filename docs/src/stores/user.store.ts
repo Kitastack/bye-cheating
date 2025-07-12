@@ -76,7 +76,7 @@ export const useUserStore = defineStore('useUserStore', () => {
     }
   }
   async function loadUserDataAction() {
-    if (!userSigninData.value) return
+    if (!userSigninData.value) return //throw new Error('Failed to fetch user data')
     // todo: get logged user data
     const fetchedUserData = await userApi.get<AxiosResponseResult<any>>('')
     userFullData.value = fetchedUserData.data.result
