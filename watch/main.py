@@ -475,7 +475,7 @@ async def captureTask(
                 + b"\r\n"
             )
     except (Exception, ConnectionRefusedError) as e:
-        message_str = "something is wrong. Try again later"
+        message_str = "something went wrong. Try again later"
         print("RTSP stream error:", e)
         traceback.print_exc()
         text_image = createTextImage(message_str)
@@ -689,7 +689,7 @@ async def recordLiveStream(id: str):
                     "title": f"Recording is failed",
                     "type": "error",
                     "caption": reportData["title"] or None,
-                    "description": f"Something is wrong with the streaming",
+                    "description": f"Something went wrong with the streaming",
                 },
                 headers=request_header,
             )

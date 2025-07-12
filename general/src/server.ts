@@ -16,6 +16,9 @@ import { pagination } from '@middlewares/pagination.middleware'
 import { errorHandler, notFoundHandler } from '@middlewares/page.middleware'
 import { notification } from '@xprisma/index'
 import { authenticateToken } from './libs/jwt.lib'
+import { verify } from 'jsonwebtoken'
+import { readFileSync } from 'fs'
+import { join } from 'path'
 
 type notificationSubscribersType = [Request, Response][]
 var notificationSubscribers: notificationSubscribersType = []
@@ -34,6 +37,8 @@ declare global {
 }
 globalThis.notificationSubscribers = notificationSubscribers
 globalThis.publishNotification = publishNotification
+
+const publicKey = readFileSync(join(__dirname, './keys/public.pem'), 'utf8')
 
 export const Application = express()
 logging.log('Logging & configuration')
@@ -63,10 +68,16 @@ Application.get('/ping', (req: Request, res: Response) => {
     success: true
   })
 })
-Application.get(
-  '/subscribe-notification',
-  authenticateToken(),
-  (req: Request, res: Response) => {
+Application.get('/subscribe-notification', (req: Request, res: Response) => {
+  try {
+    const token = req.query.token as string
+    if (!token) throw new Error()
+    verify(token, publicKey, { algorithms: ['RS256'] }, (err, payload) => {
+      if (err) {
+        throw new Error()
+      }
+      req.user = payload as any
+    })
     res.setHeader('Content-Type', 'text/event-stream')
     res.setHeader('Cache-Control', 'no-cache')
     res.setHeader('Connection', 'keep-alive')
@@ -78,8 +89,13 @@ Application.get(
         (notificationSubscriber) => notificationSubscriber[0] !== req
       )
     })
+  } catch (error) {
+    res.write(`event: error\n`)
+    res.write(
+      `data: ${JSON.stringify({ success: false, message: "You're not authenticated!" })}\n\n`
+    )
   }
-)
+})
 Application.use(notFoundHandler)
 Application.use(errorHandler)
 logging.divider()
