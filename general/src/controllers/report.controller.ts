@@ -74,7 +74,8 @@ export const getReport = async (
     const reportCount = await database.report.count(finalQuery)
     res.status(StatusCodes.ACCEPTED).json({
       success: true,
-      result: reportCount
+      result: foundReport,
+      count: reportCount
     })
   } catch (error) {
     next(error)
