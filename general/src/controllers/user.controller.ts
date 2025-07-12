@@ -424,10 +424,17 @@ export const getNotification = async (
   next: NextFunction
 ) => {
   try {
+    await isValidSchema(
+      Joi.object({
+        orderBy: Joi.array().optional()
+      }).prefs({ convert: true }),
+      req.populatedQuery
+    )
     const result = await database.notification.findMany({
       where: {
         userId: req.user?.id
       },
+      orderBy: (req.populatedQuery?.orderBy as any[]) ?? undefined,
       skip: req.page,
       take: req.limit
     })
@@ -493,7 +500,8 @@ export const getAudit = async (
     await isValidSchema(
       Joi.object({
         entityId: Joi.string().uuid().required(),
-        entityName: Joi.string().optional()
+        entityName: Joi.string().optional(),
+        orderBy: Joi.array().optional()
         // createdBySelfOnly: Joi.boolean().optional().default(false)
       }).prefs({ convert: true }),
       req.populatedQuery
@@ -525,6 +533,7 @@ export const getAudit = async (
       include: {
         user: true
       },
+      orderBy: (req.populatedQuery?.orderBy as any[]) ?? undefined,
       skip: req.page,
       take: req.limit
     })
@@ -592,10 +601,17 @@ export const getAuthentication = async (
   next: NextFunction
 ) => {
   try {
+    await isValidSchema(
+      Joi.object({
+        orderBy: Joi.array().optional()
+      }).prefs({ convert: true }),
+      req.populatedQuery
+    )
     const result = await database.authentication.findMany({
       include: {
         user: true
       },
+      orderBy: (req.populatedQuery?.orderBy as any[]) ?? undefined,
       skip: req.page,
       take: req.limit
     })
