@@ -693,11 +693,12 @@ async def recordLiveStream(id: str):
                 },
                 headers=request_header,
             )
-        await client.patch(
-            f"{settings.general_service_url}/report",
-            json={"id": report_id, "status": "error"},
-            headers=request_header,
-        )
+        async with httpx.AsyncClient() as client:
+            await client.patch(
+                f"{settings.general_service_url}/report",
+                json={"id": report_id, "status": "error"},
+                headers=request_header,
+            )
     finally:
         if vs is not None:
             vs.stop()
