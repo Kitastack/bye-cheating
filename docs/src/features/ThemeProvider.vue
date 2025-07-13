@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, watch } from 'vue'
-import { NConfigProvider, darkTheme as darkThemeNaive } from 'naive-ui'
+import { NConfigProvider, darkTheme as darkThemeNaive, useThemeVars } from 'naive-ui'
 import { useThemeStore } from '@/stores/theme.store'
 import { storeToRefs } from 'pinia'
 import { idID, dateIdID } from 'naive-ui'
 
 const whiteColor = '#FFF'
 const blackColor = '#000'
-const primaryColor = '#024ED1'
 const redColor = '#fc0303'
 const themeStore = useThemeStore()
+const theme = useThemeVars()
 const { toggleTheme, isDarkTheme } = storeToRefs(themeStore)
 const darkMediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 
@@ -43,25 +43,22 @@ onBeforeUnmount(() => {
   <NConfigProvider
     :theme-overrides="{
       common: {
-        primaryColor: primaryColor,
-        primaryColorHover: '#2877FF',
-        primaryColorPressed: primaryColor,
         borderRadius: '15px',
       },
-      Button: {
-        textColorPrimary: whiteColor,
-        textColorPressedPrimary: whiteColor,
-        textColorHoverPrimary: whiteColor,
-        textColorFocusPrimary: whiteColor,
-        textColorDisabledPrimary: whiteColor,
-        textColorWarning: blackColor,
-        textColorPressedWarning: blackColor,
-        textColorHoverWarning: blackColor,
-        textColorFocusWarning: blackColor,
-        textColorDisabledWarning: blackColor,
-      },
+      // Button: {
+      //   textColorPrimary: whiteColor,
+      //   textColorPressedPrimary: whiteColor,
+      //   textColorHoverPrimary: whiteColor,
+      //   textColorFocusPrimary: whiteColor,
+      //   textColorDisabledPrimary: whiteColor,
+      //   textColorWarning: blackColor,
+      //   textColorPressedWarning: blackColor,
+      //   textColorHoverWarning: blackColor,
+      //   textColorFocusWarning: blackColor,
+      //   textColorDisabledWarning: blackColor,
+      // },
       Tabs: {
-        tabColorSegment: primaryColor,
+        tabColorSegment: theme.primaryColor,
         tabTextColorActiveSegment: whiteColor,
       },
       Form: {

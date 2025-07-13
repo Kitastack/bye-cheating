@@ -171,9 +171,9 @@ onMounted(() => {
   <Container>
     <br />
     <NFlex justify="center">
-      <NButton v-if="isLoggedIn" @click="router.push({ path: '/' })" circle
+      <!-- <NButton v-if="isLoggedIn" @click="router.push({ path: '/' })" circle
         ><template #icon><IconBell /> </template
-      ></NButton>
+      ></NButton> -->
       <NButton @click="router.push({ path: '/' })" circle
         ><template #icon><IconHome /> </template
       ></NButton>

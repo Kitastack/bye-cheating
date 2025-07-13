@@ -25,15 +25,11 @@ import {
   NThing,
   NScrollbar,
   NCountdown,
-  NIcon,
   NA,
   NDrawer,
   NDrawerContent,
-  NDescriptions,
-  NDescriptionsItem,
   NTable,
   NH1,
-  NTag,
 } from 'naive-ui'
 import {
   IconMaximize,
@@ -56,9 +52,10 @@ import { useThemeStore } from '@/stores/theme.store'
 import { useUserStore } from '@/stores/user.store'
 import { useVuelidate } from '@vuelidate/core'
 import { useApi } from '@/composables/api'
-import { storeToRefs } from 'pinia'
-import moment from 'moment'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import ReportDetailDrawer from '@/features/ReportDetailDrawer.vue'
+import moment from 'moment'
 
 const mode_env = import.meta.env.MODE
 const api_env = import.meta.env.VITE_API
@@ -73,7 +70,7 @@ const themeStore = useThemeStore()
 const { isDarkTheme } = storeToRefs(themeStore)
 const { userSigninData, userFullData, userAuditData, isConnectedToServer } = storeToRefs(userStore)
 
-const reportDetailDrawerRef = ref<reportDataType | null>(null)
+const currentOpenedReportDetailRef = ref<reportDataType | null>(null)
 const reportSectionLoadingRef = ref<boolean>(false)
 const streamSectionLoadingRef = ref<boolean>(false)
 const userSectionRef = ref<InstanceType<typeof NSpace> | null>(null)
@@ -973,149 +970,10 @@ onMounted(() => {
             </NCard>
           </NSpace>
           <NSpace ref="reportSectionRef" vertical size="large" @vue:mounted="onGetReport">
-            <NDrawer
-              :show="Boolean(reportDetailDrawerRef)"
-              placement="bottom"
-              height="80vh"
-              @update:show="
-                () => {
-                  reportDetailDrawerRef = null
-                }
-              "
-            >
-              <NDrawerContent mask-closable closable>
-                <template #header>
-                  <NText> Summary Report </NText>
-                </template>
-                <NCard
-                  :style="{
-                    background: theme.primaryColor,
-                  }"
-                >
-                  <NSpace size="large" vertical justify="center">
-                    <NH1> {{ reportDetailDrawerRef?.title ?? '-' }}</NH1>
-                    <NText> {{ reportDetailDrawerRef?.description ?? '-' }}</NText></NSpace
-                  >
-                </NCard>
-                <br />
-                <NCard>
-                  <NFlex size="large">
-                    <video
-                      loop
-                      autoplay
-                      :width="breakpoint.mdAndDown ? '100%' : 'auto'"
-                      height="300px"
-                      style="background: black; border-radius: 15px"
-                    >
-                      <source :src="reportDetailDrawerRef?.recordUrl" type="video/mp4" />
-                      <!-- <a :href="reportDetailDrawerRef?.recordUrl">MP4</a> -->
-                    </video>
-                    <NSpace size="large" vertical justify="center">
-                      <NText
-                        ><strong>[Total Identifier/ID]: </strong>
-                        {{
-                          reportDetailDrawerRef?.calculatedClass
-                            ? `${Object.keys(JSON.parse(reportDetailDrawerRef?.calculatedClass)).length} Person`
-                            : '-'
-                        }}</NText
-                      >
-                      <NText
-                        ><strong>[Most Detected Classess]: </strong>
-                        {{
-                          reportDetailDrawerRef?.calculatedClass
-                            ? [
-                                ...new Set(
-                                  Object.values(
-                                    JSON.parse(reportDetailDrawerRef?.calculatedClass),
-                                  )?.flatMap(
-                                    (itemClass: any) => itemClass?.mean ?? itemClass?.mode,
-                                  ),
-                                ),
-                              ].join(', ')
-                            : '-'
-                        }}</NText
-                      >
-                      <NText style="text-transform: capitalize"
-                        ><strong>[Time Length/Duration]: </strong>
-                        {{
-                          reportDetailDrawerRef?.expiryTimeInMinutes
-                            ? utils?.secondsToClock(
-                                Math.round(
-                                  Math.abs(
-                                    new Date(reportDetailDrawerRef?.createdDate).getTime() -
-                                      Number(reportDetailDrawerRef.expiryTimeInMinutes * 1000),
-                                  ) / 1000,
-                                ),
-                              )
-                            : '-'
-                        }}</NText
-                      >
-                      <NText style="text-transform: capitalize"
-                        ><strong>[Status]: </strong> {{ reportDetailDrawerRef?.status }}</NText
-                      >
-                      <NText
-                        ><strong>[Created Date]: </strong>
-                        {{
-                          moment(reportDetailDrawerRef?.createdDate).format('DD MMMM YYYY, H:mm A')
-                        }}</NText
-                      >
-                      <NText
-                        ><strong>[Thumbnail URL]: </strong>
-                        <NA :href="reportDetailDrawerRef?.thumbnailUrl" target="_blank">{{
-                          reportDetailDrawerRef?.thumbnailUrl
-                        }}</NA></NText
-                      >
-                      <NText
-                        ><strong>[Record URL]: </strong>
-                        <NA :href="reportDetailDrawerRef?.recordUrl" target="_blank">{{
-                          reportDetailDrawerRef?.recordUrl
-                        }}</NA></NText
-                      >
-                      <NA
-                        :disabled="!reportDetailDrawerRef?.recordUrl"
-                        :href="`${reportDetailDrawerRef?.recordUrl}?response-content-disposition=attachment%3B%20filename%3Dvideo.mp4`"
-                        target="_blank"
-                        download
-                      >
-                        <NButton
-                          type="primary"
-                          icon-placement="right"
-                          :disabled="!reportDetailDrawerRef?.recordUrl"
-                          >Download Video <template #icon><IconArrowUpRight /></template
-                        ></NButton>
-                      </NA>
-                    </NSpace>
-                  </NFlex>
-                </NCard>
-                <br />
-                <NSpace vertical>
-                  <NTable :single-line="true" size="small">
-                    <thead>
-                      <tr>
-                        <th>Identifier (ID)</th>
-                        <th>Class (Avg)</th>
-                        <th>Class (Most)</th>
-                      </tr>
-                    </thead>
-                    <tbody v-if="reportDetailDrawerRef?.calculatedClass">
-                      <tr
-                        v-for="(calculatedItem, calculatedItemIdx) in Object.entries(
-                          JSON.parse(reportDetailDrawerRef?.calculatedClass),
-                        ).map(([key, value]) => ({
-                          ...(value as any),
-                          id: key,
-                        }))"
-                        :key="calculatedItemIdx"
-                      >
-                        <td>{{ calculatedItem?.id }}</td>
-                        <td>{{ calculatedItem?.mean }}</td>
-                        <td>{{ calculatedItem?.mode }}</td>
-                      </tr>
-                    </tbody>
-                  </NTable>
-                </NSpace>
-              </NDrawerContent>
-            </NDrawer>
+            <ReportDetailDrawer
+              :data="currentOpenedReportDetailRef ?? undefined"
+              @closed="currentOpenedReportDetailRef = null"
+            />
             <NDivider><NText>Report Story</NText></NDivider>
             <NSpin :show="reportSectionLoadingRef">
               <template #description> Loading... </template>
@@ -1157,7 +1015,7 @@ onMounted(() => {
                                 ><strong>[Record URL]:</strong> {{ item.recordUrl }}</NA
                               >
                               <NText
-                                ><strong>[Created]:</strong>
+                                ><strong>[Created Date]:</strong>
                                 {{ moment(item.createdDate).format('DD MMMM YYYY') }} ({{
                                   moment(item.createdDate).fromNow()
                                 }})</NText
@@ -1191,7 +1049,7 @@ onMounted(() => {
                                   :disabled="item.status !== 'finished'"
                                   @click="
                                     () => {
-                                      reportDetailDrawerRef = item
+                                      currentOpenedReportDetailRef = item
                                     }
                                   "
                                   type="primary"
@@ -1287,7 +1145,7 @@ onMounted(() => {
             <NSpace v-if="userSigninData" vertical>
               <NText><strong>[User ID]:</strong> {{ userSigninData.id }}</NText>
               <NText
-                ><strong>[Created]:</strong>
+                ><strong>[Created At]:</strong>
                 {{ userSigninData?.iat ? moment.unix(userSigninData.iat).fromNow() : '-' }}</NText
               >
               <NText
