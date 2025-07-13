@@ -16,6 +16,7 @@ import {
 import { useBreakpoint } from '@/composables/breakpoint'
 import { getCurrentInstance, onMounted } from 'vue'
 import moment from 'moment'
+import { IconArrowUpRight } from '@tabler/icons-vue'
 
 const message = useMessage()
 const theme = useThemeVars()
@@ -54,8 +55,12 @@ const props = withDefaults(
         }"
       >
         <NSpace size="large" vertical justify="center">
-          <NH1> {{ props.data?.title ?? '-' }}</NH1>
-          <NText> {{ props.data?.description ?? '-' }}</NText></NSpace
+          <NH1 style="color: black !important">
+            <strong>{{ props.data?.title ?? '-' }}</strong></NH1
+          >
+          <NText style="color: black !important">
+            {{ props.data?.description ?? '-' }}</NText
+          ></NSpace
         >
       </NCard>
       <br />

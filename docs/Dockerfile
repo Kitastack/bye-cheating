@@ -1,5 +1,5 @@
 # Build Stage
-FROM node:20-slim AS build-stage
+FROM node:latest AS build-stage
 
 WORKDIR /app
 
@@ -12,14 +12,13 @@ RUN npm install
 # Copy the rest of the application files to the working directory
 COPY . .
 
-# ENV VITE_CONTRACT_ADDRESS 0x5FbDB2315678afecb367f032d93F642f64180aa3
-# ENV VITE_NETWORK http://0.0.0.0:8545
+ENV VITE_API=http://localhost:8080
 
-# Build the vue application
+# Build the vite application
 RUN npm run build
 
 # Production Stage
-FROM nginx:1.25-alpine
+FROM nginx:latest
 
 # Copy the NGINX configuration file
 COPY nginx.conf /etc/nginx/conf.d/default.conf

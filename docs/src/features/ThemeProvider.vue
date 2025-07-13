@@ -7,6 +7,9 @@ import { idID, dateIdID } from 'naive-ui'
 
 const whiteColor = '#FFF'
 const blackColor = '#000'
+const primaryColor = '#89F336'
+const primaryColorLight = '#97d964'
+const primaryColorShade = '#71c92c'
 const redColor = '#fc0303'
 const themeStore = useThemeStore()
 const theme = useThemeVars()
@@ -43,23 +46,26 @@ onBeforeUnmount(() => {
   <NConfigProvider
     :theme-overrides="{
       common: {
+        primaryColor,
+        primaryColorHover: primaryColorShade,
+        primaryColorPressed: primaryColorLight,
         borderRadius: '15px',
       },
-      // Button: {
-      //   textColorPrimary: whiteColor,
-      //   textColorPressedPrimary: whiteColor,
-      //   textColorHoverPrimary: whiteColor,
-      //   textColorFocusPrimary: whiteColor,
-      //   textColorDisabledPrimary: whiteColor,
-      //   textColorWarning: blackColor,
-      //   textColorPressedWarning: blackColor,
-      //   textColorHoverWarning: blackColor,
-      //   textColorFocusWarning: blackColor,
-      //   textColorDisabledWarning: blackColor,
-      // },
+      Button: {
+        textColorPrimary: blackColor,
+        textColorPressedPrimary: blackColor,
+        textColorHoverPrimary: blackColor,
+        textColorFocusPrimary: blackColor,
+        textColorDisabledPrimary: blackColor,
+        textColorWarning: blackColor,
+        textColorPressedWarning: blackColor,
+        textColorHoverWarning: blackColor,
+        textColorFocusWarning: blackColor,
+        textColorDisabledWarning: blackColor,
+      },
       Tabs: {
-        tabColorSegment: theme.primaryColor,
-        tabTextColorActiveSegment: whiteColor,
+        tabColorSegment: primaryColor,
+        tabTextColorActiveSegment: blackColor,
       },
       Form: {
         feedbackTextColor: redColor,

@@ -54,3 +54,6 @@ body {
 .swagger-dark button {
   color: #ffffff !important;
 }
+.n-tabs-tab--active span {
+  color: black !important;
+}

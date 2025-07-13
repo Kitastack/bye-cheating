@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {
+  NIcon,
   NCard,
   NText,
   NSpace,
@@ -43,6 +44,7 @@ import {
   IconArrowUpRight,
   IconVideoOff,
   IconUserCog,
+  IconInfoCircle,
 } from '@tabler/icons-vue'
 import { required, email, minLength, helpers } from '@vuelidate/validators'
 import { getCurrentInstance, nextTick, onMounted, reactive, ref } from 'vue'
@@ -442,10 +444,20 @@ onMounted(() => {
 </script>
 <template>
   <NSpace vertical size="large">
-    <NAlert type="info">
-      <NText
+    <NAlert
+      type="default"
+      :style="{
+        background: theme.primaryColor,
+      }"
+    >
+      <template #icon>
+        <NIcon>
+          <IconInfoCircle style="color: black" />
+        </NIcon>
+      </template>
+      <NText style="color: black"
         >The API is part of a system built to track, monitor, and record suspicious behavior during
-        remote sessions through RTSP protocol. On this page, you can walkthrough the features<br
+        remote session through RTSP protocol. Here, you can walkthrough the features<br
       /></NText>
     </NAlert>
     <NDivider><NText>Authentication Story</NText></NDivider>

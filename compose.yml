@@ -115,6 +115,15 @@ services:
       - minio
       - general-service
       - watch-service
+  website-docs:
+    build: ./docs
+    restart: unless-stopped
+    environment:
+      - VITE_API=http://localhost:8080
+    networks:
+      - default-net
+    ports:
+      - 8083:5000
 volumes:
   minio_data:
   postgres_data:
