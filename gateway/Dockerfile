@@ -18,4 +18,4 @@ RUN npm run build
 # Remove source code
 RUN rm -rf src
 
-CMD ["sh", "start.sh"]
+CMD ["npm", "run" "start"]
