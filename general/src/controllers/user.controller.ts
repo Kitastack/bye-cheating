@@ -359,6 +359,35 @@ export const userUpdateForAdmin = async (
           userId: req.user!.id
         }
       })
+      return update
+    })
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      result: updatedUser
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+/**
+ * [DELETE] reset user password for admin into 12345678
+ */
+export const userResetForAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.params.id
+    const password = await generatePassword('12345678')
+    const updatedUser = await database.$transaction(async (ctx) => {
+      const update = await ctx.user.update({
+        where: {
+          id: userId
+        },
+        data: { password, updatedDate: new Date() }
+      })
+      return update
     })
     res.status(StatusCodes.CREATED).json({
       success: true,

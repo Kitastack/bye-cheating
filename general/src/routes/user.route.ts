@@ -12,7 +12,8 @@ import {
   getAuthentication,
   signupUserForAdmin,
   signOut,
-  setNotificationAsReaded
+  setNotificationAsReaded,
+  userResetForAdmin
 } from '@controllers/user.controller'
 import { authenticateToken } from '@libs/jwt.lib'
 import express from 'express'
@@ -37,6 +38,11 @@ userRouter.get(
   '/list',
   authenticateToken(['Admin', 'Developer']),
   getUserListForAdmin
+)
+userRouter.delete(
+  '/password/reset/:id',
+  authenticateToken(['Admin', 'Developer']),
+  userResetForAdmin
 )
 userRouter.post(
   '/notification/read',
